@@ -7,6 +7,7 @@ export default function DataTable({
     perPage = 10,
     loading,
     sortable = true,
+    header,
 }) {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -75,6 +76,13 @@ export default function DataTable({
     return (
         <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             {/* TOPBAR */}
+            <div className="flex items-center gap-8 p-2 mb-2">
+                <h2 className="text-lg font-semibold">{header}</h2>
+
+                <span className="px-2 py-0.5 text-sm rounded-md bg-indigo-300 text-white">
+                    {Math.min(currentPage * rowsPerPage, filteredData.length)}
+                </span>
+            </div>
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 {searchable && (
                     <div className="relative w-full md:w-72">

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaUserController;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaInformasiInstansiController;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaInformasiHakAksesController;
 use App\Http\Controllers\Admin\Master\SiswaController;
+use App\Http\Controllers\Helper\GetDataController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -38,9 +39,11 @@ Route::middleware('auth')->group(function () {
 
     //search
 
-    Route::controller(SearchController::class)->prefix('search')->name('search.')->group(function () {
-        Route::get('/list-feature',  'getListFeatur')->name('list-feature');
+    Route::controller(GetDataController::class)->prefix('getData')->name('getData.')->group(function () {
+        Route::get('/list-feature',  'getListFeatureByRole')->name('list-feature');
+        Route::get('/get-list-feature',  'getListFeature')->name('get-list-feature');
     });
+
 
     //role
     Route::prefix('manajemen')->name('manajemen.')->group(function () {
@@ -52,7 +55,14 @@ Route::middleware('auth')->group(function () {
             Route::post('/store',  'store')->name('store');
             Route::post('/update',  'update')->name('update');
             Route::post('/delete',  'delete')->name('destroy');
-            });
+        });
+
+        Route::controller(KelolaUserController::class)->prefix('/kelola-user', )->name('kelola-user.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('/getUser',  'getUser')->name('getUser');
+            Route::post('/reset-password',  'resetPassword')->name('reset-password');
+            Route::post('/update/{id}',  'update')->name('update');
+        });
     });
     //master
     Route::prefix('master')->name('master.')->group(function () {
@@ -62,6 +72,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/getGuru',  'getGuru')->name('getGuru');
             Route::post('/store',  'store')->name('store');
             Route::post('/update',  'update')->name('update');
+            Route::post('/delete/${id}',  'destroy')->name('destroy');
             Route::post('/update-status',  'updateStatus')->name('update-status');
         });
 
@@ -72,9 +83,7 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('manajemen-aplikasi')->name('manajemen-aplikasi.')->group(function () {
-        Route::controller(KelolaUserController::class)->prefix('/kelola-user', )->name('kelola-user.')->group(function () {
-            Route::get('/',  'index')->name('index');
-        });
+
         Route::controller(KelolaInformasiInstansiController::class)->prefix('/kelola-informasi-instansi', )->name('kelola-informasi-instansi.')->group(function () {
             Route::get('/',  'index')->name('index');
         });

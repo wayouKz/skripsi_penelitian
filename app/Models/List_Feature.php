@@ -9,8 +9,6 @@ class List_Feature extends Model
     protected $guarded = ['id'];
     protected $table = 'list_features';
 
-
-
       public function roles()
     {
         return $this->belongsToMany(

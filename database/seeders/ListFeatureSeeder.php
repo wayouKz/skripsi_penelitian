@@ -15,10 +15,18 @@ class ListFeatureSeeder extends Seeder
             // 🔹 DASHBOARD
             $dashboard = List_Feature::create([
                 'label' => 'Dashboard',
-                'route' => 'dashboard',
+                'route' => null,
                 'icon' => 'fa-home',
                 'deskripsi' => 'Halaman dashboard',
                 'parent_id' => null,
+                'order' => 1,
+            ]);
+            $dashboard = List_Feature::create([
+                'label' => 'Dashboard',
+                'route' => 'dashboard',
+                'icon' => 'fa-home',
+                'deskripsi' => 'Halaman dashboard',
+                'parent_id' => $dashboard->id,
                 'order' => 1,
             ]);
 
@@ -34,7 +42,7 @@ class ListFeatureSeeder extends Seeder
             List_Feature::insert([
                 [
                     'label' => 'Manajemen User',
-                    'route' => 'manajemen.index',
+                    'route' => 'manajemen.kelola-user.index',
                     'icon' => 'fa-briefcase',
                     'deskripsi' => 'Kelola manajemen',
                     'parent_id' => $manajemen->id,
@@ -45,7 +53,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Hak Akses & Peran',
                     'icon' => 'fa-shield-alt',
-                    'route' => 'roles.index',
+                    'route' => 'manajemen.hak-akses.index',
                     'deskripsi' => 'Kelola role',
                     'parent_id' => $manajemen->id,
                     'order' => 2,
@@ -55,7 +63,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Tahun Ajaran',
                     'icon' => 'fa-calendar',
-                    'route' => 'tahun.index',
+                    'route' => null,
                     'deskripsi' => 'Kelola tahun ajaran',
                     'parent_id' => $manajemen->id,
                     'order' => 3,
@@ -77,7 +85,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Daftar Kelas',
                     'icon' => 'fa-building',
-                    'route' => 'kelas.index',
+                    'route' => null,
                     'deskripsi' => 'Data kelas',
                     'parent_id' => $master->id,
                     'order' => 1,
@@ -87,7 +95,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Daftar Guru',
                     'icon' => 'fa-user-tie',
-                    'route' => 'guru.index',
+                    'route' => 'master.guru.index',
                     'deskripsi' => 'Data guru',
                     'parent_id' => $master->id,
                     'order' => 2,
@@ -97,7 +105,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Daftar Mata Pelajaran',
                     'icon' => 'fa-book',
-                    'route' => 'mapel.index',
+                    'route' => null,
                     'deskripsi' => 'Data mapel',
                     'parent_id' => $master->id,
                     'order' => 3,
@@ -107,7 +115,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Generate Jadwal Guru',
                     'icon' => 'fa-calendar-alt',
-                    'route' => 'jadwal.generate',
+                    'route' => null,
                     'deskripsi' => 'Generate jadwal',
                     'parent_id' => $master->id,
                     'order' => 4,
@@ -117,7 +125,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Daftar Siswa',
                     'icon' => 'fa-user-graduate',
-                    'route' => 'siswa.index',
+                    'route' => null,
                     'deskripsi' => 'Data siswa',
                     'parent_id' => $master->id,
                     'order' => 5,
@@ -139,7 +147,7 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Pengaturan Sistem',
                     'icon' => 'fa-sliders-h',
-                    'route' => 'settings.index',
+                    'route' => null,
                     'deskripsi' => 'Setting aplikasi',
                     'parent_id' => $sistem->id,
                     'order' => 1,

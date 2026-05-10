@@ -13,6 +13,7 @@ export default forwardRef(function TextInput(
         isFocused = false,
         icon = "user",
         error,
+        width = "w-full",
         ...props
     },
     ref,
@@ -49,7 +50,8 @@ export default forwardRef(function TextInput(
                 type={inputType}
                 ref={localRef}
                 className={
-                    "w-full pl-10 pr-10 py-2 rounded-md border-gray-300 shadow-sm bg-gray-100 " +
+                    width +
+                    " pl-10 pr-10 py-2 rounded-md border-gray-300 shadow-sm bg-gray-100 " +
                     (error
                         ? "border-red-500 focus:border-red-500 focus:ring-red-500 "
                         : "focus:border-indigo-500 focus:ring-indigo-500 ") +

@@ -49,7 +49,7 @@ const SearchBar = ({ context }) => {
             setLoading(true);
             try {
                 const url = new URL(
-                    "/search/" + context,
+                    "/getData/" + context,
                     window.location.origin,
                 );
                 const res = await axios.get(url.toString(), {
@@ -110,12 +110,12 @@ const SearchBar = ({ context }) => {
                         </div>
                     ) : results.length ? (
                         results
-                            .filter((item) => item.parent_id !== null)
+                            .filter((item) => item.parent_id != null)
                             .map((item) => {
                                 return (
                                     <div key={item.id} className="w-full">
                                         <Link
-                                            href={`/${item.route}`}
+                                            href={route(`${item.route}`)}
                                             onClick={() => {
                                                 setQuery(item.label);
                                                 setOpen(false);

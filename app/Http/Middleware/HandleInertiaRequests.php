@@ -39,6 +39,10 @@ public function share(Request $request): array
             'user' => $user,
             'list_features' => $user?->role->listFeatures,
         ],
+        'flash' => [
+            'success' => $request->session()->get('success'),
+            'error' => $request->session()->get('error'),
+        ],
     ];
 }
 }

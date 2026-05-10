@@ -19,7 +19,7 @@ export default function FormModal({
                 <DangerButton
                     type="button"
                     onClick={onClose}
-                    className="text-gray-500 hover:text-gray-700"
+                    className=" flex items-center justify-center text-gray-500 rounded-b-full rounded-t-full rounded-s-full rounded-e-full"
                 >
                     ✕
                 </DangerButton>
@@ -32,13 +32,13 @@ export default function FormModal({
 
                 {/* Footer */}
                 <div className="flex justify-end gap-2 border-t px-4 py-3">
-                    <button
+                    <DangerButton
                         type="button"
                         onClick={onClose}
-                        className="rounded bg-gray-300 px-4 py-2 text-sm"
+                        className="rounded x-4 py-2 text-sm text-white disabled:opacity-50"
                     >
                         Batal
-                    </button>
+                    </DangerButton>
 
                     <PrimaryButton
                         type="submit"

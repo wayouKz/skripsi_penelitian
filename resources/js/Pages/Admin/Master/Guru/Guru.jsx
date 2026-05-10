@@ -98,8 +98,13 @@ export default function Guru() {
         showQuestion(
             "Anda yakin ingin menghapus data ini ?",
             () => {
-                axios.post(route("master.guru.destroy", { id })).then(() => {
-                    showAlert("Data berhasil dihapus", "success");
+                axios.post(route("master.guru.destroy", { id })).then((res) => {
+                    if (res.data.success == true) {
+                        showAlert(res.data.msg, "success");
+                        getGuru();
+                    } else if (res.data.success == false) {
+                        showAlert(res.data.msg, "error");
+                    }
                 });
             },
             () => {},
@@ -143,7 +148,7 @@ export default function Guru() {
         getGuru();
     }, []);
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout header={"Kelola Guru"}>
             <div className="flex justify-end">
                 <PrimaryButton
                     className="mb-2"
@@ -151,10 +156,15 @@ export default function Guru() {
                         handleTambah();
                     }}
                 >
-                    +
+                    + Tambah Guru
                 </PrimaryButton>
             </div>
-            <DataTable columns={columns} data={Result} loading={loading} />
+            <DataTable
+                columns={columns}
+                data={Result}
+                loading={loading}
+                header={"Kelola Guru"}
+            />
             <Add
                 open={show}
                 setOpen={setShow}

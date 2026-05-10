@@ -21,8 +21,8 @@ import { Link, usePage } from "@inertiajs/react";
 import Sidebar from "./Partials/Sidebar";
 import SearchBar from "./Partials/SearchBar";
 import Navbar from "./Partials/Navbar";
-
-export default function HostingerDashboard({ header, children }) {
+import { Head } from "@inertiajs/react";
+export default function HostingerDashboard({ children, header }) {
     const user = usePage().props.auth.user;
     const [collapsed, setCollapsed] = useState(() => {
         return localStorage.getItem("sidebar") === "true";
@@ -34,7 +34,7 @@ export default function HostingerDashboard({ header, children }) {
     return (
         <div className="flex h-screen bg-gray-50">
             {/* Sidebar */}
-
+            <Head title={header} />
             {/* Menu Items */}
             <Sidebar collapsed={collapsed} />
 

@@ -72,9 +72,12 @@ export default function HakAkeses() {
         showQuestion(
             "Anda yakin ingin menghapus data ini ?",
             () => {
-                axios.post(route("master.role.destroy", { id })).then(() => {
-                    showAlert("Data berhasil dihapus", "success");
-                });
+                axios
+                    .post(route("manajemen.hak-akses.destroy", { id }))
+                    .then(() => {
+                        getRoles();
+                        showAlert("Data berhasil dihapus", "success");
+                    });
             },
             () => {},
             "Hapus",
@@ -123,7 +126,7 @@ export default function HakAkeses() {
         getRoles();
     }, []);
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout header={"Hak Akses"}>
             <div className="flex justify-end">
                 <PrimaryButton
                     className="mb-2"
@@ -131,7 +134,7 @@ export default function HakAkeses() {
                         handleTambah();
                     }}
                 >
-                    + Tambah Role
+                    + Tambah Hak Akses
                 </PrimaryButton>
             </div>
             <DataTable

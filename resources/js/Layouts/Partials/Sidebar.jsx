@@ -48,7 +48,6 @@ export default function Sidebar({ collapsed }) {
                     const parentActive =
                         isActive(item.route) ||
                         item.children?.some((child) => isActive(child.route));
-
                     return (
                         <div key={item.id} className="relative group">
                             {!item.children?.length &&

@@ -15,17 +15,16 @@ return new class extends Migration
     $table->id();
 
     $table->string('nip')->nullable()->unique();
-    $table->foreign('nip')->references('nip')->on('m_gurus')->nullOnDelete();
+    $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade')->onUpdate('cascade');
 
     $table->string('username')->unique();
     $table->string('name');
-    $table->string('email')->unique();
+    $table->string('email')->unique()->nullable();
     $table->timestamp('email_verified_at')->nullable();
     $table->string('password');
 
     $table->enum('status', ['active', 'nonactive'])->default('active');
 
-    // 🔥 GANTI JSON roles → foreign key
     $table->foreignId('role_id')
         ->constrained('roles')
         ->cascadeOnDelete();

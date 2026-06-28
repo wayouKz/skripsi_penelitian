@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('m_kelas', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('jurusan_id')->nullable()->constrained('m_jurusans')->onDelete('cascade');
             $table->string('nama_kelas');
             $table->enum('status', ['active', 'nonactive'])->default('active');
+            $table->foreignId('id_wali_kelas')
+            ->nullable()
+            ->constrained('m_gurus')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
             $table->integer('tingkat');
             $table->timestamps();
         });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Config;
 use App\Models\List_Feature;
 use Inertia\Middleware;
 use Illuminate\Http\Request;
@@ -31,14 +32,22 @@ class HandleInertiaRequests extends Middleware
      */
 public function share(Request $request): array
 {
+    try {
     $user = $request->user();
+    $config = Config::first();
+    // Lanjutkan logika jika user ditemukan
+} catch (\Illuminate\Database\QueryException $e) {
+    $user = null;
+    $config = null;
 
+}
     return [
         ...parent::share($request),
         'auth' => [
             'user' => $user,
             'list_features' => $user?->role->listFeatures,
         ],
+        'settings_application' => $config,
         'flash' => [
             'success' => $request->session()->get('success'),
             'error' => $request->session()->get('error'),

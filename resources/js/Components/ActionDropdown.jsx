@@ -1,18 +1,50 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { usePage } from "@inertiajs/react";
 
 export default function ActionDropdown({ actions = [] }) {
     const [open, setOpen] = useState(false);
+
     const buttonRef = useRef(null);
     const menuRef = useRef(null);
-    const [pos, setPos] = useState({ top: 0, left: 0 });
+
+    const [pos, setPos] = useState({
+        top: 0,
+        left: 0,
+    });
+
+    const { auth } = usePage().props;
+
+    const features = auth?.list_features || [];
+
+    const currentRoute = route().current();
+
+    const currentFeature = features.find(
+        (feature) => feature.route === currentRoute,
+    );
+    const permissionMap = {
+        Hapus: "can_delete",
+        Edit: "can_update",
+    };
+    // filter action berdasarkan permission
+    const filteredActions = actions.filter((action) => {
+        if (!action.label) return true;
+
+        const permissionField = permissionMap[action.label];
+
+        return !!currentFeature?.pivot?.[permissionField];
+    });
+
+    if (filteredActions.length === 0) return null;
 
     useEffect(() => {
         if (open && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect();
+
             setPos({
-                top: rect.bottom + window.scrollY,
-                left: rect.right + window.scrollX - 150,
+                top: rect.bottom + window.scrollY + 5,
+
+                left: rect.right + window.scrollX - 170,
             });
         }
     }, [open]);
@@ -26,7 +58,9 @@ export default function ActionDropdown({ actions = [] }) {
                 setOpen(false);
             }
         };
+
         document.addEventListener("mousedown", close);
+
         return () => document.removeEventListener("mousedown", close);
     }, []);
 
@@ -35,9 +69,9 @@ export default function ActionDropdown({ actions = [] }) {
             <button
                 ref={buttonRef}
                 onClick={() => setOpen(!open)}
-                className="rounded px-2 py-1 hover:bg-gray-200"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
             >
-                ⋮
+                <i className="fa fa-ellipsis-v"></i>
             </button>
 
             {open &&
@@ -49,22 +83,40 @@ export default function ActionDropdown({ actions = [] }) {
                             left: pos.left,
                             position: "absolute",
                         }}
-                        className="z-[9999] w-36 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5"
+                        className="z-[9999] w-44 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"
                     >
-                        {actions.map((a, i) => (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    a.onClick();
-                                    setOpen(false);
-                                }}
-                                className={`block w-full px-4 py-2 text-left text-sm hover:bg-gray-100 ${
-                                    a.danger ? "text-red-600" : ""
-                                }${a.edit ? "text-yellow-400" : ""}`}
-                            >
-                                <i className={"fa fa-" + a.icon}></i> {a.label}
-                            </button>
-                        ))}
+                        <div className="p-2">
+                            {filteredActions.map((a, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => {
+                                        a.onClick();
+                                        setOpen(false);
+                                    }}
+                                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-gray-100 ${
+                                        a.danger
+                                            ? "text-red-600"
+                                            : a.edit
+                                              ? "text-yellow-600"
+                                              : "text-gray-700"
+                                    }`}
+                                >
+                                    <div
+                                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                            a.danger
+                                                ? "bg-red-100"
+                                                : a.edit
+                                                  ? "bg-yellow-100"
+                                                  : "bg-gray-100"
+                                        }`}
+                                    >
+                                        <i className={"fa fa-" + a.icon}></i>
+                                    </div>
+
+                                    <span>{a.label}</span>
+                                </button>
+                            ))}
+                        </div>
                     </div>,
                     document.body,
                 )}

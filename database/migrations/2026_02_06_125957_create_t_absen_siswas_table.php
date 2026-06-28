@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('t_absen_siswas', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_absen')->index()->unique();
+            $table->string('kode_absen')->index();
             $table->string('kode_jadwal')->index();
             $table->string('nisn')->index();
             $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals');

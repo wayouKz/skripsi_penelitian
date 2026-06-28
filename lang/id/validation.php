@@ -118,6 +118,7 @@ return [
         'symbols'       => ':Attribute ini harus memiliki setidaknya satu simbol.',
         'uncompromised' => ':Attribute ini telah muncul di kebocoran data. Silahkan memilih :attribute yang berbeda.',
     ],
+    'captcha'               => 'Captcha tidak valid.',
     'present'                => ':Attribute wajib ada.',
     'present_if'             => 'Bidang :attribute harus ada ketika :other adalah :value.',
     'present_unless'         => 'Bidang :attribute harus ada kecuali :other adalah :value.',

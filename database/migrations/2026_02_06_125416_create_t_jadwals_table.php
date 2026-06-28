@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('t_jadwals', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_jadwal')->index()->unique();
-            $table->foreignId('t_list_guru_id')->constrained('t_list_gurus');
+            $table->string('kode_jadwal')->index();
+            // $table->foreignId('t_list_guru_id')->constrained('t_list_gurus');
             $table->foreignId('t_list_guru_mapel_id')->constrained('t_list_guru_mapels');
             $table->foreignId('mapel_id')->constrained('m_mapels');
             $table->foreignId('kelas_id')->constrained('m_kelas');

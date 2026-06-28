@@ -18,5 +18,9 @@ class MGuru extends Model
         return MGuru::where('nip', $nip)->first();
     }
 
+    public function kelas()
+    {
+        return $this->hasOne(MKelas::class, 'id_wali_kelas', 'id');
+    }
 
 }

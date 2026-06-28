@@ -106,66 +106,80 @@ public function setup(Request $request)
 public function setUpMigrate()
 {
     try {
-
-        $result = Artisan::call('migrate:fresh', [
+        // Hati-hati: ini akan menghapus semua data.
+        // Ubah menjadi 'migrate' biasa jika tidak ingin menghapus data lama.
+        Artisan::call('migrate:fresh', [
             '--force' => true,
             '--no-interaction' => true,
         ]);
-        config(['session.driver' => 'database']);
-    Artisan::call('db:seed', [
-        '--force' => true,
-        '--no-interaction' => true,
-    ]);
 
+        Artisan::call('db:seed', [
+            '--force' => true,
+            '--no-interaction' => true,
+        ]);
 
+        // Gunakan helper bawaan Inertia untuk eksternal/hard redirect
+        return Inertia::location(route('install.configure'));
 
-    return response('', 409)
-                ->header('X-Inertia-Location', route('install.configure'));
     } catch (Throwable $e) {
+        // Menangkap error jika database gagal terhubung atau migrasi gagal
         return response()->json([
             'success' => false,
-            'message' => $e->getMessage()
+            'message' => 'Gagal melakukan migrasi: ' . $e->getMessage()
         ], 500);
     }
-    }
+}
 
     public function configure(){
         return Inertia::render('Config/Configure');
     }
 
 
-    public function configureStore(Request $request){
-        $request->validate([
-            'nama_instansi' => 'required',
-            'logo_instansi' => 'required',
-            'alamat_instansi' => 'required',
-            'telepon_instansi' => 'required',
-            'website_instansi' => 'required',
-        ]);
+   public function configureStore(Request $request)
+{
+    $request->validate([
+        'nama_instansi' => 'required',
+        // Tambahkan validasi image agar lebih aman
+        'logo_instansi' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
 
+    // 1. Cek apakah konfigurasi sudah ada di database
+    $cekConfigurasi = ModelsConfig::first();
 
-        $logo = $request->file('logo_instansi');
-        $logo_name = "logo_instansi.".$logo->getClientOriginalExtension();
-        $logo->storeAs('public/logo', $logo_name);
+    $logo = $request->file('logo_instansi');
+    $logo_name = "logo_instansi." . $logo->getClientOriginalExtension();
 
-            $save = [
-                'nama_instansi' => $request->nama_instansi,
-            'alamat_instansi' => $request->alamat_instansi,
-            'telepon_instansi' => $request->telepon_instansi,
-            'email_instansi' => $request->email_instansi,
-            'logo_instansi' => $logo_name,
-            'website_instansi' => $request->website_instansi,
-            ];
+    // 2. Hapus logo lama dari storage jika ada
+    if ($cekConfigurasi && $cekConfigurasi->logo_instansi) {
+        $old_logo_path = 'public/logo/' . $cekConfigurasi->logo_instansi;
 
-            $cekConfigurasi = ModelsConfig::first();
-            if ($cekConfigurasi) {
-                $simpan = $cekConfigurasi->update($save);
-            }else{
-                $simpan = ModelsConfig::create($save);
-            }
-
-                Storage::put('installed', 'Tada Brow');
-
-
+        if (Storage::exists($old_logo_path)) {
+            Storage::delete($old_logo_path);
+        }
     }
+
+    // 3. Simpan logo baru ke storage
+    $logo->storeAs('public/logo', $logo_name);
+
+    $save = [
+        'nama_instansi'    => $request->nama_instansi,
+        'alamat_instansi'  => $request->alamat_instansi,
+        'telepon_instansi' => $request->telepon_instansi,
+        'email_instansi'   => $request->email_instansi,
+        'logo_instansi'    => $logo_name,
+        'website_instansi' => $request->website_instansi,
+    ];
+
+    // 4. Update atau Create data
+    if ($cekConfigurasi) {
+        $simpan = $cekConfigurasi->update($save);
+    } else {
+        $simpan = ModelsConfig::create($save);
+    }
+
+    Storage::put('installed', 'Aplikasi Terinstall');
+
+    // (Opsional) return redirect atau response
+    // return redirect()->back()->with('success', 'Konfigurasi berhasil disimpan!');
+}
 }

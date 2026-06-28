@@ -3,7 +3,7 @@ import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import TextInput from "@/Components/TextInput";
 import { useForm, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Add({
     open,
@@ -14,6 +14,7 @@ export default function Add({
 }) {
     const { showAlert } = useAlert();
     const flash = usePage().props.flash;
+    const [closeAlert, setCloseAlert] = useState(false);
     const { data, setData, post, put, processing, reset, errors } = useForm({
         nama_guru: "",
         jenis_kelamin: "",
@@ -69,13 +70,18 @@ export default function Add({
         } else {
             post(route("master.guru.store"), {
                 onSuccess: () => {
-                    setOpen(false);
-                    showAlert(flash?.success, "success");
-                    reset();
-                    getGuru();
+                    console.log(flash);
+                    if (flash.success) {
+                        setOpen(false);
+                        showAlert(flash.success, "success");
+                        reset();
+                        getGuru();
+                    } else if (flash.error) {
+                        showAlert(flash.error, "error");
+                    }
                 },
                 onError: () => {
-                    showAlert(flash?.error, "error");
+                    showAlert(flash.error, "error");
                 },
             });
         }
@@ -93,30 +99,48 @@ export default function Add({
             onSubmit={submit}
         >
             <div className="">
-                <div className="">
-                    <div className="flex items-center gap-4 rounded-2xl bg-yellow-500 px-5 py-4 shadow-lg">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-                            <i className="fa fa-info text-xl text-white"></i>
+                {!closeAlert && (
+                    <div className="flex items-start justify-between gap-4 rounded-2xl border border-yellow-400/30 bg-gradient-to-r from-yellow-500 to-amber-500 px-4 py-4 shadow-lg">
+                        {/* LEFT CONTENT */}
+                        <div className="flex items-start gap-4">
+                            {/* ICON */}
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20">
+                                <i className="fa fa-info text-xl text-white"></i>
+                            </div>
+
+                            {/* TEXT */}
+                            <div>
+                                <p className="font-semibold text-white">
+                                    Informasi
+                                </p>
+
+                                <p className="mt-1 text-sm leading-relaxed text-yellow-100">
+                                    Data ini akan secara otomatis membuat user
+                                    login menggunakan{" "}
+                                    <span className="font-semibold">NIP</span>{" "}
+                                    sebagai username dan password.
+                                </p>
+                            </div>
                         </div>
 
-                        <div>
-                            <p className="font-semibold text-white">
-                                Informasi
-                            </p>
-
-                            <p className="text-sm text-yellow-100">
-                                Data ini akan secara otomatis membuat user login
-                                dengan username NIP dan password NIP
-                            </p>
-                        </div>
+                        {/* CLOSE BUTTON */}
+                        <button
+                            type="button"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white transition hover:bg-white/30"
+                            onClick={() => {
+                                setCloseAlert(true);
+                            }}
+                        >
+                            <i className="fa-solid fa-xmark text-lg"></i>
+                        </button>
                     </div>
-                </div>
+                )}
             </div>
             <div className=" grid grid-cols-2 gap-4">
                 <div className="">
                     <label className="mb-1 block text-sm">Nama</label>
                     <TextInput
-                        icon="tag"
+                        icon="address-card"
                         placeholder="Nama Guru"
                         type="text"
                         className="w-full rounded border px-3 py-2"
@@ -134,7 +158,7 @@ export default function Add({
                 <div className="">
                     <label className="mb-1 block text-sm">Nip</label>
                     <TextInput
-                        icon="tag"
+                        icon="address-card"
                         type="text"
                         placeholder="Nip Guru"
                         className="w-full rounded border px-3 py-2"
@@ -169,7 +193,7 @@ export default function Add({
                 <div className="">
                     <label className="mb-1 block text-sm">Tempat Lahir</label>
                     <TextInput
-                        icon="tag"
+                        icon="location-dot"
                         type="text"
                         placeholder="Tempat Lahir"
                         className="w-full rounded border px-3 py-2"
@@ -210,10 +234,10 @@ export default function Add({
                         </span>
 
                         <TextInput
-                            icon="tag"
+                            icon="phone"
                             type="text"
                             placeholder="81234567890"
-                            className="w-full rounded-r-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full rounded-r-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
                             value={data.no_telp}
                             onChange={(e) =>
                                 setData(
@@ -233,7 +257,7 @@ export default function Add({
                     <label className="mb-1 block text-sm">Jenis Kelamin</label>
                     <select
                         className={
-                            `w-full rounded  px-3 py-2` +
+                            `w-full rounded  px-3 py-2 bg-gray-200` +
                             (errors.jenis_kelamin
                                 ? " border-red-500"
                                 : " border-gray-300")

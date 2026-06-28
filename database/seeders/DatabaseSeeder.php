@@ -30,5 +30,10 @@ class DatabaseSeeder extends Seeder
 
         ListFeatureSeeder::run();
         ListFeatureByRoleSeeder::run();
+        GuruSeeder::run();
+        MapelSeeder::run();
+        SiswaSeeder::run();
+        KelasSeeder::run();
+        TahunAjaranSeeder::run();
     }
 }

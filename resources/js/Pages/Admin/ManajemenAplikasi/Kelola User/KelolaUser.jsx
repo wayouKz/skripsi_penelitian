@@ -5,6 +5,7 @@ import Switch from "@/Components/Switch";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { useEffect, useState } from "react";
 import Add from "./Modal/Add";
+import PrimaryButton from "@/Components/PrimaryButton";
 
 export default function KelolaUser() {
     const [data, setData] = useState([]);
@@ -12,7 +13,9 @@ export default function KelolaUser() {
     const [open, setOpen] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
     const [onSubmit, setOnSubmit] = useState("");
+    const [loading, setLoading] = useState(false);
     const getData = async () => {
+        setLoading(true);
         await axios.get(route("manajemen.kelola-user.getUser")).then((res) => {
             if (res.data.status == false) {
                 setData([]);
@@ -20,6 +23,7 @@ export default function KelolaUser() {
                 setData(res.data.data);
             }
         });
+        setLoading(false);
     };
     const handleStatus = (row) => {};
     useEffect(() => {
@@ -55,6 +59,27 @@ export default function KelolaUser() {
             "Batal",
         );
     };
+
+    const handleDelete = (row) => {
+        if (row == 1) {
+            showAlert("Data default tidak dapat dihapus", "error");
+            return;
+        }
+        showQuestion(
+            "Anda yakin ingin menghapus data ini ?",
+            () => {
+                axios
+                    .post(route("manajemen.kelola-user.destroy", { id: row }))
+                    .then(() => {
+                        getData();
+                        showAlert("Data berhasil dihapus", "success");
+                    });
+            },
+            () => {},
+            "Hapus",
+            "Batal",
+        );
+    };
     const columns = [
         {
             header: "No",
@@ -71,6 +96,10 @@ export default function KelolaUser() {
         {
             header: "Username",
             accessor: "username",
+        },
+        {
+            header: "Peran",
+            render: (row) => row.role?.nama_roles ?? "-",
         },
         {
             header: "Status",
@@ -90,6 +119,7 @@ export default function KelolaUser() {
                             {
                                 label: "Edit",
                                 icon: "edit",
+                                permission: "edit",
                                 edit: true,
                                 onClick: () => handleEdit(row),
                             },
@@ -113,12 +143,25 @@ export default function KelolaUser() {
     ];
     return (
         <AuthenticatedLayout header={"Kelola User"}>
-            <DataTable columns={columns} data={data} />
+            <div className="bg-white shadow sm:rounded-lg p-6">
+                <div className="flex justify-end mb-4">
+                    <PrimaryButton onClick={() => setOpen(true)}>
+                        + Tambah User
+                    </PrimaryButton>
+                </div>
+                <DataTable
+                    loading={loading}
+                    columns={columns}
+                    data={data || []}
+                    title={"USER"}
+                />
+            </div>
             <Add
                 open={open}
                 setOpen={setOpen}
                 selectedData={selectedData}
                 onSubmit={onSubmit}
+                getData={getData}
             />
         </AuthenticatedLayout>
     );

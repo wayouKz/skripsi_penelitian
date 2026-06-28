@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Http\Controllers\Controller;
 use App\Models\TListFeatureByRole;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
@@ -43,41 +44,49 @@ class RoleController extends Controller
         return  response()->json($json);
     }
 
-    public function store(Request $request){
-        $request->validate([
-            'nama_roles' => 'required',
-        ],[
-            'nama_roles.required' => 'Nama role harus diisi',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'nama_roles' => 'required',
+    ], [
+        'nama_roles.required' => 'Nama role harus diisi',
+    ]);
 
-        $ArrayIdFeature = $request->activeMenu;
-        if(empty($ArrayIdFeature)){
-            return redirect()->back()->with('error', 'Feature harus setidaknya satu yang di pilih');
-        }
-        $storeRole = Role::create([
-            'nama_roles' => $request->nama_roles,
-            'status' => 'active'
-        ]);
-
-        if($storeRole){
-            foreach($ArrayIdFeature as $index => $value){
-             $storeFeature =   TListFeatureByRole::create([
-                    'list_feature_id' => $index,
-                    'role_id' => $storeRole->id,
-                ]);
-            }
-            if($storeFeature){
-                return redirect()->back()->with('success', 'Data feature dan peran berhasil disimpan');
-            }else{
-                return redirect()->back()->with('error', 'Data feature dan peran gagal disimpan');
-            }
-        }else{
-            return redirect()->back()->with('error', 'Data Role gagal disimpan');
-        }
-
+    if (empty($request->activeMenu)) {
+        return redirect()->back()->with('error', 'Feature harus setidaknya satu dipilih');
     }
 
- public function update(Request $request)
+    $syncData = [];
+    foreach ($request->activeMenu as $featureId => $permission) {
+        // Hanya simpan jika hak akses 'view' bernilai true/aktif
+        if (isset($permission['can_view']) && $permission['can_view'] == true) {
+            $syncData[$featureId] = [
+                'can_view'   => true,
+                'can_create' => isset($permission['can_create']),
+                'can_update' => isset($permission['can_update']),
+                'can_delete' => isset($permission['can_delete']),
+            ];
+        }
+    }
+
+    if (empty($syncData)) {
+        return redirect()->back()->with('error', 'Feature harus setidaknya satu dipilih dengan akses View aktif');
+    }
+
+    // Menggunakan Transaction agar data Role & Pivot konsisten
+    DB::transaction(function () use ($request, $syncData) {
+        $storeRole = Role::create([
+            'nama_roles' => $request->nama_roles,
+            'status'     => 'active'
+        ]);
+
+        $storeRole->listFeatures()->sync($syncData);
+    });
+
+    return redirect()->back()->with('success', 'Data feature dan role berhasil disimpan');
+}
+
+public function update(Request $request)
 {
     $request->validate([
         'nama_roles' => 'required',
@@ -91,28 +100,37 @@ class RoleController extends Controller
         return redirect()->back()->with('error', 'Role tidak ditemukan');
     }
 
-    // ❌ Protect default role
-    if ($role->id == 1) {
-        return redirect()->back()->with('error', 'Data ini secara default tidak bisa di edit dan di hapus');
+    // Proteksi role default
+    // if ($role->id == 1) {
+    //     return redirect()->back()->with('error', 'Data default tidak bisa diubah');
+    // }
+
+    $syncData = [];
+    foreach ($request->activeMenu ?? [] as $featureId => $permission) {
+        // Hanya simpan jika hak akses 'view' bernilai true/aktif
+        if (isset($permission['can_view']) && $permission['can_view'] == true) {
+            $syncData[$featureId] = [
+                'can_view'   => true,
+                'can_create' => isset($permission['can_create']),
+                'can_update' => isset($permission['can_update']),
+                'can_delete' => isset($permission['can_delete']),
+            ];
+        }
     }
 
-    // ambil feature id dari frontend
-    $featureIds = collect($request->activeMenu ?? [])
-        ->filter(fn($val) => $val)
-        ->keys()
-        ->toArray();
+    // Menggunakan Transaction agar data Role & Pivot konsisten
+    DB::transaction(function () use ($role, $request, $syncData) {
+        // Update informasi role
+        $role->update([
+            'nama_roles' => $request->nama_roles,
+        ]);
 
-    // 🔥 SYNC PIVOT (INI INTI OPTIMASI)
-    $role->listFeatures()->sync($featureIds);
-
-    // update role
-    $role->update([
-        'nama_roles' => $request->nama_roles,
-    ]);
+        // Sinkronisasi data ke tabel pivot (yang tidak masuk ke $syncData otomatis terhapus)
+        $role->listFeatures()->sync($syncData);
+    });
 
     return redirect()->back()->with('success', 'Data berhasil disimpan');
 }
-
         public function delete(Request $request)
     {
         $role = Role::find($request->id);

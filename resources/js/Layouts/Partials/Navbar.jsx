@@ -3,7 +3,7 @@ import SearchBar from "./SearchBar";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@inertiajs/react";
 
-export default function Navbar({ user, onToggle }) {
+export default function Navbar({ user, onToggle, startTour }) {
     const [open, setOpen] = useState(false);
     const ref = useRef();
 
@@ -19,15 +19,17 @@ export default function Navbar({ user, onToggle }) {
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
     return (
-        <header className="bg-white border-b border-gray-200 px-6 py-3">
+        /* PERBAIKAN: Menambahkan w-full, sticky top-0, dan z-30 untuk memastikan navbar mengunci posisi atas dengan presisi */
+        <header className="bg-white border-b border-gray-200 px-6 py-3 sticky top-0 w-full z-30 flex-shrink-0">
             <div className="flex items-center justify-between">
                 {/* LEFT */}
                 <div className="flex items-center gap-4 w-full max-w-xl">
                     {/* Hamburger */}
                     <button
                         onClick={onToggle}
-                        className="p-2 rounded-md hover:bg-gray-100"
+                        className="p-2 rounded-md hover:bg-gray-100 transition-colors"
                     >
                         <Menu size={20} className="text-gray-600" />
                     </button>
@@ -40,12 +42,24 @@ export default function Navbar({ user, onToggle }) {
 
                 {/* RIGHT */}
                 <div className="flex items-center gap-6">
+                    {/* Panduan Pemakaian */}
+                    <button
+                        type="button"
+                        onClick={startTour}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                    >
+                        <i className="fa fa-question-circle" />
+                        <span className="hidden sm:inline">
+                            Panduan Pemakaian
+                        </span>
+                    </button>
+
                     {/* Notification */}
-                    <div className="relative">
+                    <div className="relative cursor-pointer p-1 hover:bg-gray-50 rounded-full transition-colors hidden">
                         <Bell className="text-gray-600" size={20} />
 
                         {/* Badge */}
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                        <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 font-semibold rounded-full min-w-[18px] text-center">
                             3
                         </span>
                     </div>
@@ -55,23 +69,23 @@ export default function Navbar({ user, onToggle }) {
 
                     {/* User Info */}
                     <div className="flex items-center gap-3">
-                        <div className="text-right">
-                            <p className="text-sm font-medium uppercase text-gray-800">
+                        <div className="text-right hidden md:block">
+                            <p className="text-sm font-semibold uppercase text-gray-800 tracking-wide">
                                 {user?.name}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 font-medium">
                                 {user?.role?.nama_roles}
                             </p>
                         </div>
 
-                        {/* Avatar */}
+                        {/* Avatar Dropdown */}
                         <div className="relative" ref={ref}>
                             {/* BUTTON */}
                             <button
                                 onClick={() => setOpen(!open)}
-                                className="relative focus:outline-none"
+                                className="relative focus:outline-none flex items-center structure"
                             >
-                                <div className="w-10 h-10 bg-indigo-500 text-white flex items-center justify-center rounded-full">
+                                <div className="w-10 h-10 bg-green-600 text-white flex items-center justify-center rounded-full font-bold shadow-sm hover:bg-green-700 transition-colors">
                                     {user?.name?.charAt(0).toUpperCase()}
                                 </div>
 
@@ -81,8 +95,8 @@ export default function Navbar({ user, onToggle }) {
 
                             {/* DROPDOWN */}
                             {open && (
-                                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                                    <div className="p-4 border-b">
+                                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 origin-top-right">
+                                    <div className="p-4 border-b bg-gray-50 rounded-t-lg md:hidden">
                                         <p className="text-sm font-medium uppercase text-gray-800">
                                             {user?.name}
                                         </p>
@@ -91,12 +105,12 @@ export default function Navbar({ user, onToggle }) {
                                         </p>
                                     </div>
 
-                                    <div className="py-2">
+                                    <div className="py-1">
                                         <Link
                                             href={route("logout")}
                                             method="post"
                                             as="button"
-                                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors text-left"
                                         >
                                             <i className="fa fa-sign-out"></i>
                                             Log out

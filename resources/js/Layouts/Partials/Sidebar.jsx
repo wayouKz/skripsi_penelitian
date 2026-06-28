@@ -2,15 +2,21 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 
-export default function Sidebar({ collapsed }) {
+export default function Sidebar({ collapsed, menuItems }) {
     const { url, props } = usePage();
-    const menuItems = props.auth.list_features;
 
+    const logo = props.settings_application?.logo_instansi;
+    const appName = props.settings_application?.nama_aplikasi;
     const [openMenu, setOpenMenu] = useState(null);
 
     const isActive = (path) => {
         if (!path) return false;
-        return url.startsWith("/" + path);
+
+        const formattedPath = path
+            .replace(/\./g, "/") // ganti . jadi /
+            .replace(/\/index$/, ""); // hapus /index di akhir
+
+        return url.startsWith("/" + formattedPath);
     };
 
     // auto buka parent kalau child aktif
@@ -29,38 +35,50 @@ export default function Sidebar({ collapsed }) {
     }, [url]);
 
     return (
+        /* PERBAIKAN 1: Menambahkan flex flex-col h-full agar kontainer memiliki tinggi penuh yang statis */
         <aside
-            className={`bg-white border-r transition-all duration-300 ${
+            className={`bg-white border-r transition-all duration-300 flex flex-col h-full ${
                 collapsed ? "w-20" : "w-64"
             }`}
         >
             {/* Logo */}
-            <div className="p-6 border-b border-gray-200">
-                <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-black flex items-center justify-center">
-                        <div className="text-white font-bold text-xl">G</div>
-                    </div>
-                    <span className="text-xl font-bold hidden"></span>
+            {/* flex-shrink-0 menjaga bagian logo agar tetap di atas (tidak ikut tergulung) */}
+            <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                <div className="flex items-center space-x-3">
+                    {logo ? (
+                        <img
+                            src={`/storage/public/logo/${logo}`}
+                            alt="Logo"
+                            className="w-10 h-10 object-contain"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">
+                                {appName?.charAt(0)?.toUpperCase() || "A"}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
-            <nav className="flex-1 py-4 space-y-2 overflow-y-aut p-4">
+
+            {/* PERBAIKAN 2: Menambahkan overflow-y-auto dan min-h-0 supaya menu daftar list bisa di-scroll */}
+            <nav className="flex-1 py-4 space-y-2 p-4 overflow-y-auto min-h-0 content-scrollbar">
                 {menuItems.map((item) => {
-                    const parentActive =
-                        isActive(item.route) ||
-                        item.children?.some((child) => isActive(child.route));
+                    const parentActive = isActive(item.route);
                     return (
                         <div key={item.id} className="relative group">
                             {!item.children?.length &&
                                 (item.route ? (
                                     <Link
                                         href={route(item?.route)}
+                                        id={`menu-item-${item.id}`}
                                         className={`flex items-center ${
                                             collapsed
                                                 ? "justify-center"
-                                                : "px-4 space-x-3"
-                                        } py-3 rounded-lg transition ${
+                                                : " space-x-3"
+                                        } py-2 px-2 rounded-full transition ${
                                             parentActive
-                                                ? "bg-indigo-600 text-white"
+                                                ? "bg-green-600 text-white"
                                                 : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                                         }`}
                                     >
@@ -81,13 +99,13 @@ export default function Sidebar({ collapsed }) {
                                         className={`flex items-center ${
                                             collapsed
                                                 ? "justify-center"
-                                                : "px-4 space-x-3"
-                                        } py-3 text-gray-400`}
+                                                : "mx-auto p-2"
+                                        }  text-gray-300  border-b border-gray-200 rounded-lg `}
                                     >
                                         <i className={`fa ${item.icon}`} />
 
                                         {!collapsed && (
-                                            <span className="text-sm">
+                                            <span className="text-sm ">
                                                 {item.label}
                                             </span>
                                         )}
@@ -95,16 +113,14 @@ export default function Sidebar({ collapsed }) {
                                 ))}
 
                             {/* TOOLTIP */}
-                            {collapsed && (
-                                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:block bg-indigo-900 text-white text-xs px-2 py-1 rounded shadow whitespace-nowrap z-50">
-                                    {item.label}
-                                </div>
-                            )}
                         </div>
                     );
                 })}
             </nav>
-            <div className="p-2 border-t border-gray-200">
+
+            {/* Bagian Kontrol Akun */}
+            {/* flex-shrink-0 menjaga bagian profile/kontrol akun agar paku statis di dasar sidebar */}
+            <div className="p-2 border-t border-gray-200 flex-shrink-0">
                 <div className="relative group">
                     <Link
                         href={route("profile.edit")}

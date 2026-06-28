@@ -95,7 +95,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                         placeholder="Cari menu..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
                     />
 
                     <select
@@ -124,7 +124,9 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                 setEditMode(false);
                             }}
                             className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
-                                selectedMenu?.id === menu.id ? "bg-blue-50" : ""
+                                selectedMenu?.id === menu.id
+                                    ? "bg-emerald-50"
+                                    : ""
                             }`}
                         >
                             <div className="flex items-center gap-2">
@@ -192,7 +194,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                             </button>
                                             <button
                                                 onClick={saveEdit}
-                                                className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                                                className="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm"
                                             >
                                                 Simpan
                                             </button>
@@ -370,7 +372,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                         className={`cursor-pointer p-4 rounded-lg border flex items-center justify-center transition
                                             ${
                                                 isSelected
-                                                    ? "bg-blue-50 border-blue-500 text-blue-600"
+                                                    ? "bg-emerald-50 border-emerald-500 text-emerald-600"
                                                     : "hover:bg-gray-50"
                                             }`}
                                     >

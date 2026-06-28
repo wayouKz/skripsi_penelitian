@@ -18,7 +18,8 @@ return new class extends Migration
             $table->foreignId('kelas_id')->constrained('m_kelas');
             $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans');
             $table->string('nama_siswa');
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+            $table->enum('status', ['siswa_aktif', 'alumni'])->default('siswa_aktif');
+            // $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
             $table->timestamps();
         });
     }

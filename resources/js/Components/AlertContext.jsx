@@ -41,7 +41,7 @@ const TOAST_STYLES = {
 };
 
 const LABELS = {
-    success: "Berhasil",
+    success: "Sukses",
     error: "Gagal",
     info: "Info",
     warning: "Peringatan",
@@ -177,13 +177,19 @@ function ModalButton({ onClick, variant, children }) {
 export function AlertProvider({ children }) {
     const [alert, setAlert] = useState(null);
 
-    // ─── Logic tidak berubah ───────────────────────────────────────────
-
+    // 1. Alert Biasa (Pojok Kanan Bawah)
     const showAlert = (message, type = "info", duration = 3000) => {
         setAlert({ type: "alert", message, alertType: type });
         setTimeout(() => setAlert(null), duration);
     };
 
+    // 2. Alert Center (Tengah Layar) - FUNGSI BARU DITAMBAHKAN
+    const showCenterAlert = (message, type = "info", duration = 3000) => {
+        setAlert({ type: "center_alert", message, alertType: type });
+        setTimeout(() => setAlert(null), duration);
+    };
+
+    // 3. Question (Modal Yes/No)
     const showQuestion = (
         message,
         onConfirm = () => {},
@@ -217,20 +223,21 @@ export function AlertProvider({ children }) {
         }
     };
 
-    // ─── Render ───────────────────────────────────────────────────────
-
     const ts = TOAST_STYLES[alert?.alertType] ?? TOAST_STYLES.info;
 
+    // Jangan lupa mengekspor showCenterAlert agar bisa dipanggil di komponen lain
     return (
-        <AlertContext.Provider value={{ showAlert, showQuestion }}>
+        <AlertContext.Provider
+            value={{ showAlert, showCenterAlert, showQuestion }}
+        >
             <style>{KEYFRAMES}</style>
             {children}
 
             <AnimatePresence>
-                {/* ── Toast Alert ── */}
+                {/* ── 1. TOAST ALERT (Pojok Kanan Bawah) ── */}
                 {alert?.type === "alert" && (
                     <motion.div
-                        key="alert"
+                        key="alert-toast"
                         initial={{ opacity: 0, x: 80, scale: 0.9 }}
                         animate={{ opacity: 1, x: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 80, scale: 0.9 }}
@@ -241,8 +248,8 @@ export function AlertProvider({ children }) {
                         }}
                         style={{
                             position: "fixed",
-                            bottom: 24,
-                            right: 24,
+                            bottom: 24, // Tetap di bawah
+                            right: 24, // Tetap di kanan
                             zIndex: 9999,
                             display: "flex",
                             alignItems: "center",
@@ -261,7 +268,6 @@ export function AlertProvider({ children }) {
                                 "'Plus Jakarta Sans', system-ui, sans-serif",
                         }}
                     >
-                        {/* Icon badge */}
                         <div
                             style={{
                                 width: 36,
@@ -276,8 +282,6 @@ export function AlertProvider({ children }) {
                         >
                             <ToastIcon type={alert.alertType} />
                         </div>
-
-                        {/* Text content */}
                         <div style={{ flex: 1 }}>
                             <div
                                 style={{
@@ -299,8 +303,6 @@ export function AlertProvider({ children }) {
                                 {alert.message}
                             </div>
                         </div>
-
-                        {/* Progress bar */}
                         <motion.div
                             initial={{ scaleX: 1 }}
                             animate={{ scaleX: 0 }}
@@ -319,7 +321,108 @@ export function AlertProvider({ children }) {
                     </motion.div>
                 )}
 
-                {/* ── Question Modal ── */}
+                {/* ── 2. CENTER ALERT (Pop up di tengah) ── */}
+                {alert?.type === "center_alert" && (
+                    <motion.div
+                        key="alert-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: "fixed",
+                            inset: 0,
+                            zIndex: 9998,
+                            background: "rgba(0,0,0,0.45)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <motion.div
+                            key="alert-modal"
+                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 380,
+                                damping: 30,
+                            }}
+                            style={{
+                                position: "relative",
+                                zIndex: 9999,
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                textAlign: "center",
+                                gap: 12,
+                                padding: 24,
+                                borderRadius: 16,
+                                minWidth: 320,
+                                maxWidth: 380,
+                                overflow: "hidden",
+                                background: ts.bg,
+                                border: ts.border,
+                                boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                                fontFamily:
+                                    "'Plus Jakarta Sans', system-ui, sans-serif",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: 48,
+                                    height: 48,
+                                    borderRadius: 12,
+                                    background: ts.iconBg,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <ToastIcon type={alert.alertType} />
+                            </div>
+
+                            <div
+                                style={{
+                                    fontSize: 16,
+                                    fontWeight: 700,
+                                    color: ts.titleColor,
+                                }}
+                            >
+                                {LABELS[alert.alertType] ?? alert.alertType}
+                            </div>
+
+                            <div
+                                style={{
+                                    fontSize: 14,
+                                    color: "#6b7280",
+                                    lineHeight: 1.5,
+                                }}
+                            >
+                                {alert.message}
+                            </div>
+
+                            {/* <button
+                                onClick={() => setAlert(null)}
+                                style={{
+                                    marginTop: 8,
+                                    width: "100%",
+                                    padding: "10px",
+                                    borderRadius: 10,
+                                    background: ts.progress,
+                                    color: "#fff",
+                                    border: "none",
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                }}
+                            >
+                                OK
+                            </button> */}
+                        </motion.div>
+                    </motion.div>
+                )}
+                {/* ── 3. QUESTION MODAL (Tidak Berubah) ── */}
                 {alert?.type === "question" && (
                     <motion.div
                         key="question-overlay"
@@ -335,7 +438,6 @@ export function AlertProvider({ children }) {
                             inset: 0,
                             background: "rgba(15,15,20,.72)",
                             backdropFilter: "blur(8px)",
-                            WebkitBackdropFilter: "blur(8px)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -363,7 +465,6 @@ export function AlertProvider({ children }) {
                                     "0 32px 64px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04)",
                             }}
                         >
-                            {/* Icon circle */}
                             <div
                                 style={{
                                     width: 80,
@@ -379,8 +480,6 @@ export function AlertProvider({ children }) {
                             >
                                 <ModalIcon />
                             </div>
-
-                            {/* Title */}
                             <div
                                 style={{
                                     fontSize: 20,
@@ -392,8 +491,6 @@ export function AlertProvider({ children }) {
                             >
                                 Lanjutkan tindakan?
                             </div>
-
-                            {/* Divider */}
                             <div
                                 style={{
                                     width: "100%",
@@ -402,8 +499,6 @@ export function AlertProvider({ children }) {
                                     marginBottom: 16,
                                 }}
                             />
-
-                            {/* Message */}
                             <p
                                 style={{
                                     fontSize: 14,
@@ -414,8 +509,6 @@ export function AlertProvider({ children }) {
                             >
                                 {alert.message}
                             </p>
-
-                            {/* Actions */}
                             <div style={{ display: "flex", gap: 10 }}>
                                 <ModalButton
                                     onClick={handleCancel}

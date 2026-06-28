@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\ManajemenAplikasi\GenerativeAI;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaFiturAplikasiController;
+use App\Http\Controllers\Akademik\JurnalMengajarController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -13,8 +15,16 @@ use App\Http\Controllers\Admin\Master\GuruController;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaUserController;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaInformasiInstansiController;
 use App\Http\Controllers\Admin\ManajemenAplikasi\KelolaInformasiHakAksesController;
+use App\Http\Controllers\Admin\Master\JurusanController;
 use App\Http\Controllers\Admin\Master\SiswaController;
+use App\Http\Controllers\Akademik\AbsenController;
+use App\Http\Controllers\Akademik\PenilaianController;
+use App\Http\Controllers\Akademik\KelasDiAmpuController;
 use App\Http\Controllers\Helper\GetDataController;
+use App\Http\Controllers\Master\JadwalController;
+use App\Http\Controllers\Master\KelasController;
+use App\Http\Controllers\Master\MapelController;
+use App\Http\Controllers\Master\TahunAjaranController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -34,7 +44,6 @@ Route::prefix('install')->group(function () {
     Route::post('/configure-post', [InstalerController::class, 'configureStore'])->name('install.configure.store');
 });
     Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
 
     //search
@@ -42,13 +51,32 @@ Route::middleware('auth')->group(function () {
     Route::controller(GetDataController::class)->prefix('getData')->name('getData.')->group(function () {
         Route::get('/list-feature',  'getListFeatureByRole')->name('list-feature');
         Route::get('/get-list-feature',  'getListFeature')->name('get-list-feature');
+        Route::get('/kelas',  'getKelas')->name('get-kelas');
+        Route::get('/cek-siswa-tahun-ajaran',  'cekSiswaTahunAjaran')->name('cek-siswa');
+        Route::get('/get-Mapel-Guru',  'getMapelGuru')->name('get-mapel-guru');
+        Route::get('/get-list-guru',  'getListGuru')->name('get-list-guru');
+        Route::get('get-kelas-siswa',  'getKelasSiswa')->name('get-kelas-siswa');
+        Route::get('get-kelas-siswa-unmapped',  'getKelasSiswaUnmapped')->name('get-list-siswa-unmapped');
+        Route::get('get-tahun-ajaran',  'getTahunAjaran')->name('get-tahun-ajaran');
+        Route::get('get-kelas-tujuan',  'getKelasTujuan')->name('get-kelas-tujuan');
+        Route::get('siswa-in-kelas',  'getSiswaInKelas')->name('siswa-in-kelas');
+        Route::get('get-cek-kelas-tujuan',  'cekKelasTujuan')->name('cek-kelas-tujuan');
+        Route::get('get-siswa-alumni',  'getSiswaAlumni')->name('get-siswa-alumni');
+        Route::get('get-history-jadwal',  'getHistoryJadwal')->name('get-history-jadwal');
+        Route::get('get-guru-pengampu-kelas',  'getGuruPengampuKelas')->name('get-guru-pengampu-kelas');
+        Route::get('get-Siswa-PerKelas',  'getSiswaPerKelas')->name('getSiswaPerKelas');
+        Route::get('get-mapel-guru-kelas',  'getMapelGuruKelas')->name('get-mapel-guru-kelas');
+        Route::get('get-jadwal-guru-kelas',  'getJadwalGuruKelas')->name('get-jadwal-guru-kelas');
+        Route::get('get-history-absensi',  'getHistoryAbsensi')->name('get-history-absensi');
+        Route::get('get-kelas-aktif',  'getKelasAktif')->name('get-kelas-aktif');
     });
+
 
 
     //role
     Route::prefix('manajemen')->name('manajemen.')->group(function () {
 
-        Route::controller(RoleController::class)->prefix('/kelola-hak-akses', )->name('hak-akses.')->group(function () {
+        Route::controller(RoleController::class)->prefix('/kelola-hak-akses', )->name('kelola-hak-akses.')->group(function () {
             Route::get('/',  'index')->name('index');
             Route::get('/getHakAkses',  'getRole')->name('getHakAkses');
             Route::post('/update-status',  'updateStatus')->name('update-status');
@@ -62,6 +90,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/getUser',  'getUser')->name('getUser');
             Route::post('/reset-password',  'resetPassword')->name('reset-password');
             Route::post('/update/{id}',  'update')->name('update');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/delete/{id}',  'destroy')->name('destroy');
+        });
+
+        Route::controller(GenerativeAI::class)->prefix('/generative-ai', )->name('generative-ai.')->group(function () {
+            Route::post('/recomendation-guru',  'RecomendationGuru')->name('recomendation-guru');
         });
     });
     //master
@@ -70,26 +104,88 @@ Route::middleware('auth')->group(function () {
         Route::controller(GuruController::class)->prefix('/guru', )->name('guru.')->group(function () {
             Route::get('/',  'index')->name('index');
             Route::get('/getGuru',  'getGuru')->name('getGuru');
+            Route::get('/getWaliKelas',  'getWaliKelas')->name('getWaliKelas');
             Route::post('/store',  'store')->name('store');
             Route::post('/update',  'update')->name('update');
-            Route::post('/delete/${id}',  'destroy')->name('destroy');
+            Route::post('/delete/{id}',  'destroy')->name('destroy');
             Route::post('/update-status',  'updateStatus')->name('update-status');
+            Route::post('/mapping-mappel',  'mappingGuruMapel')->name('mapping-mappel');
+            Route::get('/get-guru-mapel',  'DataGuruMapel')->name('getGuruMapel');
         });
 
         Route::controller(SiswaController::class)->prefix('/siswa')->name('siswa.')->group(function () {
             Route::get('/',  'index')->name('index');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/update',  'update')->name('update');
+            Route::post('/delete/{id}',  'destroy')->name('destroy');
+            Route::get('/getSiswa',  'getSiswa')->name('getSiswa');
+            Route::post('mapping-kelas-siswa',  'mappingKelasSiswa')->name('mapping-kelas');
+            Route::post('/proses-kenaikan',  'prosesKenaikan')->name('proses-kenaikan');
+        });
+
+        Route::controller(TahunAjaranController::class)->prefix('/tahun-ajaran')->name('tahun-ajaran.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('/getTahunAjaran',  'getTahunAjaran')->name('getTahunAjaran');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/update',  'update')->name('update');
+        });
+
+        Route::controller(KelasController::class)->prefix('/kelas')->name('kelas.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('/mapping-kelas/{namaKelas}',  'mappingKelas')->name('mappingKelas');
+            Route::get('/getKelas',  'getKelas')->name('getKelas');
+            Route::get('/getWaliKelas',  'getWaliKelas')->name('getWaliKelas');
+            Route::get('/getSiswaPerTahunAjaran/{id_tahun_ajaran}/{kelas_id}',  'getSiswaPerTahunAjaran')->name('getSiswaPerTahunAjaran');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/update',  'update')->name('update');
+            Route::post('/destroy',  'destroy')->name('destroy');
+            Route::post('/update-status',  'update-status')->name('update');
+        });
+
+        Route::controller(JurusanController::class)->prefix('/jurusan')->name('jurusan.')->group(function () {
+            Route::get('/get-jurusan',  'getJurusan')->name('getJurusan');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/update',  'update')->name('update');
+            Route::post('/destroy',  'destroy')->name('destroy');
+        });
+
+        Route::controller(MapelController::class)->prefix('/mapel')->name('mapel.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('/get-mapel',  'getMapel')->name('getMapel');
+            Route::post('/store',  'store')->name('store');
+            Route::post('/update',  'update')->name('update');
+            Route::post('/destroy/{id}',  'destroy')->name('destroy');
+        });
+        Route::controller(JadwalController::class)->prefix('/generate-jadwal')->name('generate-jadwal.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::post('/store',  'generate')->name('store');
         });
 
     });
 
+    Route::prefix('akademik')->name('akademik.')->group(function () {
+        Route::controller(AbsenController::class)->prefix('/absensi', )->name('absensi.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::post('/store',  'store')->name('store');
+        });
+
+        Route::controller(KelasDiAmpuController::class)->prefix('/kelas-diampu', )->name('kelas-diampu.')->group(function () {
+            Route::get('/',  'index')->name('index');
+            Route::get('/{id}',  'show')->name('detail');
+        });
+
+        Route::controller(JurnalMengajarController::class)->prefix('/jurnal', )->name('jurnal.')->group(function () {
+            Route::get('/',  'index')->name('index');
+        });
+
+        Route::controller(PenilaianController::class)->prefix('/penilaian', )->name('penilaian.')->group(function () {
+            Route::get('/',  'index')->name('index');
+        });
+    });
     Route::prefix('manajemen-aplikasi')->name('manajemen-aplikasi.')->group(function () {
 
         Route::controller(KelolaInformasiInstansiController::class)->prefix('/kelola-informasi-instansi', )->name('kelola-informasi-instansi.')->group(function () {
             Route::get('/',  'index')->name('index');
-        });
-        Route::controller(KelolaFiturAplikasiController::class)->prefix('/kelola-fitur-aplikasi', )->name('kelola-fitur-aplikasi.')->group(function () {
-            Route::get('/',  'index')->name('index');
-            Route::post('/update',  'update')->name('update');
         });
     });
 

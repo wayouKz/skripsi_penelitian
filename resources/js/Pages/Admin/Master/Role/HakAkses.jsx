@@ -73,7 +73,7 @@ export default function HakAkeses() {
             "Anda yakin ingin menghapus data ini ?",
             () => {
                 axios
-                    .post(route("manajemen.hak-akses.destroy", { id }))
+                    .post(route("manajemen.kelola-hak-akses.destroy", { id }))
                     .then(() => {
                         getRoles();
                         showAlert("Data berhasil dihapus", "success");
@@ -86,7 +86,7 @@ export default function HakAkeses() {
     };
     const handleStatus = (row) => {
         axios
-            .post(route("manajemen.hak-akses.update-status"), {
+            .post(route("manajemen.kelola-hak-akses.update-status"), {
                 id: row.id,
                 status: row.status == "active" ? "nonactive" : "active",
             })
@@ -102,7 +102,7 @@ export default function HakAkeses() {
     const getRoles = async () => {
         setLoading(true);
         await axios
-            .get(route("manajemen.hak-akses.getHakAkses"))
+            .get(route("manajemen.kelola-hak-akses.getHakAkses"))
             .then((res) => {
                 if (res.data.status == false) {
                     seResult([]);
@@ -127,22 +127,25 @@ export default function HakAkeses() {
     }, []);
     return (
         <AuthenticatedLayout header={"Hak Akses"}>
-            <div className="flex justify-end">
-                <PrimaryButton
-                    className="mb-2"
-                    onClick={() => {
-                        handleTambah();
-                    }}
-                >
-                    + Tambah Hak Akses
-                </PrimaryButton>
+            <div className="bg-white shadow sm:rounded-lg p-6">
+                <div className="flex justify-end">
+                    <PrimaryButton
+                        className="mb-2"
+                        onClick={() => {
+                            handleTambah();
+                        }}
+                    >
+                        + Tambah Hak Akses
+                    </PrimaryButton>
+                </div>
+                <DataTable
+                    title="PERAN"
+                    columns={columns}
+                    data={Result}
+                    searchable={true}
+                    loading={loading}
+                />
             </div>
-            <DataTable
-                columns={columns}
-                data={Result}
-                searchable={true}
-                loading={loading}
-            />
             <Add
                 open={show}
                 setOpen={setShow}

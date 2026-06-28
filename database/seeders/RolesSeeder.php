@@ -11,10 +11,15 @@ class RolesSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public static function run(): void
+    public  static function run(): void
     {
         Role::create([
             'nama_roles' => 'Super Admin',
+            'status' => 'active'
+        ]);
+
+        Role::create([
+            'nama_roles' => 'Guru',
             'status' => 'active'
         ]);
     }

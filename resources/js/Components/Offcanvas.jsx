@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import DangerButton from "./DangerButton";
 
 export default function Offcanvas({
     open,
@@ -63,19 +64,19 @@ export default function Offcanvas({
                 {/* HEADER */}
                 <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
                     <div>
-                        <h2 className="text-lg font-semibold text-indigo-800">
+                        <h2 className="text-lg font-semibold text-green-800">
                             {icon} {title}
                         </h2>
                     </div>
 
                     {/* CLOSE BUTTON */}
 
-                    <button
+                    <DangerButton
                         onClick={onClose}
                         className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100"
                     >
                         <i className="fa fa-times"></i>
-                    </button>
+                    </DangerButton>
                 </div>
 
                 {/* BODY */}

@@ -14,22 +14,23 @@ public function up(): void
     Schema::create('t_list_feature_by_roles', function (Blueprint $table) {
         $table->id();
 
-        // relasi ke feature
         $table->foreignId('list_feature_id')
             ->constrained('list_features')
             ->cascadeOnDelete();
 
-        // relasi ke role
         $table->foreignId('role_id')
             ->constrained('roles')
             ->cascadeOnDelete();
 
-        // optional (kalau mau urutan per role)
+        $table->boolean('can_view')->default(false);
+        $table->boolean('can_create')->default(false);
+        $table->boolean('can_update')->default(false);
+        $table->boolean('can_delete')->default(false);
+
         $table->integer('order')->default(0);
 
         $table->timestamps();
 
-        // biar tidak duplicate
         $table->unique(['list_feature_id', 'role_id']);
     });
 }

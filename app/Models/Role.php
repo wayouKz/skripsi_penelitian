@@ -23,6 +23,7 @@ class Role extends Model
             't_list_feature_by_roles',
             'role_id',          // foreign key di pivot untuk role
             'list_feature_id'   // foreign key di pivot untuk feature
-        )->withTimestamps()->withPivot('order');
+        )->withTimestamps()
+          ->withPivot('can_view', 'can_create', 'can_update', 'can_delete', 'order');
     }
 }

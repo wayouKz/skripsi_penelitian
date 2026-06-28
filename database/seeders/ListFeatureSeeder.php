@@ -16,16 +16,17 @@ class ListFeatureSeeder extends Seeder
             $dashboard = List_Feature::create([
                 'label' => 'Dashboard',
                 'route' => null,
-                'icon' => 'fa-home',
-                'deskripsi' => 'Halaman dashboard',
+                'icon' => 'fa-gauge',
+                'deskripsi' => 'Ringkasan informasi dan statistik utama dari seluruh aktivitas sistem akademik.',
                 'parent_id' => null,
                 'order' => 1,
             ]);
-            $dashboard = List_Feature::create([
+
+            List_Feature::create([
                 'label' => 'Dashboard',
                 'route' => 'dashboard',
                 'icon' => 'fa-home',
-                'deskripsi' => 'Halaman dashboard',
+                'deskripsi' => 'Lihat statistik sekolah, grafik kehadiran, dan ringkasan data operasional harian.',
                 'parent_id' => $dashboard->id,
                 'order' => 1,
             ]);
@@ -34,7 +35,7 @@ class ListFeatureSeeder extends Seeder
             $manajemen = List_Feature::create([
                 'label' => 'Manajemen',
                 'icon' => 'fa-layer-group',
-                'deskripsi' => 'Menu manajemen',
+                'deskripsi' => 'Pusat kendali untuk mengelola hak akses, pengguna, dan pengaturan kalender akademik.',
                 'parent_id' => null,
                 'order' => 2,
             ]);
@@ -44,7 +45,7 @@ class ListFeatureSeeder extends Seeder
                     'label' => 'Manajemen User',
                     'route' => 'manajemen.kelola-user.index',
                     'icon' => 'fa-briefcase',
-                    'deskripsi' => 'Kelola manajemen',
+                    'deskripsi' => 'Kelola data akun pengguna sistem, termasuk penambahan akun baru dan reset kata sandi.',
                     'parent_id' => $manajemen->id,
                     'order' => 1,
                     'created_at' => now(),
@@ -53,8 +54,8 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Hak Akses & Peran',
                     'icon' => 'fa-shield-alt',
-                    'route' => 'manajemen.hak-akses.index',
-                    'deskripsi' => 'Kelola role',
+                    'route' => 'manajemen.kelola-hak-akses.index',
+                    'deskripsi' => 'Atur wewenang dan batasan fitur untuk setiap peran pengguna di dalam aplikasi.',
                     'parent_id' => $manajemen->id,
                     'order' => 2,
                     'created_at' => now(),
@@ -63,8 +64,8 @@ class ListFeatureSeeder extends Seeder
                 [
                     'label' => 'Tahun Ajaran',
                     'icon' => 'fa-calendar',
-                    'route' => null,
-                    'deskripsi' => 'Kelola tahun ajaran',
+                    'route' => 'master.tahun-ajaran.index',
+                    'deskripsi' => 'Atur periode tahun ajaran aktif dan kelola riwayat peralihan semester akademik.',
                     'parent_id' => $manajemen->id,
                     'order' => 3,
                     'created_at' => now(),
@@ -72,21 +73,44 @@ class ListFeatureSeeder extends Seeder
                 ],
             ]);
 
+            // 🔹 AKADEMIK & PEMBELAJARAN (Fitur Baru)
+          // 🔹 AKADEMIK & PROSES BELAJAR MENGAJAR (KBM)
+$akademik = List_Feature::create([
+    'label' => 'Akademik & KBM',
+    'icon' => 'fa-graduation-cap',
+    'deskripsi' => 'Pusat kendali aktivitas belajar mengajar, manajemen kelas yang diampu, absensi, dan jurnal kelas.',
+    'parent_id' => null,
+    'order' => 3, // Sesuaikan urutan menu utama Anda
+]);
+
+    List_Feature::insert([
+        [
+            'label' => 'Kelas yang Diampu',
+            'icon' => 'fa-chalkboard-user',
+            'route' => 'akademik.kelas-diampu.index',
+            'deskripsi' => 'Daftar kelas dan mata pelajaran yang menjadi tanggung jawab mengajar Anda pada semester ini.',
+            'parent_id' => $akademik->id,
+            'order' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ],
+    ]);
+
             // 🔹 MASTER DATA
             $master = List_Feature::create([
                 'label' => 'Master Data',
                 'icon' => 'fa-database',
-                'deskripsi' => 'Data utama',
+                'deskripsi' => 'Kumpulan entitas data utama yang menjadi pondasi operasional dan akademik sekolah.',
                 'parent_id' => null,
-                'order' => 3,
+                'order' => 4, // Berubah dari 3 menjadi 4
             ]);
 
             List_Feature::insert([
                 [
-                    'label' => 'Daftar Kelas',
-                    'icon' => 'fa-building',
-                    'route' => null,
-                    'deskripsi' => 'Data kelas',
+                    'label' => 'Daftar Siswa',
+                    'icon' => 'fa-user-graduate',
+                    'route' => 'master.siswa.index',
+                    'deskripsi' => 'Kelola biodata lengkap siswa, pendaftaran, serta proses mutasi dan kenaikan kelas.',
                     'parent_id' => $master->id,
                     'order' => 1,
                     'created_at' => now(),
@@ -96,37 +120,37 @@ class ListFeatureSeeder extends Seeder
                     'label' => 'Daftar Guru',
                     'icon' => 'fa-user-tie',
                     'route' => 'master.guru.index',
-                    'deskripsi' => 'Data guru',
+                    'deskripsi' => 'Kelola profil tenaga pendidik beserta status kepegawaian dan informasi penugasan.',
                     'parent_id' => $master->id,
                     'order' => 2,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
                 [
-                    'label' => 'Daftar Mata Pelajaran',
-                    'icon' => 'fa-book',
-                    'route' => null,
-                    'deskripsi' => 'Data mapel',
+                    'label' => 'Daftar Kelas',
+                    'icon' => 'fa-door-open',
+                    'route' => 'master.kelas.index',
+                    'deskripsi' => 'Manajemen ruang kelas, pembagian tingkat, dan penentuan kapasitas rombongan belajar.',
                     'parent_id' => $master->id,
                     'order' => 3,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
                 [
-                    'label' => 'Generate Jadwal Guru',
-                    'icon' => 'fa-calendar-alt',
-                    'route' => null,
-                    'deskripsi' => 'Generate jadwal',
+                    'label' => 'Daftar Mata Pelajaran',
+                    'icon' => 'fa-book',
+                    'route' => 'master.mapel.index',
+                    'deskripsi' => 'Kelola struktur kurikulum dan daftar mata pelajaran untuk setiap tingkatan kelas.',
                     'parent_id' => $master->id,
                     'order' => 4,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ],
                 [
-                    'label' => 'Daftar Siswa',
-                    'icon' => 'fa-user-graduate',
-                    'route' => null,
-                    'deskripsi' => 'Data siswa',
+                    'label' => 'Generate Jadwal Guru',
+                    'icon' => 'fa-calendar-alt',
+                    'route' => 'master.generate-jadwal.index',
+                    'deskripsi' => 'Susun dan hasilkan jadwal mengajar secara otomatis untuk menghindari bentrok antar guru dan ruang.',
                     'parent_id' => $master->id,
                     'order' => 5,
                     'created_at' => now(),
@@ -138,17 +162,17 @@ class ListFeatureSeeder extends Seeder
             $sistem = List_Feature::create([
                 'label' => 'Sistem',
                 'icon' => 'fa-cog',
-                'deskripsi' => 'Pengaturan sistem',
+                'deskripsi' => 'Konfigurasi teknis dan pengaturan identitas dasar platform aplikasi.',
                 'parent_id' => null,
-                'order' => 4,
+                'order' => 5, // Berubah dari 4 menjadi 5
             ]);
 
             List_Feature::insert([
                 [
                     'label' => 'Pengaturan Sistem',
                     'icon' => 'fa-sliders-h',
-                    'route' => null,
-                    'deskripsi' => 'Setting aplikasi',
+                    'route' => 'manajemen-aplikasi.kelola-informasi-instansi.index',
+                    'deskripsi' => 'Sesuaikan profil instansi, logo, nama sekolah, dan visibilitas dasar aplikasi.',
                     'parent_id' => $sistem->id,
                     'order' => 1,
                     'created_at' => now(),

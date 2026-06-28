@@ -1,19 +1,22 @@
+import { useAlert } from "@/Components/AlertContext";
 import Form from "@/Components/Form";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { router, useForm } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function KelolaInformasiInstansi() {
     const [logoPreview, setLogoPreview] = useState(null);
+    const dataInstansi = usePage().props.settings_application;
+    const { showAlert } = useAlert();
     const { data, setData, post, processing, errors } = useForm({
-        nama_instansi: "",
-        logo_instansi: null,
-        alamat_instansi: "",
-        telepon_instansi: "",
-        email_instansi: "",
-        website_instansi: "",
+        nama_instansi: dataInstansi?.nama_instansi || "",
+        logo_instansi: dataInstansi?.logo_instansi || null,
+        alamat_instansi: dataInstansi?.alamat_instansi || "",
+        telepon_instansi: dataInstansi?.telepon_instansi || "",
+        email_instansi: dataInstansi?.email_instansi || "",
+        website_instansi: dataInstansi?.website_instansi || "",
     });
 
     const handleLogoChange = (e) => {
@@ -30,7 +33,7 @@ export default function KelolaInformasiInstansi() {
         router.post(route("install.configure.store"), data, {
             forceFormData: true,
             onSuccess: () => {
-                console.log("Konfigurasi berhasil");
+                showAlert("Informasi instansi berhasil diperbarui", "success");
             },
         });
     };
@@ -38,134 +41,221 @@ export default function KelolaInformasiInstansi() {
         <AuthenticatedLayout>
             <div className="bg-white shadow rounded-4">
                 <Form onSubmit={submit}>
-                    <div className="grid grid-cols-4 gap-2">
-                        <div className="col-span-4">
-                            <label className="block text-sm font-medium mb-1">
-                                Nama Instansi
-                            </label>
-                            <TextInput
-                                className="block w-full"
-                                type="text"
-                                value={data.nama_instansi}
-                                onChange={(e) =>
-                                    setData("nama_instansi", e.target.value)
-                                }
-                            />
-                            {errors.nama_instansi && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.nama_instansi}
+                    {/* Header */}
+                    <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r rounded-3xl from-green-500 to-green-600">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                                <i className="fa fa-building text-white text-xl"></i>
+                            </div>
+
+                            <div>
+                                <h2 className="text-lg font-semibold text-white">
+                                    Profil Instansi
+                                </h2>
+                                <p className="text-sm text-green-100">
+                                    Kelola informasi dan identitas instansi
                                 </p>
-                            )}
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Logo Instansi */}
-                        <div className="col-span-4">
-                            <label className="block text-sm font-medium mb-1">
-                                Logo Instansi
-                            </label>
+                    {/* Body */}
+                    <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                            {/* Nama Instansi */}
+                            <div className="md:col-span-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Nama Instansi
+                                </label>
 
-                            {logoPreview && (
-                                <div className="flex  w-1/2 ">
-                                    <img
-                                        src={logoPreview}
-                                        alt="Preview Logo"
-                                        className="object-contain justify-center items-center"
-                                    />
-                                </div>
-                            )}
-
-                            {/* Input */}
-                            <label className="cursor-pointer">
-                                <span className="block w-full p-2  bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">
-                                    Upload Logo
-                                </span>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleLogoChange}
+                                <TextInput
+                                    className="block w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    type="text"
+                                    icon="building"
+                                    placeholder="Masukkan nama instansi"
+                                    value={data.nama_instansi}
+                                    onChange={(e) =>
+                                        setData("nama_instansi", e.target.value)
+                                    }
                                 />
-                            </label>
 
-                            <p className="text-xs text-gray-500 mt-1">
-                                PNG, JPG, atau SVG (max 2MB)
-                            </p>
+                                {errors.nama_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.nama_instansi}
+                                    </p>
+                                )}
+                            </div>
 
-                            {errors.logo_instansi && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.logo_instansi}
-                                </p>
-                            )}
-                        </div>
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium mb-1">
-                                Alamat Instansi
-                            </label>
-                            <TextInput
-                                className="block w-full"
-                                type="text"
-                                value={data.alamat_instansi}
-                                onChange={(e) =>
-                                    setData("alamat_instansi", e.target.value)
-                                }
-                            />
-                            {errors.alamat_instansi && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.alamat_instansi}
-                                </p>
-                            )}
-                        </div>
+                            {/* Logo */}
+                            <div className="md:col-span-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Logo Instansi
+                                </label>
 
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium mb-1">
-                                Telepon Instansi
-                            </label>
-                            <TextInput
-                                className="block w-full"
-                                type="text"
-                                value={data.telepon_instansi}
-                                onChange={(e) =>
-                                    setData("telepon_instansi", e.target.value)
-                                }
-                            />
-                        </div>
+                                <div className="border-2 border-dashed border-gray-300 rounded-3xl bg-gray-50 p-6 hover:border-green-400 transition">
+                                    {logoPreview || data?.logo_instansi ? (
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-40 h-40 bg-white rounded-2xl shadow-sm flex items-center justify-center overflow-hidden border">
+                                                <img
+                                                    src={
+                                                        logoPreview
+                                                            ? logoPreview
+                                                            : `/storage/public/logo/${data.logo_instansi}`
+                                                    }
+                                                    alt="Logo Instansi"
+                                                    className="object-contain w-full h-full p-3"
+                                                />
+                                            </div>
 
-                        <div className="col-span-4">
-                            <label className="block text-sm font-medium mb-1">
-                                Email Instansi
-                            </label>
-                            <TextInput
-                                className="block w-full"
-                                type="email"
-                                value={data.email_instansi}
-                                onChange={(e) =>
-                                    setData("email_instansi", e.target.value)
-                                }
-                            />
-                            {errors.email_instansi && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.email_instansi}
-                                </p>
-                            )}
-                        </div>
+                                            <p className="text-xs text-gray-500 mt-3">
+                                                {logoPreview
+                                                    ? "Preview logo baru"
+                                                    : "Logo instansi saat ini"}
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-6">
+                                            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-3">
+                                                <i className="fa fa-image text-green-600 text-2xl"></i>
+                                            </div>
 
-                        <div className="col-span-4">
-                            <label className="block text-sm font-medium mb-1">
-                                Website Instansi
-                            </label>
-                            <TextInput
-                                className="block w-full"
-                                type="text"
-                                value={data.website_instansi}
-                                onChange={(e) =>
-                                    setData("website_instansi", e.target.value)
-                                }
-                            />
-                            {errors.website_instansi && (
-                                <p className="text-red-500 text-xs mt-1">
-                                    {errors.website_instansi}
-                                </p>
-                            )}
+                                            <p className="text-sm font-medium text-gray-700">
+                                                Upload logo instansi
+                                            </p>
+
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                PNG, JPG, SVG maksimal 2MB
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex justify-center mt-5">
+                                        <label className="cursor-pointer">
+                                            <span className="px-5 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-md transition">
+                                                {logoPreview ||
+                                                data?.logo_instansi
+                                                    ? "Ganti Logo"
+                                                    : "Pilih File"}
+                                            </span>
+
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleLogoChange}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {errors.logo_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.logo_instansi}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Alamat */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Alamat Instansi
+                                </label>
+
+                                <TextInput
+                                    className="block w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    type="text"
+                                    icon="map-marker-alt"
+                                    placeholder="Masukkan alamat"
+                                    value={data.alamat_instansi}
+                                    onChange={(e) =>
+                                        setData(
+                                            "alamat_instansi",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+
+                                {errors.alamat_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.alamat_instansi}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Telepon */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Telepon Instansi
+                                </label>
+
+                                <TextInput
+                                    className="block w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    type="text"
+                                    icon="phone"
+                                    placeholder="08xxxxxxxxxx"
+                                    value={data.telepon_instansi}
+                                    onChange={(e) =>
+                                        setData(
+                                            "telepon_instansi",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+
+                            {/* Email */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Email Instansi
+                                </label>
+
+                                <TextInput
+                                    className="block w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    type="email"
+                                    icon="envelope"
+                                    placeholder="email@instansi.com"
+                                    value={data.email_instansi}
+                                    onChange={(e) =>
+                                        setData(
+                                            "email_instansi",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+
+                                {errors.email_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.email_instansi}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Website */}
+                            <div className="md:col-span-2">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Website Instansi
+                                </label>
+
+                                <TextInput
+                                    className="block w-full rounded-2xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    type="text"
+                                    icon="globe"
+                                    placeholder="https://website.com"
+                                    value={data.website_instansi}
+                                    onChange={(e) =>
+                                        setData(
+                                            "website_instansi",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+
+                                {errors.website_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.website_instansi}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </Form>

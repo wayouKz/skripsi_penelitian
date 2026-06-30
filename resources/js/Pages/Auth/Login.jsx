@@ -6,7 +6,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 
-export default function Login({ status, canResetPassword }) {
+export default function Login({ status, canResetPassword, config }) {
     const [captchaKey, setCaptchaKey] = useState(Date.now());
     const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
 
@@ -42,11 +42,10 @@ export default function Login({ status, canResetPassword }) {
                 <div
                     className="hidden lg:flex w-full lg:w-1/2 relative bg-cover bg-center"
                     style={{
-                        backgroundImage:
-                            "url('/assets/bg-login/bg-login-1.jpg')",
-                        // Tambahkan ini jika gambar tetap menyebabkan overflow
+                        backgroundImage: `url(/storage/public/sampul_instansi/${config?.sampul_instansi})`, // Hapus kurung kurawal ekstra
                         backgroundSize: "cover",
                         backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat", // Tambahkan ini agar gambar tidak berulang
                     }}
                 >
                     {/* Overlay Gradient Hijau agar teks terbaca dan tampil elegan */}

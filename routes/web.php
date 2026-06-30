@@ -186,6 +186,7 @@ Route::middleware('auth')->group(function () {
 
         Route::controller(KelolaInformasiInstansiController::class)->prefix('/kelola-informasi-instansi', )->name('kelola-informasi-instansi.')->group(function () {
             Route::get('/',  'index')->name('index');
+            Route::post('/store',  'store')->name('store');
         });
     });
 

@@ -149,6 +149,8 @@ public function setUpMigrate()
     $logo = $request->file('logo_instansi');
     $logo_name = "logo_instansi." . $logo->getClientOriginalExtension();
 
+    $sampulInstansi = $request->file('sampul_instansi');
+    $sampulName = "sampul_instansi." . $sampulInstansi->getClientOriginalExtension();
     // 2. Hapus logo lama dari storage jika ada
     if ($cekConfigurasi && $cekConfigurasi->logo_instansi) {
         $old_logo_path = 'public/logo/' . $cekConfigurasi->logo_instansi;
@@ -158,9 +160,17 @@ public function setUpMigrate()
         }
     }
 
+    if($cekConfigurasi && $cekConfigurasi->sampul_instansi){
+        $old_sampul_path = 'public/sampul_instansi/' . $cekConfigurasi->sampul_instansi;
+
+        if (Storage::exists($old_sampul_path)) {
+            Storage::delete($old_sampul_path);
+        }
+    }
+
     // 3. Simpan logo baru ke storage
     $logo->storeAs('public/logo', $logo_name);
-
+    $sampulInstansi->storeAs('public/sampul_instansi', $sampulName);
     $save = [
         'nama_instansi'    => $request->nama_instansi,
         'alamat_instansi'  => $request->alamat_instansi,
@@ -168,6 +178,7 @@ public function setUpMigrate()
         'email_instansi'   => $request->email_instansi,
         'logo_instansi'    => $logo_name,
         'website_instansi' => $request->website_instansi,
+        'sampul_instansi'  => $sampulName
     ];
 
     // 4. Update atau Create data

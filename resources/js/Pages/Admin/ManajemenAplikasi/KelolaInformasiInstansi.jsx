@@ -8,6 +8,7 @@ import { useState } from "react";
 
 export default function KelolaInformasiInstansi() {
     const [logoPreview, setLogoPreview] = useState(null);
+    const [sampulPreview, setSampulPreview] = useState(null); // Tambahkan ini
     const dataInstansi = usePage().props.settings_application;
     const { showAlert } = useAlert();
     const { data, setData, post, processing, errors } = useForm({
@@ -17,7 +18,15 @@ export default function KelolaInformasiInstansi() {
         telepon_instansi: dataInstansi?.telepon_instansi || "",
         email_instansi: dataInstansi?.email_instansi || "",
         website_instansi: dataInstansi?.website_instansi || "",
+        sampul_instansi: dataInstansi?.sampul_instansi || null, // Tambahkan ini
     });
+    const handleSampulChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setData("sampul_instansi", file);
+        setSampulPreview(URL.createObjectURL(file));
+    };
 
     const handleLogoChange = (e) => {
         const file = e.target.files[0];
@@ -30,15 +39,22 @@ export default function KelolaInformasiInstansi() {
     const submit = (e) => {
         e.preventDefault();
 
-        router.post(route("install.configure.store"), data, {
-            forceFormData: true,
-            onSuccess: () => {
-                showAlert("Informasi instansi berhasil diperbarui", "success");
+        post(
+            route("manajemen-aplikasi.kelola-informasi-instansi.store"),
+            data,
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    showAlert(
+                        "Informasi instansi berhasil diperbarui",
+                        "success",
+                    );
+                },
             },
-        });
+        );
     };
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout header="Kelola Informasi Instansi">
             <div className="bg-white shadow rounded-4">
                 <Form onSubmit={submit}>
                     {/* Header */}
@@ -154,7 +170,58 @@ export default function KelolaInformasiInstansi() {
                                     </p>
                                 )}
                             </div>
+                            {/* Foto Sampul */}
+                            <div className="md:col-span-4 mt-6">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Foto Sampul (Header/Banner)
+                                </label>
 
+                                <div className="border-2 border-dashed border-gray-300 rounded-3xl bg-gray-50 p-4 hover:border-green-400 transition">
+                                    {/* Preview Area */}
+                                    <div className="w-full h-48 bg-gray-200 rounded-2xl overflow-hidden mb-4 shadow-sm">
+                                        {sampulPreview ||
+                                        data?.sampul_instansi ? (
+                                            <img
+                                                src={
+                                                    sampulPreview
+                                                        ? sampulPreview
+                                                        : `/storage/public/sampul_instansi/${data.sampul_instansi}`
+                                                }
+                                                alt="Sampul Instansi"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-gray-400">
+                                                <i className="fa fa-image text-4xl"></i>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Tombol Upload */}
+                                    <div className="flex justify-center">
+                                        <label className="cursor-pointer">
+                                            <span className="px-5 py-2.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-sm font-medium shadow-md transition">
+                                                {sampulPreview ||
+                                                data?.sampul_instansi
+                                                    ? "Ganti Sampul"
+                                                    : "Upload Sampul"}
+                                            </span>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleSampulChange}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {errors.sampul_instansi && (
+                                    <p className="text-red-500 text-xs mt-2">
+                                        {errors.sampul_instansi}
+                                    </p>
+                                )}
+                            </div>
                             {/* Alamat */}
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">

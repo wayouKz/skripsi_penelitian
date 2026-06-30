@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('telepon_instansi')->nullable();
             $table->string('email_instansi')->nullable();
             $table->string('website_instansi')->nullable();
+            $table->string('sampul_instansi')->nullable();
             $table->timestamps();
         });
     }

@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Models\List_Feature;
+use App\Models\WAHYU\MGuru;
+use App\Models\WAHYU\MKelas;
+use App\Models\WAHYU\MMapel;
+use App\Models\WAHYU\MSiswa;
 use Gemini;
 
 class DashboardController extends Controller
@@ -14,11 +18,20 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $listFeature = List_Feature::all();
-        //$logs = ActivityLog::latest()->limit(10)->get();
-        return Inertia::render('Dashboard/Dashboard', [
-            'listFeature' => $listFeature
-        ]);
+
+        $Guru = MGuru::where('status','active')->count();
+        $Siswa = MSiswa::where('status','active')->count();
+        $Kelas = MKelas::where('status','active')->count();
+        $Mapel = MMapel::where('status','active')->count();
+
+        $total = [
+            'Guru' => $Guru,
+            'Siswa' => $Siswa,
+            'Kelas' => $Kelas,
+            'Mapel' => $Mapel
+        ];
+
+        return Inertia::render('Dashboard/Dashboard',compact('total'));
     }
 
     /**

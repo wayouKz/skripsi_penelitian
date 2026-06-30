@@ -7,7 +7,7 @@ import JurnalMengajar from "./JurnalMengajar";
 export default function Detail({ dataKelas }) {
     const [activeTab, setActiveTab] = useState("informasi");
     return (
-        <AuthenticatedLayout header={`Detail Kelas ` + dataKelas?.nama_kelas}>
+        <AuthenticatedLayout header={`Kelas ` + dataKelas?.nama_kelas}>
             <div className=" min-h-screen bg-gray-50/50">
                 <div className="max-w-7xl mx-auto ">
                     {/* Header & Tombol Kembali */}

@@ -70,15 +70,10 @@ export default function Add({
         } else {
             post(route("master.guru.store"), {
                 onSuccess: () => {
-                    console.log(flash);
-                    if (flash.success) {
-                        setOpen(false);
-                        showAlert(flash.success, "success");
-                        reset();
-                        getGuru();
-                    } else if (flash.error) {
-                        showAlert(flash.error, "error");
-                    }
+                    setOpen(false);
+                    showAlert(flash.success, "success");
+                    reset();
+                    getGuru();
                 },
                 onError: () => {
                     showAlert(flash.error, "error");

@@ -278,6 +278,7 @@ export default function Guru() {
     };
 
     const handleTambah = () => {
+        setSelectedGuru(null);
         setShow(true);
         setIsEdit(false);
     };

@@ -29,7 +29,7 @@ export default function GenerateJadwal() {
     const [tahunAjaranList, setTahunAjaranList] = useState([]);
     const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(null);
     const [historyJadwal, setHistoryJadwal] = useState([]);
-
+    const [selectedNamaTahunAjaran, setSelectedNamaTahunAjaran] = useState("");
     // 3. State UI & GA
     const [activeTab, setActiveTab] = useState("konfigurasi");
     const [isGenerating, setIsGenerating] = useState(false);
@@ -350,7 +350,7 @@ export default function GenerateJadwal() {
                                         JADWAL KELAS {kelas}
                                     </h3>
                                     <span className="bg-green-800 text-green-100 text-xs font-bold px-3 py-1 rounded-full">
-                                        Tahun Ajaran Aktif
+                                        {selectedNamaTahunAjaran}
                                     </span>
                                 </div>
 
@@ -532,11 +532,16 @@ export default function GenerateJadwal() {
                                     <div className="w-full md:w-80">
                                         <select
                                             value={selectedTahunAjaran || ""}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                                 setSelectedTahunAjaran(
                                                     e.target.value,
-                                                )
-                                            }
+                                                );
+                                                setSelectedNamaTahunAjaran(
+                                                    e.target.options[
+                                                        e.target.selectedIndex
+                                                    ].text,
+                                                );
+                                            }}
                                             className={`w-full text-sm font-bold rounded-xl border-2 px-4 py-3.5 transition-all shadow-sm cursor-pointer focus:outline-none focus:ring-4 focus:ring-green-500/20 ${
                                                 !selectedTahunAjaran
                                                     ? "bg-amber-50 border-amber-300 text-amber-800 focus:border-amber-500"

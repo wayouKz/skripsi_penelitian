@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Crypt;
 class KelasDiAmpuController extends Controller
 {
     public function index(Request $request) {
-        return inertia('Akademik/KelasDiAmpu/KelasDiAmpu');
+        return inertia('Akademik/Index');
     }
 
     public function show($id){

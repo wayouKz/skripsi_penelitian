@@ -85,7 +85,7 @@ $akademik = List_Feature::create([
 
     List_Feature::insert([
         [
-            'label' => 'Kelas yang Diampu',
+            'label' => 'Akademik',
             'icon' => 'fa-chalkboard-user',
             'route' => 'akademik.kelas-diampu.index',
             'deskripsi' => 'Daftar kelas dan mata pelajaran yang menjadi tanggung jawab mengajar Anda pada semester ini.',

@@ -43,7 +43,7 @@ class GuruController extends Controller
             ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
             ->get();
         }else{
-            $data = MKelas::with('waliKelas')->where('id', $request->kelas_id)
+            $data = MKelas::with('waliKelas')->where('m_kelas.id', $request->kelas_id)
             ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
             ->get();
         }

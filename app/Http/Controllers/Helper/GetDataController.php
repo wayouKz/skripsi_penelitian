@@ -66,7 +66,7 @@ class GetDataController extends Controller
         $formattedData = $data->map(function ($item) {
             return [
                 "value" => (string) $item->id,         // Ambil ID sebagai value
-                "label" => $item->nama_kelas .( " " .$item->nama_jurusan . ")" ? strtoupper($item->nama_jurusan)  : "") ,       // Sesuaikan 'nama_kelas' dengan nama kolom di database Anda
+                "label" => $item->nama_kelas . " ".($item->nama_jurusan  ? strtoupper($item->nama_jurusan)  : "") ,       // Sesuaikan 'nama_kelas' dengan nama kolom di database Anda
             ];
         })->toArray();
 
@@ -84,7 +84,7 @@ class GetDataController extends Controller
     }
 
     public function cekSiswaTahunAjaran(){
-        $data = MSiswa::get();
+        $data = MSiswa::where('status', 'active')->get();
         if($data->isEmpty()){
             $json = [ "success" => false ,"message" => "Sistem tidak dapat menemukan data siswa"];
         }else{
@@ -111,8 +111,10 @@ class GetDataController extends Controller
                     $join->whereRaw('1 = 0');
                 }
             })
-
-            ->leftJoin('m_gurus as guru', 'guru.nip', '=', 't_list_gurus.nip')
+            ->leftJoin('m_gurus as guru', function ($join) {
+                $join->on('t_list_gurus.nip', '=', 'guru.nip');
+                $join->where('guru.status', 'active');
+            })
             ->leftJoin('m_kelas','m_kelas.id' , '=', 't_list_gurus.kelas_id')
             ->select(
                 'm_mapels.id',

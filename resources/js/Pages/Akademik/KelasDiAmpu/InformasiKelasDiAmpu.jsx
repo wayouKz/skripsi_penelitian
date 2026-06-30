@@ -1,8 +1,10 @@
+import { useAlert } from "@/Components/AlertContext";
 import DataTable from "@/Components/Datatables";
 import { useEffect, useState } from "react";
 
 export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
     console.log(dataKelas);
+    const { showAlert } = useAlert();
     const [dataSiswa, setDataSiswa] = useState([]);
     const [loading, setLoading] = useState(false);
     const columns = [
@@ -56,7 +58,7 @@ export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
                 if (res.data.success == true) {
                     setDataSiswa(res.data.data);
                 } else if (res.data.success == false) {
-                    showAlert("Gagal mengambil data siswa", "error");
+                    showAlert("Data siswa masih kosong.", "info");
                 }
             });
     };

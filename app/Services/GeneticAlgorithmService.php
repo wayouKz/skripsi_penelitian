@@ -19,14 +19,15 @@ class GeneticAlgorithmService
     private $jam = [];
     private $slotWaktu = [];
     private $prioritasPagiNip;
-
-    public function __construct($params, $guruMapels, $kelas)
+    private $prioritasPagi;
+    public function __construct($params, $guruMapels, $kelas,$prioritasPagi = [])
     {
         $this->populasi = $params['populasi'] ?? 100;
         $this->maxGenerasi = $params['generasi'] ?? 500;
         $this->crossoverRate = $params['crossover_rate'] ?? 0.8;
         $this->mutationRate = $params['mutation_rate'] ?? 0.1;
         $this->prioritasPagiNip = $params['prioritas_pagi_nip'] ?? [];
+        $this->prioritasPagi = $prioritasPagi;
 
         // Ambil Slot Waktu Dinamis dari Frontend
         if (isset($params['slot_waktu']) && is_array($params['slot_waktu']) && count($params['slot_waktu']) > 0) {
@@ -138,27 +139,34 @@ class GeneticAlgorithmService
                         $hariDipilih = $this->hari[array_rand($this->hari)];
 
                         // 🌟 KUNCI SLOT PAGI UNTUK GURU PRIORITAS
-                        $isPrioritas = in_array($gm->nip, $this->prioritasPagiNip);
+                        $isPrioritas = false;
+                        foreach ($this->prioritasPagi as $p) {
+                            if ($gm->nip === (string)$p['nip'] && (int)$gm->kelas_id === (int)$p['kelas_id']) {
+                                $isPrioritas = true;
+                                break;
+                            }
+                        }
                         if ($isPrioritas) {
                             // Asumsi jam pagi adalah jam 1, 2, 3.
                             // Batasi nilai random agar tidak melebihi jam ke-3
-                            $maxMulaiPagi = 3 - $bebanBlok;
-                            $maxMulai = max(0, $maxMulaiPagi);
+                           $maxMulai = min(3 - $bebanBlok, count($this->jam) - $bebanBlok);
+                            $jamMulaiAwal = $this->jam[mt_rand(0, max(0, $maxMulai - 1))];
                         } else {
                             // Untuk guru biasa, bebas dari jam 1 sampai 10
                             $maxMulai = max(0, count($this->jam) - $bebanBlok);
+                            $jamMulaiAwal = $this->jam[mt_rand(0, $maxMulai)];
                         }
                         $jamMulaiAwal = $this->jam[mt_rand(0, $maxMulai)];
 
-                        $bentrok = false;
+                       $bentrok = false;
                         for ($j = 0; $j < $bebanBlok; $j++) {
                             $jamCek = $jamMulaiAwal + $j;
-                            if (isset($matrixKelas[$gm->kelas_id][$hariDipilih][$jamCek])) {
+                            if (isset($matrixKelas[$gm->kelas_id][$hariDipilih][$jamCek]) ||
+                                isset($matrixGuru[$gm->nip][$hariDipilih][$jamCek])) { // Pastikan Anda juga melacak $matrixGuru
                                 $bentrok = true;
                                 break;
                             }
                         }
-
                         if (!$bentrok) {
                             $slotDitemukan = true;
                             for ($j = 0; $j < $bebanBlok; $j++) {
@@ -320,9 +328,20 @@ private function mutasi($kromosom)
                 while ($idx1 === $idx2) $idx2 = array_rand($gens);
 
                 // 🌟 LOGIKA PENGAMAN: Mencegah Guru Prioritas tergeser
-                $isGuru1Prioritas = in_array($gens[$idx1]['nip'], $this->prioritasPagiNip);
-                $isGuru2Prioritas = in_array($gens[$idx2]['nip'], $this->prioritasPagiNip);
-
+                // $isGuru1Prioritas = in_array($gens[$idx1]['nip'], $this->prioritasPagiNip);
+                // $isGuru2Prioritas = in_array($gens[$idx2]['nip'], $this->prioritasPagiNip);
+                $isGuru1Prioritas = false;
+                foreach($this->prioritasPagi as $p) {
+                    if ($gens[$idx1]['nip'] === $p['nip'] && $gens[$idx1]['kelas_id'] === (int)$p['kelas_id']) {
+                        $isGuru1Prioritas = true; break;
+                    }
+                }
+                $isGuru2Prioritas = false;
+                foreach($this->prioritasPagi as $p) {
+                    if ($gens[$idx1]['nip'] === $p['nip'] && $gens[$idx1]['kelas_id'] === (int)$p['kelas_id']) {
+                        $isGuru2Prioritas = true; break;
+                    }
+                }
                 // Jika salah satu (atau keduanya) adalah Guru Prioritas,
                 // mutasi dibatalkan atau dialihkan agar posisi pagi tetap terjaga
                 if ($isGuru1Prioritas || $isGuru2Prioritas) {

@@ -16,7 +16,7 @@ export default function Login({ status, canResetPassword }) {
         remember: false,
         captcha: "",
     });
-
+    const currentYear = new Date().getFullYear();
     const submit = (e) => {
         e.preventDefault();
 
@@ -240,20 +240,15 @@ export default function Login({ status, canResetPassword }) {
                             </div>
 
                             {/* Area Footer Links */}
-                            <div className="mt-8 pt-6 flex items-center justify-center gap-4 text-sm font-medium text-gray-400">
-                                <Link
-                                    href="#"
-                                    className="hover:text-green-600 transition-colors duration-200"
-                                >
-                                    Pusat Bantuan
-                                </Link>
-                                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                <Link
-                                    href="#"
-                                    className="hover:text-green-600 transition-colors duration-200"
-                                >
-                                    Kebijakan Privasi
-                                </Link>
+                            <div className="mt-8 pt-6  gap-4 text-sm font-medium text-gray-400">
+                                <p className="text-gray-500 text-center">
+                                    Aplikasi Versi{" "}
+                                    {import.meta.env.VITE_APP_VERSION}
+                                </p>
+                                <p className="text-gray-500 text-center">
+                                    &copy; {currentYear} Sistem Informasi
+                                    Akademik Madrasah
+                                </p>
                             </div>
                         </form>
                     </div>

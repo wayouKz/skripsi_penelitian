@@ -124,9 +124,11 @@ export default function Sidebar({ collapsed, menuItems }) {
                 <div className="relative group">
                     <Link
                         href={route("profile.edit")}
-                        className={`flex items-center ${
-                            collapsed ? "justify-center" : "px-4 space-x-3"
-                        } py-3 rounded-lg text-gray-600 hover:bg-gray-100 transition`}
+                        className={`flex items-center py-3 rounded-lg transition ${
+                            route().current("profile.edit")
+                                ? "bg-green-600 text-white"
+                                : "text-gray-600 hover:bg-gray-100"
+                        } ${collapsed ? "justify-center" : "px-4 space-x-3"}`}
                     >
                         {/* ICON */}
                         <i className="fa fa-user-cog text-lg"></i>

@@ -44,16 +44,8 @@ export default function HistoryAbsensi({ title, kode_jadwal, onClose }) {
     }, []);
 
     return (
-        <div className="flex flex-col h-full bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden">
             {/* Header Utama Modal */}
-            <div className="flex items-center justify-between border-b px-5 py-4 bg-white shrink-0 z-10">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i className="fa fa-history text-emerald-600"></i> {title}
-                </h2>
-                <DangerButton type="button" onClick={onClose}>
-                    ✕
-                </DangerButton>
-            </div>
 
             {/* Container Konten */}
             <div className="w-full overflow-y-auto px-5 py-5 bg-gray-50/50 flex-1 relative">
@@ -83,10 +75,30 @@ export default function HistoryAbsensi({ title, kode_jadwal, onClose }) {
                     </div>
                 ) : history.length === 0 ? (
                     /* Kosong */
-                    <div className="w-full flex items-center justify-center py-12">
-                        <span className="text-sm font-medium text-gray-500 bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm">
-                            Belum ada history absensi
-                        </span>
+                    <div className="w-full flex flex-col items-center justify-center py-16 px-4">
+                        <div className="bg-gray-100 p-4 rounded-full mb-4">
+                            {/* Ikon Jam (Bisa diganti FontAwesome jika ada) */}
+                            <svg
+                                className="w-8 h-8 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                        </div>
+                        <h3 className="text-gray-700 text-base font-semibold mb-1">
+                            Tidak ada data
+                        </h3>
+                        <p className="text-sm text-gray-500 text-center max-w-sm">
+                            Belum ada history absensi yang tercatat untuk saat
+                            ini.
+                        </p>
                     </div>
                 ) : selectedItem ? (
                     /* ================= AREA DETAIL (HANYA TABEL SISWA) ================= */

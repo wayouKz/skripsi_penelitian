@@ -32,7 +32,6 @@ export default function DataTable({
             columns.some((col) => {
                 if (!col.accessor) return false;
 
-                // Ambil nilai properti secara aman (null-safe)
                 const value = row[col.accessor];
                 if (value === null || value === undefined) return false;
 
@@ -175,7 +174,12 @@ export default function DataTable({
                                                 sortConfig.key ===
                                                     col.accessor && (
                                                     <i
-                                                        className={`fa-solid ${sortConfig.direction === "asc" ? "fa-sort-up" : "fa-sort-down"} text-green-500`}
+                                                        className={`fa-solid ${
+                                                            sortConfig.direction ===
+                                                            "asc"
+                                                                ? "fa-sort-up"
+                                                                : "fa-sort-down"
+                                                        } text-green-500`}
                                                     />
                                                 )}
                                         </div>
@@ -186,14 +190,29 @@ export default function DataTable({
 
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
-                                <tr>
-                                    <td
-                                        colSpan={columns.length}
-                                        className="py-12 text-center"
-                                    >
-                                        <i className="fa-solid fa-spinner fa-spin text-2xl text-green-500"></i>
-                                    </td>
-                                </tr>
+                                /* SKELETON LOADING */
+                                Array.from({ length: 5 }).map((_, rowIndex) => (
+                                    <tr key={`skeleton-row-${rowIndex}`}>
+                                        {columns.map((_, colIndex) => (
+                                            <td
+                                                key={`skeleton-col-${colIndex}`}
+                                                className="px-4 py-4"
+                                            >
+                                                <div
+                                                    className={`h-4 bg-gray-200 rounded-lg animate-pulse ${
+                                                        colIndex === 0
+                                                            ? "w-12"
+                                                            : colIndex ===
+                                                                columns.length -
+                                                                    1
+                                                              ? "w-20"
+                                                              : "w-3/4"
+                                                    }`}
+                                                ></div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
                             ) : paginatedData.length === 0 ? (
                                 <tr>
                                     <td

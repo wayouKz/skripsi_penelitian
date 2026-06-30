@@ -431,15 +431,15 @@ export default function Guru() {
                                                 borderRadius: "0.5rem", // rounded-lg
                                                 padding: "2px", // Sedikit padding ekstra agar lega
                                                 borderColor: state.isFocused
-                                                    ? "#818cf8"
-                                                    : "#e5e7eb", // border-green-400 / border-gray-200
+                                                    ? "#16a34a"
+                                                    : "#16a34a", // border-green-400 / border-gray-200
                                                 boxShadow: state.isFocused
                                                     ? "0 0 0 3px rgba(165, 180, 252, 0.4)" // ring-green-300
                                                     : "none",
                                                 "&:hover": {
                                                     borderColor: state.isFocused
-                                                        ? "#818cf8"
-                                                        : "#d1d5db",
+                                                        ? "#16a34a"
+                                                        : "#16a34a",
                                                 },
                                             }),
                                             // 2. Gaya Kotak Dropdown (List Menu)
@@ -456,9 +456,9 @@ export default function Guru() {
                                                 ...baseStyles,
                                                 backgroundColor:
                                                     state.isSelected
-                                                        ? "#6366f1" // bg-green-500 (Jika dipilih)
+                                                        ? "#16a34a" // bg-green-500 (Jika dipilih)
                                                         : state.isFocused
-                                                          ? "#e0e7ff" // bg-green-50 (Saat di-hover)
+                                                          ? "#16a34a" // bg-green-50 (Saat di-hover)
                                                           : "white",
                                                 color: state.isSelected
                                                     ? "white"
@@ -469,7 +469,7 @@ export default function Guru() {
                                                 padding: "10px 14px",
                                                 fontSize: "0.875rem", // text-sm
                                                 "&:active": {
-                                                    backgroundColor: "#c7d2fe", // bg-green-200 saat diklik
+                                                    backgroundColor: "#16a34a", // bg-green-200 saat diklik
                                                 },
                                             }),
                                             // 4. Gaya Teks yang Terpilih & Placeholder

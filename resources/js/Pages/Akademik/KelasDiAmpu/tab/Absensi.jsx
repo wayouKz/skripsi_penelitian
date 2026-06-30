@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import HistoryAbsensi from "./modal/HistoryAbsensi";
 import { useAlert } from "@/Components/AlertContext";
 import axios from "axios";
+import Offcanvas from "@/Components/Offcanvas";
 
 export default function Absensi({ dataKelas }) {
     const [open, setOpen] = useState(false);
@@ -370,15 +371,15 @@ export default function Absensi({ dataKelas }) {
 
             {/* ── KONDISI 3 : Tidak ada jadwal ──────────── */}
             {selectedMapel && !isLoadingSiswa && tidakAdaJadwal === true && (
-                <div className="flex items-start gap-3.5 bg-red-50 border border-red-200 rounded-xl p-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mt-0.5">
-                        <i className="fa fa-calendar-times text-red-500 text-sm"></i>
+                <div className="flex items-start gap-3.5 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mt-0.5">
+                        <i className="fa fa-calendar-times text-yellow-500 text-sm"></i>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-red-700">
+                        <p className="text-sm font-semibold text-yellow-700">
                             Jadwal Tidak Aktif
                         </p>
-                        <p className="text-xs text-red-500 mt-0.5 leading-relaxed">
+                        <p className="text-xs text-yellow-500 mt-0.5 leading-relaxed">
                             Tidak ada jadwal pelajaran yang aktif untuk kelas
                             ini pada hari dan jam saat ini.
                         </p>
@@ -526,18 +527,17 @@ export default function Absensi({ dataKelas }) {
                 )}
 
             {/* ── MODAL RIWAYAT ─────────────────────────── */}
-            <Modal
-                show={open}
+            <Offcanvas
+                open={open}
                 onClose={() => setOpen(false)}
-                maxWidth="full"
-                closeable={false}
+                title={"Absensi " + namaMapel}
+                width="w-1/3"
             >
                 <HistoryAbsensi
                     onClose={() => setOpen(false)}
                     kode_jadwal={selectedMapel}
-                    title={"Absensi " + namaMapel}
                 />
-            </Modal>
+            </Offcanvas>
         </>
     );
 }

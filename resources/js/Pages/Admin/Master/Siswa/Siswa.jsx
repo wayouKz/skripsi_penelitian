@@ -20,12 +20,12 @@ export default function Siswa() {
     const [ShowMapping, setShowMapping] = useState(false);
     // State untuk mengontrol tab/menu yang aktif
     const [menu, setMenu] = useState("master_siswa");
-    const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
     const [taAsal, setTaAsal] = useState("");
     const [kelasAsalId, setKelasAsalId] = useState("");
-    const [kelasList, setKelasList] = useState([]);
     const [ResultSiswaAlumni, setResultSiswaAlumni] = useState([]);
     const [taAlumniAsal, setTaAlumniAsal] = useState("all");
+    const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
+
     const columns = [
         // ... (Kolom tabel tetap sama seperti kode Anda sebelumnya)
         {
@@ -164,44 +164,11 @@ export default function Siswa() {
         if (menu == "master_siswa") {
             getSiswa();
         } else if (menu == "siswa_aktif") {
-            loadData();
         } else if (menu == "siswa_alumni") {
             getDataAlumni(taAlumniAsal);
             getTa();
         }
     }, [menu]);
-
-    const loadData = async () => {
-        try {
-            // 1. Jalankan ketiga fungsi GET secara bersamaan (Paralel)
-            const [resTahunAjaran, resKelas, resKelasSiswa] = await Promise.all(
-                [
-                    axios.get(route("getData.get-tahun-ajaran")),
-                    axios.get(route("getData.get-kelas")),
-                    axios.get(
-                        route("getData.get-kelas-siswa", {
-                            tahun_ajaran: taAsal,
-                        }),
-                    ),
-                ],
-            );
-
-            // 2. Set ke masing-masing state secara spesifik agar aman dari error .map()
-            setDataTahunAjaran(resTahunAjaran.data.data || []);
-            setKelasList(resKelas.data.data || []);
-            // Jika kamu punya state untuk list relasi kelas siswa, masukkan ke sini:
-            // setKelasSiswaList(resKelasSiswa.data.data || []);
-        } catch (error) {
-            console.error("Gagal mengambil data inisialisasi:", error);
-            if (typeof showCenterAlert === "function") {
-                showCenterAlert(
-                    "Gagal memuat data awal dari server",
-                    "error",
-                    2000,
-                );
-            }
-        }
-    };
 
     const getTa = async () => {
         try {
@@ -288,7 +255,6 @@ export default function Siswa() {
                     {menu === "siswa_aktif" && (
                         <SiswaKelas
                             columnsSiswaPerKelas={columnsSiswaPerKelas}
-                            dataTahunAjaran={dataTahunAjaran}
                             loading={loading}
                             taAsal={taAsal}
                             setTaAsal={setTaAsal}
@@ -297,7 +263,6 @@ export default function Siswa() {
                             ShowMapping={ShowMapping}
                             setShowMapping={setShowMapping}
                             ResultSiswaPerKelas={ResultSiswaPerKelas}
-                            kelasList={kelasList}
                             handleKelasChange={handleKelasChange}
                             handleMappingKelas={handleMappingKelas}
                         />
@@ -322,7 +287,6 @@ export default function Siswa() {
                                                 getDataAlumni(e.target.value);
                                             }}
                                         >
-                                            {console.log(dataTahunAjaran)}
                                             <option value="all">
                                                 Semua Tahun Ajaran
                                             </option>

@@ -109,14 +109,14 @@ export default function DataTable({
     return (
         <div className="w-full">
             {/* TOPBAR */}
-            <div className="flex items-center gap-4 p-2 mb-4">
+            {/* <div className="flex items-center gap-4 p-2 mb-4">
                 <h2 className="text-xl font-bold text-gray-800">{header}</h2>
                 {title && (
                     <span className="px-2.5 py-1 text-xs font-semibold uppercase rounded-full bg-green-100 text-green-700">
                         {sortedData.length} {title}
                     </span>
                 )}
-            </div>
+            </div> */}
 
             <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 {searchable && (
@@ -219,7 +219,7 @@ export default function DataTable({
                                         colSpan={columns.length}
                                         className="py-12 text-center text-sm text-gray-400"
                                     >
-                                        Tidak ada kecocokan data ditemukan
+                                        Tidak ada data
                                     </td>
                                 </tr>
                             ) : (

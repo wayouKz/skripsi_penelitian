@@ -46,6 +46,7 @@ public function share(Request $request): array
         'auth' => [
             'user' => $user,
             'list_features' => $user?->role->listFeatures,
+            'guru' => $user?->guru,
         ],
         'settings_application' => $config,
         'flash' => [

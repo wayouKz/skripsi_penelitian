@@ -1,28 +1,33 @@
 import { useState } from "react";
 import Checkbox from "@/Components/Checkbox";
 import InputError from "@/Components/InputError";
-import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
-import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
+import TextInput from "@/Components/TextInput";
 
 export default function Login({ status, canResetPassword, config }) {
     const [captchaKey, setCaptchaKey] = useState(Date.now());
     const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
+    const [showPassword, setShowPassword] = useState(false); // State untuk Toggle Password
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        username: "superadmin",
-        password: "superadmin",
+        username: "",
+        password: "",
         remember: false,
         captcha: "",
     });
+
     const currentYear = new Date().getFullYear();
+
     const submit = (e) => {
         e.preventDefault();
 
         post(route("login"), {
             onFinish: () => reset("password"),
-            onError: () => setCaptchaKey(Date.now()),
+            onError: () => {
+                setCaptchaKey(Date.now());
+                reset("captcha");
+            },
         });
     };
 
@@ -35,222 +40,190 @@ export default function Login({ status, canResetPassword, config }) {
         <>
             <Head title="Log in" />
 
-            <div className="flex bg-white min-h-screen overflow-x-hidden">
-                {/* KOLOM KIRI: Latar Belakang Gambar Sekolah
-                  Sembunyi di HP (hidden), tampil separuh layar di Desktop (lg:flex)
-                */}
-                <div
-                    className="hidden lg:flex w-full lg:w-1/2 relative bg-cover bg-center"
-                    style={{
-                        backgroundImage: `url(/storage/public/sampul_instansi/${config?.sampul_instansi})`, // Hapus kurung kurawal ekstra
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat", // Tambahkan ini agar gambar tidak berulang
-                    }}
-                >
-                    {/* Overlay Gradient Hijau agar teks terbaca dan tampil elegan */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-green-900/90 via-green-900/40 to-transparent"></div>
+            {/* CONTAINER UTAMA: Latar belakang full layar */}
+            <div
+                className="min-h-screen w-full relative bg-cover bg-center flex flex-col justify-between"
+                style={{
+                    backgroundImage: `url(${
+                        config?.sampul_instansi
+                            ? `/storage/public/sampul_instansi/${config.sampul_instansi}`
+                            : "/img/sampul-default.jpg"
+                    })`,
+                }}
+            >
+                {/* OVERLAY: Warna biru semi transparan menutupi seluruh gambar */}
+                <div className="absolute inset-0 bg-green-700/70 mix-blend-multiply"></div>
 
-                    {/* Teks Sambutan di atas gambar */}
-                    <div className="absolute bottom-0 left-0 p-12 text-white w-full">
-                        <div className="mb-4 inline-block px-3 py-1 rounded-full bg-green-500/30 border border-green-400/50 backdrop-blur-sm text-sm font-semibold tracking-wider">
-                            SISTEM INFORMASI AKADEMIK
-                        </div>
-                        <h1 className="text-4xl font-extrabold mb-3 leading-tight shadow-sm">
-                            Portal Layanan &<br />
-                            Manajemen Sekolah
+                {/* AREA TENGAH: Teks Kiri & Form Kanan */}
+                <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center container mx-auto px-6 lg:px-16 gap-10 lg:gap-24 py-12">
+                    {/* BAGIAN KIRI: Teks Instansi */}
+                    <div className="w-full lg:w-1/2 text-white text-center lg:text-left mt-10 lg:mt-0">
+                        <h1 className="text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg tracking-tight">
+                            SIM Akademik
                         </h1>
-                        <p className="text-green-50 text-lg max-w-md font-light">
-                            Silakan masuk menggunakan kredensial Anda untuk
-                            mengakses dashboard presensi, jadwal, dan
-                            administrasi.
+                        <p className="text-xl lg:text-2xl font-semibold mb-2 drop-shadow-md">
+                            {config?.nama_instansi || "SISTEM INFORMASI"}{" "}
+                            {/* Sesuaikan variabel config */}
+                        </p>
+                        <p className="text-sm lg:text-base text-green-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
+                            {config?.alamat_instansi ||
+                                "JL. M.H THAMRIN DESA PALOPO KEC. MARISA (96266)"}
+                            <br className="hidden lg:block" />
+                            email :{" "}
+                            {config?.email_instansi || "contoh@contoh.com"}
                         </p>
                     </div>
-                </div>
 
-                {/* KOLOM KANAN: Form Login
-                  Penuh di HP, separuh layar di Desktop
-                */}
-                <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 xl:p-24 bg-white relative">
-                    {/* Lingkaran Dekorasi Halus di Background Form (Opsional) */}
-                    <div className="absolute top-[-10%] right-[-5%] w-96 h-96 bg-green-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+                    {/* BAGIAN KANAN: Card Form Login */}
+                    <div className="w-full max-w-[420px] bg-white rounded-[32px] shadow-2xl p-8 sm:p-10">
+                        {/* 1. Barisan Logo (Sesuaikan src dengan logo instansi Anda) */}
+                        <div className="flex justify-center items-center gap-6 mb-6">
+                            <img
+                                src={
+                                    config?.logo_instansi
+                                        ? `/storage/public/logo/${config.logo_instansi}`
+                                        : "/img/logo-default.png" // Pastikan letak gambar default kamu ada di folder public/img/
+                                }
+                                alt="Logo Utama"
+                                className="h-14 w-auto object-contain"
+                            />
+                        </div>
 
-                    <div className="w-full max-w-md relative z-10">
+                        {/* 2. Judul Form */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-extrabold text-green-600 tracking-tight">
+                                SIM akademik
+                            </h2>
+                            <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wider">
+                                Sistem Informasi & Manajemen Akademik
+                            </p>
+                        </div>
+
+                        {/* 3. Notifikasi Error / Status */}
                         {status && (
-                            <div className="mb-6 text-sm font-medium text-green-600 bg-green-50 p-4 rounded-lg border border-green-200 flex items-center gap-2">
-                                <i className="fa fa-check-circle text-lg"></i>
+                            <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg text-center">
                                 {status}
                             </div>
                         )}
 
-                        {/* Bagian Header Form */}
-                        <div className="mb-10 text-left">
-                            <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                                Selamat Datang
-                            </h2>
-                            <p className="mt-2 text-base text-gray-500">
-                                Masukkan username dan password Anda.
-                            </p>
-                        </div>
-
-                        <form onSubmit={submit} className="space-y-6">
+                        {/* 4. Form Input */}
+                        <form onSubmit={submit} className="space-y-4">
                             {/* Input Username */}
                             <div>
-                                <InputLabel
-                                    htmlFor="username"
-                                    value="USERNAME"
-                                    className="text-xs font-bold text-gray-700 tracking-wide"
-                                />
                                 <TextInput
-                                    error={errors.username}
-                                    placeholder="Ketik username Anda"
                                     id="username"
                                     type="text"
                                     name="username"
                                     value={data.username}
-                                    className="mt-1.5 block w-full bg-gray-50 border-gray-200 focus:bg-white focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    placeholder="Ketik Nama Pengguna"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                     autoComplete="username"
-                                    isFocused={true}
                                     onChange={(e) =>
                                         setData("username", e.target.value)
                                     }
                                 />
                                 <InputError
                                     message={errors.username}
-                                    className="mt-2"
+                                    className="mt-1.5 ml-1"
                                 />
                             </div>
 
-                            {/* Input Password */}
-                            <div>
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <InputLabel
-                                        htmlFor="password"
-                                        value="PASSWORD"
-                                        className="text-xs font-bold text-gray-700 tracking-wide mb-0"
-                                    />
-                                    {canResetPassword && (
-                                        <Link
-                                            href={route("password.request")}
-                                            className="text-xs font-semibold text-green-600 hover:text-green-700 focus:outline-none transition-colors"
-                                        >
-                                            Lupa Sandi?
-                                        </Link>
-                                    )}
-                                </div>
+                            {/* Input Password dengan Toggle Mata */}
+                            <div className="relative">
                                 <TextInput
-                                    error={errors.password}
-                                    placeholder="••••••••"
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     name="password"
                                     value={data.password}
-                                    className="block w-full bg-gray-50 border-gray-200 focus:bg-white focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    placeholder="password"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors pr-10"
                                     autoComplete="current-password"
                                     onChange={(e) =>
                                         setData("password", e.target.value)
                                     }
                                 />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                >
+                                    <i
+                                        className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                                    ></i>
+                                </button>
                                 <InputError
                                     message={errors.password}
-                                    className="mt-2"
+                                    className="mt-1.5 ml-1"
                                 />
                             </div>
 
-                            <div className="bg-gray-50/80 p-4 rounded-xl border border-gray-100 shadow-sm">
-                                <div className="space-y-3">
-                                    <button
-                                        type="button"
-                                        onClick={refreshCaptcha}
-                                        className="w-full relative bg-white border border-gray-200 rounded overflow-hidden group"
-                                        aria-label="Segarkan kode keamanan"
-                                    >
-                                        <img
-                                            src={`/captcha/flat?${captchaKey}`}
-                                            alt="Kode keamanan"
-                                            className={`w-full object-cover transition-opacity duration-300 ${
-                                                isCaptchaLoading
-                                                    ? "opacity-10"
-                                                    : "opacity-100 group-hover:opacity-80"
-                                            }`}
-                                            onLoad={() =>
-                                                setIsCaptchaLoading(false)
-                                            }
-                                        />
-                                        {/* Optional: Add a subtle "Refresh" icon here that appears on hover */}
-                                    </button>
-
-                                    <TextInput
-                                        error={errors.captcha}
-                                        placeholder="Ketik kode di atas"
+                            {/* Input Captcha Inline dengan Gambar */}
+                            {/* Input Captcha Inline dengan Gambar */}
+                            <div>
+                                {/* Set tinggi container menjadi 44px */}
+                                <div className="flex gap-3 h-[44px]">
+                                    <input
                                         id="captcha"
                                         type="text"
                                         value={data.captcha}
-                                        className="block w-full text-center h-[50px]"
+                                        placeholder="Ketik huruf"
+                                        className="w-full h-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         onChange={(e) =>
                                             setData("captcha", e.target.value)
                                         }
                                     />
 
-                                    <InputError
-                                        message={errors.captcha}
-                                        className="mt-2"
-                                    />
+                                    {/* Gambar Captcha dengan ukuran fix 118x44 px */}
+                                    <div
+                                        className="w-[200px] h-[44px] flex-shrink-0 bg-white rounded-xl overflow-hidden cursor-pointer relative border border-gray-200 group"
+                                        onClick={refreshCaptcha}
+                                        title="Klik untuk menyegarkan kode"
+                                    >
+                                        <img
+                                            src={`/captcha/flat?${captchaKey}`}
+                                            alt="Captcha"
+                                            /* Memaksa gambar mengikuti ukuran 118x44 px */
+                                            className={`w-[200px] h-[44px] object-fill transition-opacity duration-300 ${isCaptchaLoading ? "opacity-0" : "opacity-100 group-hover:opacity-80"}`}
+                                            onLoad={() =>
+                                                setIsCaptchaLoading(false)
+                                            }
+                                        />
+
+                                        {/* Indikator Loading */}
+                                        {isCaptchaLoading && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                                                <i className="fa fa-spinner fa-spin text-gray-400"></i>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+                                <InputError
+                                    message={errors.captcha}
+                                    className="mt-1.5 ml-1"
+                                />
                             </div>
 
-                            {/* Checkbox Remember Me */}
-                            <div className="pt-1">
-                                <label className="flex items-center cursor-pointer group">
-                                    <Checkbox
-                                        name="remember"
-                                        checked={data.remember}
-                                        onChange={(e) =>
-                                            setData(
-                                                "remember",
-                                                e.target.checked,
-                                            )
-                                        }
-                                        className="rounded border-gray-300 text-green-600 shadow-sm focus:ring-green-500"
-                                    />
-                                    <span className="ms-2 text-sm text-gray-600 font-medium select-none group-hover:text-gray-900 transition-colors">
-                                        Ingat saya di perangkat ini
-                                    </span>
-                                </label>
-                            </div>
-
-                            {/* Tombol Login */}
-                            <div className="pt-4">
-                                {/* Tombol diubah menjadi nuansa hijau menyesuaikan tema sekolah */}
+                            {/* Tombol Submit */}
+                            <div className="pt-2">
                                 <PrimaryButton
-                                    className="w-full justify-center py-3.5 text-base bg-green-600 hover:bg-green-700 focus:bg-green-700 active:bg-green-800 shadow-lg shadow-green-600/30 transition-all rounded-lg"
+                                    className="w-full justify-center py-3.5 text-sm font-bold bg-emerald-600 hover:bg-green-700 active:bg-green-800 rounded-xl tracking-wide shadow-md transition-all"
                                     disabled={processing}
                                 >
                                     {processing ? (
                                         <i className="fa fa-spinner fa-spin mr-2"></i>
                                     ) : null}
-                                    <span className="font-bold tracking-wide">
-                                        Masuk ke Sistem
-                                    </span>
-                                    {!processing && (
-                                        <i className="fa fa-arrow-right ms-2 opacity-80"></i>
-                                    )}
+                                    MASUK
                                 </PrimaryButton>
-                            </div>
-
-                            {/* Area Footer Links */}
-                            <div className="mt-8 pt-6  gap-4 text-sm font-medium text-gray-400">
-                                <p className="text-gray-500 text-center">
-                                    Aplikasi Versi{" "}
-                                    {import.meta.env.VITE_APP_VERSION}
-                                </p>
-                                <p className="text-gray-500 text-center">
-                                    &copy; {currentYear} Sistem Informasi
-                                    Akademik Madrasah
-                                </p>
                             </div>
                         </form>
                     </div>
+                </div>
+
+                {/* BAGIAN BAWAH: Footer Copyright */}
+                <div className="relative z-10 py-6 text-center text-green-100/80 text-xs font-medium tracking-wide">
+                    &copy; {currentYear} Aplikasi SIM Akademik by Mahasiswa UNG
                 </div>
             </div>
         </>

@@ -4,7 +4,7 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import { useForm, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Add({
     open,
@@ -21,8 +21,10 @@ export default function Add({
     const { showAlert } = useAlert();
     const flash = usePage().props.flash;
 
+    const [loading, setLoading] = useState(false);
     const submit = (e) => {
         e.preventDefault();
+        setLoading(true);
 
         if (isEdit) {
             post(
@@ -38,6 +40,7 @@ export default function Add({
                             showAlert(flash.error, "error");
                         }
 
+                        setLoading(false);
                         setOpen(false);
                         getMapel(); // Panggil ulang data mapel
                         reset();
@@ -53,7 +56,7 @@ export default function Add({
                     } else if (flash.error) {
                         showAlert(flash.error, "error");
                     }
-
+                    setLoading(false);
                     setOpen(false);
                     getMapel(); // Panggil ulang data mapel
                     reset();
@@ -77,6 +80,7 @@ export default function Add({
         <FormModal
             title={isEdit ? "Edit Mata Pelajaran" : "Tambah Mata Pelajaran"}
             show={open}
+            loading={loading}
             onClose={() => setOpen(false)}
             setOpen={setOpen}
             onSubmit={submit}

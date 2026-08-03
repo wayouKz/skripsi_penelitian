@@ -42,6 +42,7 @@ public function store(Request $request)
             'kode_jadwal'     => $kode_jadwal,
             'tahun_ajaran_id' => $tahun_ajaran_id,
             'tanggal_absen'   => $tanggal,
+            'pertemuan'       => $item['pertemuan'],
             'waktu'             => $jam,
             'nisn'            => $item['nisn'],
             'status'          => $item['status_kehadiran'],

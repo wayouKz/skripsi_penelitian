@@ -21,6 +21,7 @@ export default function Add({
         id_wali_kelas: "",
         tingkat: "",
         jurusan_id: null,
+        tahun_ajaran_id: "",
     });
 
     const { showAlert } = useAlert();
@@ -28,6 +29,7 @@ export default function Add({
     const [waliKelas, setWaliKelas] = useState([]);
     const [showJurusan, setShowJurusan] = useState(false);
     const [ListJurusan, setListJurusan] = useState([]);
+    const [TahunAjaran, setTahunAjaran] = useState([]);
     // Memoize options agar tidak melakukan kalkulasi ulang setiap render
     const waliOptions = useMemo(
         () =>
@@ -77,6 +79,23 @@ export default function Add({
             return [];
         }
     };
+
+    // const getTahunAjaran = async () => {
+    //     try {
+    //         const res = await axios.get(
+    //             route("master.tahun-ajaran.getTahunAjaran"),
+    //         );
+    //         setTahunAjaran(res.data.data ?? []);
+    //     } catch (error) {
+    //         return [];
+    //     }
+    // };
+    // const tahunAjaranOptions = TahunAjaran.map((ta) => ({
+    //     value: ta.id,
+    //     label: ta.tahun_ajaran, // misal: "2023/2024"
+    //     semester: ta.semester, // misal: "Ganjil" / "Genap" (opsional)
+    //     status: ta.status, // misal: "Aktif" (opsional)
+    // }));
     useEffect(() => {
         if (open) getWaliKelas();
     }, [open]);
@@ -91,6 +110,7 @@ export default function Add({
                 id_wali_kelas: Kelas.id_wali_kelas || "",
                 tingkat: Kelas.tingkat || "",
                 jurusan_id: Kelas.jurusan_id || "",
+                // tahun_ajaran_id: Kelas.tahun_ajaran_id || "",
             });
             if (Kelas.jurusan) setShowJurusan(true);
         } else {
@@ -139,6 +159,48 @@ export default function Add({
                     />
                     <InputError message={errors.id_wali_kelas} />
                 </div>
+                {/* <div className="col-span-2"> */}
+                {/* <InputLabel value="Pilih Tahun Ajaran" /> */}
+                {/* <Select
+                        styles={{
+                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                        }}
+                        menuPortalTarget={document.body}
+                        options={tahunAjaranOptions}
+                        placeholder="Pilih Tahun Ajaran..."
+                        value={
+                            tahunAjaranOptions.find(
+                                (o) => o.value == data.tahun_ajaran_id, // Pastikan state form Anda bernama tahun_ajaran_id
+                            ) || null
+                        }
+                        onChange={(val) =>
+                            setData("tahun_ajaran_id", val?.value)
+                        }
+                        formatOptionLabel={(option) => (
+                            <div className="flex justify-between items-center">
+                                <span>
+                                    {option.label}{" "}
+                                    {option.semester
+                                        ? `- ${option.semester}`
+                                        : ""}
+                                </span>
+                                {/* Opsional: Jika Anda punya field status aktif/tidak aktif */}
+                {/* {option.status && (
+                                    <span
+                                        className={`text-xs font-semibold ${
+                                            option.status === "Aktif"
+                                                ? "text-green-600"
+                                                : "text-gray-500"
+                                        }`}
+                                    >
+                                        {option.status}
+                                    </span>
+                                )}
+                            </div> */}
+                {/* )} */}
+                {/* /> */}
+                {/* <InputError message={errors.tahun_ajaran_id} /> */}
+                {/* </div> */}
 
                 {/* Field Nama & Tingkat */}
                 <div className="col-span-1">

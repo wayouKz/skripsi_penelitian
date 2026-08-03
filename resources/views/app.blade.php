@@ -14,7 +14,7 @@
             integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
             crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="icon" href="{{ asset('/storage/public/logo/logo_instansi.png') }}" type="image/png" />
-
+        
         <link rel="apple-touch-icon" href="{{ asset('/storage/public/logo/logo_instansi.png') }}">
         <!-- Scripts -->
 

@@ -21,6 +21,7 @@ return new class extends Migration
             ->constrained('m_gurus')
             ->onDelete('cascade')
             ->onUpdate('cascade');
+            // $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('tingkat');
             $table->timestamps();
         });

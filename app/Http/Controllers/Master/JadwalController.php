@@ -17,6 +17,8 @@ class JadwalController extends Controller
 
     public function generate(Request $request)
 {
+    set_time_limit(300);
+    ini_set('memory_limit', '512M');
     $params = $request->all();
     $prioritasPagi = $request->input('prioritas_pagi', []); // Diharapkan array of object
 
@@ -33,7 +35,6 @@ class JadwalController extends Controller
         )
         ->get();
 
-    // Injeksi data prioritas ke objek guruMapels agar mudah dibaca di Service
     $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
         $item->is_prioritas_pagi = false;
         foreach ($prioritasPagi as $p) {
@@ -44,55 +45,99 @@ class JadwalController extends Controller
         }
         return $item;
     });
-
     $kelas = DB::table('m_kelas')->get();
 
     return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
-        // Kita kirim $prioritasPagi sebagai array ke service
-        $gaEngine = new GeneticAlgorithmService($params, $guruMapels, $kelas, $prioritasPagi);
 
+        // 1. Matikan kompresi Zlib (karena kompresi akan menahan data sampai proses selesai)
+        ini_set('zlib.output_compression', 'Off');
+        if (function_exists('apache_setenv')) {
+            apache_setenv('no-gzip', '1');
+        }
+
+        // 2. Hancurkan SEMUA lapisan output buffer PHP bawaan secara paksa
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
+
+        echo str_repeat(" ", 4096) . "\n\n";
+        flush();
+
+        echo "data: " . json_encode([
+            'type' => 'progress',
+            'generation' => 0,
+            'fitness' => 0,
+            'message' => 'Memulai inisialisasi populasi awal...'
+        ]) . "\n\n";
+        flush();
+
+        $gaEngine = new GeneticAlgorithmService($params, $guruMapels, $kelas, $prioritasPagi);
         $gaEngine->onGenerationComplete = function($generasi, $fitness) {
-            echo "data: " . json_encode([
-                'type' => 'progress',
-                'generation' => $generasi,
-                'fitness' => $fitness
-            ]) . "\n\n";
-            if (ob_get_level() > 0) ob_flush(); flush();
+                echo "data: " . json_encode([
+                    'type' => 'progress',
+                    'generation' => $generasi,
+                    'fitness' => $fitness
+                ]) . "\n\n";
+                flush();
         };
 
         $hasil = $gaEngine->generate();
 
-        if (!empty($hasil['jadwal'])) {
-            DB::beginTransaction();
-            try {
-                DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
+       if (!empty($hasil['jadwal'])) {
+    DB::beginTransaction();
+    $insert = [];
 
-                $insertData = [];
-                $kodeJadwalMap = [];
-                foreach ($hasil['jadwal'] as $gen) {
-                    $kunci = $gen['kelas_id'] . '_' . $gen['mapel_id'];
-                    if (!isset($kodeJadwalMap[$kunci])) $kodeJadwalMap[$kunci] = 'JDW-' . Str::random(6);
+    foreach ($hasil['jadwal'] as $jadwal) {
 
-                    $insertData[] = [
-                        'kode_jadwal' => $kodeJadwalMap[$kunci],
-                        't_list_guru_mapel_id' => $gen['t_list_guru_mapel_id'],
-                        'mapel_id' => $gen['mapel_id'],
-                        'kelas_id' => $gen['kelas_id'],
-                        'hari' => $gen['hari'],
-                        'jam_mulai' => $gen['jam_mulai'],
-                        'jam_selesai' => $gen['jam_selesai'],
-                        'tahun_ajaran_id' => $params['tahun_ajaran_id'],
-                        'created_at' => now(), 'updated_at' => now()
-                    ];
-                }
-                DB::table('t_jadwals')->insert($insertData);
-                DB::commit();
-                echo "data: " . json_encode(['type' => 'done', 'message' => 'Berhasil!']) . "\n\n";
-            } catch (\Exception $e) {
-                DB::rollBack();
-                echo "data: " . json_encode(['type' => 'error', 'message' => $e->getMessage()]) . "\n\n";
-            }
-        }
-    }, 200, ['Content-Type' => 'text/event-stream', 'Cache-Control' => 'no-cache', 'Connection' => 'keep-alive']);
+        $insert[] = [
+            'kode_jadwal'     => 'JDWL' . Str::random(100),
+            'tahun_ajaran_id' => $params['tahun_ajaran_id'],
+            'hari'            => $jadwal['hari'],
+            'jam_mulai'       => $jadwal['jam_mulai'],
+            'jam_selesai'     => $jadwal['jam_selesai'],
+            'kelas_id'        => $jadwal['kelas_id'],
+            'mapel_id'        => $jadwal['mapel_id'],
+            't_list_guru_mapel_id'         => $jadwal['t_list_guru_mapel_id'],
+        ];
+    }
+
+    try {
+        DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
+        DB::table('t_jadwals')->insert($insert);
+
+        DB::commit();
+
+        echo "data: " . json_encode(['type' => 'done', 'message' => 'Berhasil!']) . "\n\n";
+        flush();
+
+    } catch (\Exception $e) {
+        // 3. ROLLBACK jika ada query yang gagal
+        DB::rollBack();
+
+        // 4. Tangkap error yang lebih detail (Pesan Error + Baris Kode + File)
+        $detailError = $e->getMessage() . ' di baris ' . $e->getLine();
+
+        // Jika butuh dicatat di log file Laravel (storage/logs/laravel.log)
+        // \Log::error('Error Insert Jadwal: ' . $e->getMessage());
+
+        echo "data: " . json_encode(['type' => 'error', 'message' => $detailError]) . "\n\n";
+        flush();
+    }
+}
+
+    // 6. Pastikan header anti-buffering ini tetap ada
+    }, 200, [
+        'Content-Type' => 'text/event-stream',
+        'Cache-Control' => 'no-cache, must-revalidate',
+        'Connection' => 'keep-alive',
+        'X-Accel-Buffering' => 'no',
+    ]);
+    }
+
+    public function pdf(Request $request){
+        return response()->view('pdf.jadwal.jadwal', [
+            'tahun_ajaran_id' => $request->input('tahun_ajaran_id'),
+            'kelas' => $request->input('kelas'),
+        ])->header('Content-Type', 'application/pdf');
     }
 }

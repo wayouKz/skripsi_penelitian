@@ -25,7 +25,25 @@ export default function KelolaUser() {
         });
         setLoading(false);
     };
-    const handleStatus = (row) => {};
+    const handleStatus = (row) => {
+        if (row.id == 1) {
+            showAlert("Data default tidak dapat diubah", "error");
+            return;
+        }
+        axios
+            .post(route("manajemen.kelola-user.update-status"), {
+                id: row.id,
+                status: row.status == "active" ? "nonactive" : "active",
+            })
+            .then((res) => {
+                if (res.data.success == true) {
+                    getData();
+                    showAlert("Data berhasil diubah", "success");
+                } else if (res.data.success == false) {
+                    showAlert("Data gagal diubah", "error");
+                }
+            });
+    };
     useEffect(() => {
         getData();
     }, []);

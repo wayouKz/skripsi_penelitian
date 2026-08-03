@@ -85,6 +85,10 @@ export default function HakAkeses() {
         );
     };
     const handleStatus = (row) => {
+        if (row.nama_roles == "Super Admin") {
+            showAlert("Data default tidak dapat diubah", "error");
+            return;
+        }
         axios
             .post(route("manajemen.kelola-hak-akses.update-status"), {
                 id: row.id,

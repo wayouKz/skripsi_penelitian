@@ -1,537 +1,573 @@
-import ActionDropdown from "@/Components/ActionDropdown";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import axios from "axios";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import DataTable from "@/Components/Datatables";
 import PrimaryButton from "@/Components/PrimaryButton";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { useEffect, useState } from "react";
-import Add from "./Add";
+import ActionDropdown from "@/Components/ActionDropdown";
 import Switch from "@/Components/Switch";
-import { useAlert } from "@/Components/AlertContext";
 import Menu from "@/Components/Menu";
 import Select from "react-select";
+import { useAlert } from "@/Components/AlertContext";
+
+// Import Modals (Pastikan path-nya sesuai di project Anda)
+import Add from "./Add";
 import EditWaliKelas from "./EditWaliKelas";
 import MappingGuruMapel from "./MappingGuruMapel";
+import Modal from "@/Components/Modal";
+import DangerButton from "@/Components/DangerButton";
+import InputLabel from "@/Components/InputLabel";
+
 export default function Guru() {
-    const [Result, setResult] = useState([]);
-    const [ResultWaliKelas, setResultWaliKelas] = useState([]);
-    const [ResultGuruMapel, setResultGuruMapel] = useState([]);
-    const [showEditWali, setShowEditWali] = useState(false);
-    const [IseditWali, setIsEditWali] = useState(null);
-    const [show, setShow] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
     const { showAlert, showQuestion } = useAlert();
-    const [menu, setMenu] = useState("master_guru");
-    const [selectedKelas, setSelectedKelas] = useState(null);
-    const [opsiKelas, setOpsiKelas] = useState([]);
-    const [showMappingGuruMapel, setShowMappingGuruMapel] = useState(false);
-    const menus = [
-        {
-            value: "master_guru",
-            nama_menu: "Master Guru",
-        },
-        {
-            value: "wali_kelas",
-            nama_menu: "Daftar Wali Kelas",
-        },
-        {
-            value: "guru_mapel",
-            nama_menu: "Daftar Guru Mata Pelajaran",
-        },
-    ];
-    const [selectedGuru, setSelectedGuru] = useState(null);
+
+    // =========================================================================
+    // STATE DECLARATIONS
+    // =========================================================================
+    const [activeMenu, setActiveMenu] = useState("master_guru");
     const [loading, setLoading] = useState(false);
-    const columns = [
-        {
-            header: "No",
-            render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
-                    {i + 1}
-                </span>
-            ),
-        },
-        {
-            header: "Nip",
-            accessor: "nip",
-        },
-        {
-            header: "Nama Guru",
-            accessor: "nama_guru",
-        },
-        {
-            header: "Jenis Kelamin",
-            accessor: "jenis_kelamin",
-        },
-        {
-            header: "Tempat Lahir",
-            accessor: "tempat_lahir",
-        },
-        {
-            header: "Tanggal Lahir",
-            accessor: "tanggal_lahir",
-        },
-        {
-            header: "Alamat",
-            accessor: "alamat",
-        },
-        {
-            header: "No Telpon",
-            accessor: "no_telp",
-        },
-        {
-            header: "Status",
-            render: (row) => (
-                <Switch
-                    checked={row.status == "active" ? true : false}
-                    onChange={() => handleStatus(row)}
-                />
-            ),
-        },
-        {
-            header: "#",
-            render: (row) => (
-                <>
-                    <ActionDropdown
-                        actions={[
-                            {
-                                edit: true,
-                                label: "Edit",
-                                icon: "edit",
-                                onClick: () => {
-                                    setSelectedGuru(row);
-                                    setShow(true);
-                                    setIsEdit(true);
-                                },
-                            },
-                            {
-                                danger: true,
-                                label: "Delete",
-                                icon: "trash",
-                                onClick: () => {
-                                    handleDelete(row);
-                                },
-                            },
-                        ]}
-                    ></ActionDropdown>
-                </>
-            ),
-        },
+    const [openPdf, setOpenPdf] = useState(false);
+    const [TahunAjaran, setTahunAjaran] = useState([]);
+    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(null); // Ditambahkan
+
+    const [data, setData] = useState({
+        guru: [],
+        wali: [],
+        mapel: [],
+    });
+
+    const [filter, setFilter] = useState({ kelas: null });
+    const [opsiKelas, setOpsiKelas] = useState([]);
+
+    const [modal, setModal] = useState({
+        show: false,
+        type: null,
+        isEdit: false,
+        data: null,
+    });
+
+    const menus = [
+        { value: "master_guru", nama_menu: "Master Guru" },
+        { value: "wali_kelas", nama_menu: "Daftar Wali Kelas" },
+        { value: "guru_mapel", nama_menu: "Daftar Guru Mata Pelajaran" },
     ];
 
-    const columnsWaliKelas = [
-        {
-            header: "No",
-            render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
-                    {i + 1}
-                </span>
-            ),
-        },
-        {
-            header: "Kelas",
-            // Menggunakan fungsi render untuk masuk ke dalam nested object kelas
-            render: (row) => (
-                <span>{row.nama_kelas + " " + (row.nama_jurusan || "")}</span>
-            ),
-        },
-        {
-            header: "Nip",
-            render: (row) => (
-                <span className="">
-                    {row.wali_kelas ? (
-                        row.wali_kelas.nip
-                    ) : (
-                        <span className="text-gray-400 italic">
-                            Belum diatur
-                        </span>
-                    )}
-                </span>
-            ),
-        },
-        {
-            header: "Nama Guru",
-            render: (row) => (
-                <span className="">
-                    {row.wali_kelas ? (
-                        row.wali_kelas.nama_guru
-                    ) : (
-                        <span className="text-gray-400 italic">
-                            Belum diatur
-                        </span>
-                    )}
-                </span>
-            ),
-        },
-        {
-            header: "#",
-            render: (row) => (
-                <>
-                    <ActionDropdown
-                        actions={[
-                            {
-                                edit: true,
-                                label: "Edit",
-                                icon: "edit",
-                                onClick: () => {
-                                    setShowEditWali(true);
-                                    setIsEditWali(row);
-                                },
-                            },
-                        ]}
-                    ></ActionDropdown>
-                </>
-            ),
-        },
-    ];
+    // =========================================================================
+    // DATA FETCHING (DIBUNGKUS useCallback AGAR TIDAK RE-RENDER)
+    // =========================================================================
 
-    const columnsGuruMapel = [
-        {
-            header: "Kode ",
-            render: (row) => <span className="p-5">{row.kode_mapel}</span>,
-        },
-        {
-            header: "Mata Pelajaran",
-            render: (row) => (
-                <span className="p-5">
-                    <i className="fa fa-book text-green-400 text-xs me-2"></i>
-                    {row.mapel}
-                </span>
-            ),
-        },
-        {
-            header: "Nama Guru Dan Beban Jam",
-            render: (row) => (
-                <div className="flex flex-wrap gap-2">
-                    {row.guru.map((g) => (
-                        <div
-                            key={g.value}
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-green-50 border border-green-100 text-green-700 text-sm transition-colors hover:bg-green-100"
-                        >
-                            <i className="fa fa-user text-green-400 text-xs"></i>
-                            <span className="font-medium">{g.label}</span>
-
-                            {/* Opsional: Jika Anda ingin menampilkan beban jam sekalian */}
-                            {g.beban_jam > 0 && (
-                                <span className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-bold bg-white text-green-600 border border-green-100 shadow-sm">
-                                    <i className="fa fa-clock"></i>{" "}
-                                    {g.beban_jam} Jam
-                                </span>
-                            )}
-                        </div>
-                    ))}
-
-                    {/* Jika belum ada guru yang di-mapping */}
-                    {(!row.guru || row.guru.length === 0) && (
-                        <span className="text-xs text-red-400 italic">
-                            Belum ada guru yang di tetapkan
-                        </span>
-                    )}
-                </div>
-            ),
-        },
-    ];
-    const handleDelete = (id) => {
-        if (id == 1) {
-            showAlert("Data default tidak dapat dihapus", "error");
-            return;
+    const loadGuru = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(route("master.guru.getGuru"));
+            setData((prev) => ({
+                ...prev,
+                guru: res.data.status !== false ? res.data.data : [],
+            }));
+        } catch (error) {
+            setData((prev) => ({ ...prev, guru: [] }));
+        } finally {
+            setLoading(false);
         }
-        showQuestion(
-            "Anda yakin ingin menghapus data ini ?",
-            () => {
-                axios.post(route("master.guru.destroy", { id })).then((res) => {
-                    if (res.data.success == true) {
-                        showAlert(res.data.msg, "success");
-                        getGuru();
-                    } else if (res.data.success == false) {
-                        showAlert(res.data.msg, "error");
-                    }
-                });
-            },
-            () => {},
-            "Hapus",
-            "Batal",
-        );
-    };
+    }, []);
+
+    const loadGuruMapel = useCallback(async (ta_id = null) => {
+        setLoading(true);
+        try {
+            const params = ta_id ? { tahun_ajaran_id: ta_id } : {};
+            const res = await axios.get(
+                route("master.guru.getGuruMapel", params),
+            );
+            setData((prev) => ({
+                ...prev,
+                mapel: res.data.status !== false ? res.data.data : [],
+            }));
+        } catch (error) {
+            setData((prev) => ({ ...prev, mapel: [] }));
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const loadKelas = useCallback(async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get(route("getData.get-kelas"));
+            setOpsiKelas(res.data.status !== false ? res.data.data : []);
+        } catch (error) {
+            setOpsiKelas([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const loadWaliKelas = useCallback(async (kelas_id = null) => {
+        setLoading(true);
+        try {
+            const params = kelas_id ? { kelas_id } : {};
+            const res = await axios.get(
+                route("master.guru.getWaliKelas", params),
+            );
+            setData((prev) => ({
+                ...prev,
+                wali: res.data.status !== false ? res.data.data : [],
+            }));
+        } catch (error) {
+            setData((prev) => ({ ...prev, wali: [] }));
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const getTahunAjaran = useCallback(async () => {
+        try {
+            const res = await axios.get(
+                route("master.tahun-ajaran.getTahunAjaran"),
+            );
+            const taData = res.data?.data || [];
+            setTahunAjaran(taData);
+
+            if (taData.length > 0) {
+                const taAktif = taData.find((ta) => ta.status === "Aktif");
+                if (taAktif) {
+                    setSelectedTahunAjaran(taAktif.id);
+                    loadGuruMapel(taAktif.id); // Langsung load data mapel untuk TA aktif
+                }
+            }
+        } catch (error) {
+            console.error("Gagal memuat tahun ajaran:", error);
+            setTahunAjaran([]);
+        }
+    }, [loadGuruMapel]);
+
+    // =========================================================================
+    // EFFECTS
+    // =========================================================================
+
+    useEffect(() => {
+        if (activeMenu === "master_guru") {
+            loadGuru();
+        } else if (activeMenu === "wali_kelas") {
+            loadKelas();
+            loadWaliKelas(filter.kelas);
+        } else if (activeMenu === "guru_mapel") {
+            getTahunAjaran();
+            // loadGuruMapel akan dipanggil oleh getTahunAjaran setelah mendapat TA Aktif
+        }
+    }, [
+        activeMenu,
+        filter.kelas,
+        loadGuru,
+        loadWaliKelas,
+        loadKelas,
+        getTahunAjaran,
+    ]);
+
+    // =========================================================================
+    // ACTIONS & HANDLERS
+    // =========================================================================
+
+    const openModal = (type, data = null, isEdit = false) =>
+        setModal({ show: true, type, isEdit, data });
+
+    const closeModal = () =>
+        setModal({ show: false, type: null, isEdit: false, data: null });
+
     const handleStatus = (row) => {
         axios
             .post(route("master.guru.update-status"), {
                 nip: row.nip,
-                status: row.status == "active" ? "nonactive" : "active",
+                status: row.status === "active" ? "nonactive" : "active",
             })
-            .then((res) => {
+            .then(() => {
+                loadGuru();
+                showAlert("Data berhasil diubah", "success");
+            });
+    };
+
+    const handleDelete = (id) => {
+        showQuestion("Apakah anda yakin ingin menghapus data ini?", () => {
+            axios.post(route("master.guru.destroy", { id: id })).then((res) => {
                 if (res.data.success == true) {
-                    getGuru();
-                    showAlert("Data berhasil diubah", "success");
-                } else if (res.data.success == false) {
-                    showAlert("Data gagal diubah", "error");
-                }
-            });
-    };
-    const getGuru = async () => {
-        setLoading(true);
-        await axios.get(route("master.guru.getGuru")).then((res) => {
-            if (res.data.status == false) {
-                setResult([]);
-            } else {
-                setLoading(false);
-                setResult(res.data.data);
-            }
-        });
-    };
-
-    const handleTambah = () => {
-        setSelectedGuru(null);
-        setShow(true);
-        setIsEdit(false);
-    };
-
-    const getWaliKelas = async (kelas_id) => {
-        setLoading(true);
-        setSelectedKelas(kelas_id);
-        if (kelas_id?.value != null) {
-            await axios
-                .get(
-                    route("master.guru.getWaliKelas", {
-                        kelas_id: kelas_id.value,
-                    }),
-                )
-                .then((res) => {
-                    if (res.data.status == false) {
-                        setResultWaliKelas([]);
-                    } else {
-                        setLoading(false);
-                        setResultWaliKelas(res.data.data);
-                    }
-                });
-            return;
-        } else if (kelas_id == null) {
-            await axios.get(route("master.guru.getWaliKelas")).then((res) => {
-                if (res.data.status == false) {
-                    setResultWaliKelas([]);
+                    showAlert(res.data.message, "success");
+                    loadGuru();
                 } else {
-                    setLoading(false);
-                    setResultWaliKelas(res.data.data);
+                    showAlert(res.data.message, "error");
                 }
             });
-        }
-    };
-    const getKelas = async () => {
-        setLoading(true);
-        await axios.get(route("getData.get-kelas")).then((res) => {
-            if (res.data.status == false) {
-                setOpsiKelas([]);
-            } else {
-                setLoading(false);
-                setOpsiKelas(res.data.data);
-            }
         });
     };
 
-    const getGuruMapel = async () => {
-        setLoading(true);
-        await axios.get(route("master.guru.getGuruMapel")).then((res) => {
-            if (res.data.status == false) {
-                setResultGuruMapel([]);
-            } else {
-                setLoading(false);
-                setResultGuruMapel(res.data.data);
-            }
-        });
-        setLoading(false);
+    const handleChangeTA = (val) => {
+        setSelectedTahunAjaran(val);
+        loadGuruMapel(val); // Reload mapel berdasarkan TA yang dipilih
     };
-    const handleMappingGuruMapel = () => {
-        setShowMappingGuruMapel(true);
+
+    // =========================================================================
+    // COLUMNS & OPTIONS MEMOIZATION
+    // =========================================================================
+
+    const tahunAjaranOptions = useMemo(() => {
+        return TahunAjaran.map((ta) => ({
+            value: ta.id,
+            label: ta.tahun_ajaran,
+            semester: ta.semester,
+            status: ta.status,
+        }));
+    }, [TahunAjaran]);
+
+    const selectStyles = {
+        control: (base) => ({
+            ...base,
+            borderRadius: "0.5rem",
+            borderColor: "#16a34a",
+        }),
     };
-    useEffect(() => {
-        if (menu == "master_guru") {
-            getGuru();
-        } else if (menu == "wali_kelas") {
-            getKelas();
-            getWaliKelas(null);
-        } else if (menu == "guru_mapel") {
-            getGuruMapel();
-        }
-    }, [menu]);
+
+    const columnsGuru = useMemo(
+        () => [
+            { header: "No", render: (_, i) => i + 1 },
+            { header: "Nip", accessor: "nip" },
+            { header: "Nama Guru", accessor: "nama_guru" },
+            {
+                header: "Status",
+                render: (row) => (
+                    <Switch
+                        checked={row.status === "active"}
+                        onChange={() => handleStatus(row)}
+                    />
+                ),
+            },
+            {
+                header: "#",
+                render: (row) => (
+                    <ActionDropdown
+                        actions={[
+                            {
+                                edit: true,
+                                label: "Edit",
+                                icon: "edit",
+                                onClick: () => openModal("add_guru", row, true),
+                            },
+                            {
+                                label: "Hapus",
+                                icon: "trash",
+                                danger: true,
+                                onClick: () => handleDelete(row.id),
+                            },
+                        ]}
+                    />
+                ),
+            },
+        ],
+        [],
+    );
+
+    const columnsWali = useMemo(
+        () => [
+            { header: "No", render: (_, i) => i + 1 },
+            {
+                header: "Kelas",
+                render: (row) => (
+                    <span>
+                        {row.nama_kelas + " " + (row.nama_jurusan || "")}
+                    </span>
+                ),
+            },
+            {
+                header: "Nama Guru",
+                render: (row) => (
+                    <span>{row.wali_kelas?.nama_guru || "Belum diatur"}</span>
+                ),
+            },
+            {
+                header: "#",
+                render: (row) => (
+                    <ActionDropdown
+                        actions={[
+                            {
+                                edit: true,
+                                label: "Edit",
+                                onClick: () =>
+                                    openModal("edit_wali", row, true),
+                            },
+                        ]}
+                    />
+                ),
+            },
+        ],
+        [],
+    );
+
+    const columnsMapel = useMemo(
+        () => [
+            { header: "Mata Pelajaran", render: (row) => row.mapel },
+            {
+                header: "#",
+                render: (row) => (
+                    <button
+                        type="button"
+                        className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-md transition-colors"
+                        onClick={() => openModal("details", row)}
+                    >
+                        <i className="fa fa-eye mr-1"></i> Detail
+                    </button>
+                ),
+            },
+        ],
+        [],
+    );
 
     return (
         <AuthenticatedLayout header={"Kelola Guru"}>
             <div className="flex flex-col md:flex-row bg-gray-50 items-start gap-4 p-4 md:p-0">
-                <Menu menu={menu} setMenu={setMenu} menus={menus} />
+                <Menu menu={activeMenu} setMenu={setActiveMenu} menus={menus} />
+
                 <div className="flex-1 min-w-0 md:p-6 w-full mt-4 md:mt-0">
-                    {menu === "master_guru" && (
-                        <>
-                            <div className="bg-white shadow sm:rounded-lg p-6">
-                                <div className="flex justify-end">
-                                    <PrimaryButton
-                                        className="mb-2"
-                                        onClick={() => {
-                                            handleTambah();
-                                        }}
-                                    >
-                                        + Tambah Guru
-                                    </PrimaryButton>
-                                </div>
-                                <DataTable
-                                    columns={columns}
-                                    data={Result}
-                                    loading={loading}
-                                    header={"Kelola Guru"}
-                                    title="GURU"
-                                />
-                            </div>
-                            <Add
-                                open={show}
-                                setOpen={setShow}
-                                isEdit={isEdit}
-                                Guru={selectedGuru}
-                                getGuru={getGuru}
+                    {activeMenu === "master_guru" && (
+                        <div className="bg-white shadow sm:rounded-lg p-6">
+                            <DataTable
+                                columns={columnsGuru}
+                                data={data.guru}
+                                loading={loading}
                             />
-                        </>
+                        </div>
                     )}
 
-                    {menu === "wali_kelas" && (
+                    {activeMenu === "wali_kelas" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
-                            {/* Wadah Filter: Diberi margin bottom (mb-6) agar ada jarak dengan tabel di bawahnya */}
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                                {/* Label Filter dengan Icon */}
-                                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 shrink-0">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-4 w-4 text-green-500"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                                        />
-                                    </svg>
-                                    Filter Kelas :
+                            <div className="flex items-center gap-3 mb-6 bg-white p-4 border border-gray-100 rounded-lg">
+                                <label className="text-sm font-semibold text-gray-700">
+                                    Filter Kelas:
                                 </label>
-
-                                {/* Dropdown Select2 */}
-                                <div className="w-full sm:w-72">
-                                    {" "}
-                                    {/* Lebar diatur agar pas (tidak terlalu panjang/pendek) */}
+                                <div className="w-72">
                                     <Select
                                         options={opsiKelas}
-                                        value={selectedKelas}
-                                        onChange={(pilihan) =>
-                                            getWaliKelas(pilihan)
+                                        value={
+                                            opsiKelas.find(
+                                                (o) => o.value === filter.kelas,
+                                            ) || null
                                         }
-                                        placeholder="Cari atau pilih kelas..."
-                                        isSearchable={true}
+                                        onChange={(opt) =>
+                                            setFilter({
+                                                kelas: opt ? opt.value : null,
+                                            })
+                                        }
                                         isClearable={true}
-                                        styles={{
-                                            // 1. Gaya Kotak Utama
-                                            control: (baseStyles, state) => ({
-                                                ...baseStyles,
-                                                backgroundColor: "white",
-                                                borderRadius: "0.5rem", // rounded-lg
-                                                padding: "2px", // Sedikit padding ekstra agar lega
-                                                borderColor: state.isFocused
-                                                    ? "#16a34a"
-                                                    : "#16a34a", // border-green-400 / border-gray-200
-                                                boxShadow: state.isFocused
-                                                    ? "0 0 0 3px rgba(165, 180, 252, 0.4)" // ring-green-300
-                                                    : "none",
-                                                "&:hover": {
-                                                    borderColor: state.isFocused
-                                                        ? "#16a34a"
-                                                        : "#16a34a",
-                                                },
-                                            }),
-                                            // 2. Gaya Kotak Dropdown (List Menu)
-                                            menu: (baseStyles) => ({
-                                                ...baseStyles,
-                                                borderRadius: "0.5rem",
-                                                boxShadow:
-                                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)", // shadow-lg
-                                                border: "1px solid #f3f4f6", // border-gray-100
-                                                overflow: "hidden",
-                                            }),
-                                            // 3. Gaya Tiap Item Pilihan
-                                            option: (baseStyles, state) => ({
-                                                ...baseStyles,
-                                                backgroundColor:
-                                                    state.isSelected
-                                                        ? "#16a34a" // bg-green-500 (Jika dipilih)
-                                                        : state.isFocused
-                                                          ? "#16a34a" // bg-green-50 (Saat di-hover)
-                                                          : "white",
-                                                color: state.isSelected
-                                                    ? "white"
-                                                    : state.isFocused
-                                                      ? "#4338ca" // text-green-700
-                                                      : "#4b5563", // text-gray-600
-                                                cursor: "pointer",
-                                                padding: "10px 14px",
-                                                fontSize: "0.875rem", // text-sm
-                                                "&:active": {
-                                                    backgroundColor: "#16a34a", // bg-green-200 saat diklik
-                                                },
-                                            }),
-                                            // 4. Gaya Teks yang Terpilih & Placeholder
-                                            singleValue: (baseStyles) => ({
-                                                ...baseStyles,
-                                                color: "#374151", // text-gray-700
-                                                fontWeight: "500",
-                                            }),
-                                            placeholder: (baseStyles) => ({
-                                                ...baseStyles,
-                                                color: "#9ca3af", // text-gray-400
-                                                fontSize: "0.875rem", // text-sm
-                                            }),
-                                        }}
+                                        styles={selectStyles}
                                     />
                                 </div>
                             </div>
                             <DataTable
-                                columns={columnsWaliKelas}
-                                data={ResultWaliKelas}
+                                columns={columnsWali}
+                                data={data.wali}
                                 loading={loading}
-                                header={"Wali Kelas"}
-                                title="Wali Kelas"
-                            />
-                            <EditWaliKelas
-                                open={showEditWali}
-                                setOpen={setShowEditWali}
-                                getKelas={getWaliKelas}
-                                Kelas={IseditWali}
                             />
                         </div>
                     )}
 
-                    {menu === "guru_mapel" && (
+                    {activeMenu === "guru_mapel" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
-                            <div className="flex justify-end">
+                            <div className="flex justify-between items-end mb-4">
+                                <div className="w-1/2 sm:w-1/3">
+                                    <InputLabel value="Pilih Tahun Ajaran" />
+                                    <Select
+                                        styles={{
+                                            ...selectStyles,
+                                            menuPortal: (base) => ({
+                                                ...base,
+                                                zIndex: 9999,
+                                            }),
+                                        }}
+                                        menuPortalTarget={document.body}
+                                        options={tahunAjaranOptions}
+                                        placeholder="Pilih Tahun Ajaran..."
+                                        value={
+                                            tahunAjaranOptions.find(
+                                                (option) =>
+                                                    option.value ===
+                                                    selectedTahunAjaran,
+                                            ) || null
+                                        }
+                                        onChange={(val) =>
+                                            handleChangeTA(val?.value)
+                                        }
+                                        formatOptionLabel={(option) => (
+                                            <div className="flex justify-between items-center">
+                                                <span>
+                                                    {option.label}{" "}
+                                                    {option.semester
+                                                        ? `- ${option.semester}`
+                                                        : ""}
+                                                </span>
+                                                {option.status && (
+                                                    <span
+                                                        className={`text-xs font-semibold ${
+                                                            option.status ===
+                                                            "Aktif"
+                                                                ? "text-green-600"
+                                                                : "text-gray-500"
+                                                        }`}
+                                                    >
+                                                        {option.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    />
+                                </div>
                                 <PrimaryButton
-                                    className="mb-2"
-                                    onClick={() => {
-                                        handleMappingGuruMapel();
-                                    }}
+                                    onClick={() => openModal("map_guru_mapel")}
+                                    className="h-10"
                                 >
-                                    <i className="fa fa-plus mr-2"></i> Kelola
-                                    Guru Mata Pelajaran
+                                    Kelola Guru Mata Pelajaran
                                 </PrimaryButton>
                             </div>
                             <DataTable
-                                columns={columnsGuruMapel}
-                                data={ResultGuruMapel}
+                                columns={columnsMapel}
+                                data={data.mapel}
                                 loading={loading}
-                                header={" Mata Pelajaran"}
-                                title=" Mata Pelajaran"
                             />
                         </div>
                     )}
-                    <MappingGuruMapel
-                        open={showMappingGuruMapel}
-                        setOpen={setShowMappingGuruMapel}
-                        getGuruMapel={getGuruMapel}
-                    />
                 </div>
             </div>
+
+            <Add
+                open={modal.show && modal.type === "add_guru"}
+                setOpen={closeModal}
+                isEdit={modal.isEdit}
+                Guru={modal.data}
+                getGuru={loadGuru}
+            />
+
+            <Modal
+                show={modal.show && modal.type === "details"}
+                onClose={closeModal}
+                maxWidth="2xl"
+            >
+                {/* Header Modal */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white sticky top-0 z-10">
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-800">
+                            Detail Penugasan Guru
+                        </h2>
+                        <p className="text-sm text-gray-500 font-medium mt-1">
+                            {modal.data?.mapel}{" "}
+                            <span className="text-indigo-600 font-bold">
+                                ({modal.data?.kode_mapel})
+                            </span>
+                        </p>
+                    </div>
+                    <button
+                        onClick={closeModal}
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-red-500"
+                    >
+                        <i className="fa fa-times text-lg"></i>
+                    </button>
+                </div>
+
+                {/* Content Modal */}
+                <div className="p-6 max-h-[70vh] overflow-y-auto bg-gray-50">
+                    {modal.data?.guru?.length > 0 ? (
+                        <div className="space-y-5">
+                            {modal.data.guru.map((g) => {
+                                // Hitung total jam di luar return JSX untuk optimasi
+                                const totalJam = g.mengajar.reduce(
+                                    (total, item) =>
+                                        total + (parseInt(item.beban_jam) || 0),
+                                    0,
+                                );
+
+                                return (
+                                    <div
+                                        key={g.value}
+                                        className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
+                                    >
+                                        {/* Nama Guru Header */}
+                                        <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                                            <div>
+                                                <h3 className="font-bold text-gray-900 text-base">
+                                                    {g.label}
+                                                </h3>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">
+                                                    NIP:{" "}
+                                                    {g.nip || "Tidak tersedia"}
+                                                </p>
+                                            </div>
+                                            {/* Badge Total Jam */}
+                                            <div className="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
+                                                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                                                    Total Jam
+                                                </p>
+                                                <span className="text-lg font-black text-indigo-600">
+                                                    {totalJam}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Tabel Kelas */}
+                                        <div className="p-0">
+                                            <table className="w-full text-sm">
+                                                <thead className="text-gray-500 bg-gray-50/50">
+                                                    <tr>
+                                                        <th className="px-5 py-3 text-left font-medium">
+                                                            Kelas
+                                                        </th>
+                                                        <th className="px-5 py-3 text-right font-medium">
+                                                            Beban Jam
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-100">
+                                                    {g.mengajar.map((item) => (
+                                                        <tr
+                                                            key={item.id}
+                                                            className="hover:bg-indigo-50/30 transition-colors"
+                                                        >
+                                                            <td className="px-5 py-3 font-semibold text-gray-700">
+                                                                {item.kelas}
+                                                            </td>
+                                                            <td className="px-5 py-3 text-right font-mono text-gray-600">
+                                                                <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">
+                                                                    {
+                                                                        item.beban_jam
+                                                                    }{" "}
+                                                                    Jam
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-16 text-gray-400">
+                            <i className="fa fa-folder-open text-5xl mb-4 block opacity-30"></i>
+                            <p className="font-medium">
+                                Belum ada guru yang ditugaskan pada mata
+                                pelajaran ini.
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </Modal>
+
+            <EditWaliKelas
+                open={modal.show && modal.type === "edit_wali"}
+                setOpen={closeModal}
+                getKelas={() => loadWaliKelas(filter.kelas)}
+                Kelas={modal.data}
+            />
+
+            <MappingGuruMapel
+                open={modal.show && modal.type === "map_guru_mapel"}
+                setOpen={closeModal}
+                getGuruMapel={() => loadGuruMapel(selectedTahunAjaran)}
+            />
         </AuthenticatedLayout>
     );
 }

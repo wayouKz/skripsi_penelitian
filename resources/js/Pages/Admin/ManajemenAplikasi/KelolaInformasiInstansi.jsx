@@ -39,24 +39,17 @@ export default function KelolaInformasiInstansi() {
     const submit = (e) => {
         e.preventDefault();
 
-        post(
-            route("manajemen-aplikasi.kelola-informasi-instansi.store"),
-            data,
-            {
-                forceFormData: true,
-                onSuccess: () => {
-                    showAlert(
-                        "Informasi instansi berhasil diperbarui",
-                        "success",
-                    );
-                },
+        post(route("manajemen-aplikasi.kelola-informasi-instansi.store"), {
+            forceFormData: true,
+            onSuccess: () => {
+                showAlert("Informasi instansi berhasil diperbarui", "success");
             },
-        );
+        });
     };
     return (
         <AuthenticatedLayout header="Kelola Informasi Instansi">
             <div className="bg-white shadow rounded-4">
-                <Form onSubmit={submit}>
+                <Form onSubmit={submit} loading={processing}>
                     {/* Header */}
                     <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r rounded-3xl from-green-500 to-green-600">
                         <div className="flex items-center gap-3">

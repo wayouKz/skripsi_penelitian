@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('t_alumnis', function (Blueprint $table) {
             $table->id();
             $table->string('nisn')->index();
-            $table->foreign('nisn')->references('nisn')->on('m_siswas');
+            $table->foreign('nisn')->references('nisn')->on('m_siswas')->onDelete('cascade');
            $table->foreignId('lulus_tahun_ajaran')
       ->constrained('m_tahun_ajarans')
       ->onDelete('cascade'); // Or 'set null' if you prefer to keep the alumni

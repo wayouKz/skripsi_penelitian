@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('t_guru_penggantis', function (Blueprint $table) {
             $table->id();
             $table->string('kode_jadwal')->index();
-            $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals');
+            $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals')->onDelete('cascade');
 
             $table->string('nip')->index();
-            $table->foreign('nip')->references('nip')->on('m_gurus');
+            $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade');
 
             $table->string('nip_pengganti')->index();
-            $table->foreign('nip_pengganti')->references('nip')->on('m_gurus');
+            $table->foreign('nip_pengganti')->references('nip')->on('m_gurus')->onDelete('cascade');
 
             $table->date('tanggal_pergantian');
 
@@ -28,10 +28,10 @@ return new class extends Migration
 
             // Status alur penugasan
             $table->enum('status', [
-                'menunggu', // Menunggu konfirmasi dari guru pengganti
-                'diterima', // Guru pengganti bersedia mengajar
-                'ditolak',  // Guru pengganti menolak/tidak bisa
-                'selesai'   // Sesi kelas pengganti sudah selesai dilaksanakan
+                'menunggu',
+                'diterima',
+                'ditolak',
+                'selesai'
             ])->default('menunggu');
             $table->timestamps();
         });

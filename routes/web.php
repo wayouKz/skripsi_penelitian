@@ -21,6 +21,7 @@ use App\Http\Controllers\Akademik\AbsenController;
 use App\Http\Controllers\Akademik\PenilaianController;
 use App\Http\Controllers\Akademik\KelasDiAmpuController;
 use App\Http\Controllers\Helper\GetDataController;
+use App\Http\Controllers\Helper\Pdf;
 use App\Http\Controllers\Master\JadwalController;
 use App\Http\Controllers\Master\KelasController;
 use App\Http\Controllers\Master\MapelController;
@@ -69,8 +70,15 @@ Route::middleware('auth')->group(function () {
         Route::get('get-jadwal-guru-kelas',  'getJadwalGuruKelas')->name('get-jadwal-guru-kelas');
         Route::get('get-history-absensi',  'getHistoryAbsensi')->name('get-history-absensi');
         Route::get('get-kelas-aktif',  'getKelasAktif')->name('get-kelas-aktif');
+        Route::get('get-jadwal-perguru',  'getJadwalPerGuru')->name('get-jadwal-perguru');
+        Route::get('get-siswa-perwalian',  'getSiswaPerwalian')->name('get-siswa-perwalian');
+
+        Route::get('/cek-data-mapel',  'cekDataMapel')->name('cek-data-mapel');
     });
 
+    Route::controller(Pdf::class)->prefix('pdf')->name('pdf.')->group(function () {
+        Route::get('/jadwal',  'jadwal')->name('jadwal');
+    });
 
 
     //role
@@ -90,6 +98,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/getUser',  'getUser')->name('getUser');
             Route::post('/reset-password',  'resetPassword')->name('reset-password');
             Route::post('/update/{id}',  'update')->name('update');
+            Route::post('/update-status',  'update_status')->name('update-status');
             Route::post('/store',  'store')->name('store');
             Route::post('/delete/{id}',  'destroy')->name('destroy');
         });
@@ -128,6 +137,8 @@ Route::middleware('auth')->group(function () {
             Route::get('/getTahunAjaran',  'getTahunAjaran')->name('getTahunAjaran');
             Route::post('/store',  'store')->name('store');
             Route::post('/update',  'update')->name('update');
+        Route::post('/import-sk',  'ProsesImportSK')->name('import-sk');
+
         });
 
         Route::controller(KelasController::class)->prefix('/kelas')->name('kelas.')->group(function () {

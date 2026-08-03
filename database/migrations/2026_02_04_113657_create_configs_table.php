@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('configs', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_instansi');
-            $table->string('logo_instansi');
-            $table->string('alamat_instansi');
+            $table->string('nama_instansi')->nullable();
+            $table->string('logo_instansi')->nullable();
+            $table->string('alamat_instansi')->nullable();
             $table->string('telepon_instansi')->nullable();
             $table->string('email_instansi')->nullable();
             $table->string('website_instansi')->nullable();

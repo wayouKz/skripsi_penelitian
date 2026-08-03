@@ -58,7 +58,7 @@ export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
                 if (res.data.success == true) {
                     setDataSiswa(res.data.data);
                 } else if (res.data.success == false) {
-                    showAlert("Data siswa masih kosong.", "info");
+                    showAlert(res.data.msg, "info");
                 }
             });
     };
@@ -69,7 +69,7 @@ export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
         <div className="p-6">
             <div className="mb-4">
                 <h2 className="text-lg font-semibold text-gray-800">
-                    Informasi Siswa Dalam Kelas
+                    <i className="fa fa-users mr-2"></i> Siswa
                 </h2>
             </div>
             <DataTable loading={loading} columns={columns} data={dataSiswa} />

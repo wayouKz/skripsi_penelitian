@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('nama_guru');
             $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
-            $table->string('tempat_lahir');
-            $table->date('tanggal_lahir');
-            $table->string('alamat');
+            $table->string('tempat_lahir')->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('alamat')->nullable();
             $table->string('no_telp')->nullable();
-            $table->string('nip')->index()->unique();
+            $table->string('nip')->index()->unique()->nullable();
             $table->enum('status', ['active', 'nonactive'])->default('active');
             $table->timestamps();
         });

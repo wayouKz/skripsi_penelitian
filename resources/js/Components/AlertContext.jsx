@@ -102,7 +102,7 @@ const ModalIcon = () => (
         height="36"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#7c3aed"
+        stroke="#16a34a"
         strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -130,7 +130,7 @@ const KEYFRAMES = `
 
 const BTN_STYLES = {
     confirm: {
-        background: "#7c3aed",
+        background: "#16a34a",
         color: "#fff",
         border: "none",
         boxShadow: "0 4px 16px rgba(124,58,237,.3)",

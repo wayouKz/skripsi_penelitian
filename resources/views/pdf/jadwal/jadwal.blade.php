@@ -10,7 +10,7 @@ $groupedByKelas = collect($jadwal)->groupBy('nama_kelas');
 <!-- Header Dokumen per Kelas -->
 <h2 style="text-align: center; margin-bottom: 5px; color: #222;">JADWAL PELAJARAN KELAS {{ $namaKelas }}</h2>
 <p style="text-align: center; margin-bottom: 20px; font-size: 12px; color: #666;">
-    Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }}
+    Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }} / {{ $tahunAjaran->semester ?? '-' }}
 </p>
 
 <!-- Tabel Jadwal -->

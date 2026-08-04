@@ -29,7 +29,7 @@
 
         <!-- 2. Kolom Teks Tengah (Lebar 70% - Presisi di Tengah Halaman) -->
         <td width="70%" style="text-align: center; vertical-align: middle;">
-            <h1>{{ $instansi->nama_instansi }}</h1>
+            <h1> {{ strtoupper($instansi->nama_instansi) }}</h1>
             <p>{{ $instansi->alamat_instansi }}</p>
             <p>Telepon: {{ $instansi->telepon_instansi }} | Website: <i>{{ $instansi->website_instansi }}</i></p>
         </td>

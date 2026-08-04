@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAlert } from "@/Components/AlertContext";
+import Select from "react-select";
 // --- IMPORT DRIVER.JS ---
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
@@ -42,6 +43,57 @@ export default function TabKenaikanKelas() {
         kelasName: "",
     });
     const [autoLogs, setAutoLogs] = useState([]);
+
+    // --- STYLING CUSTOM UNTUK REACT-SELECT ---
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: state.isDisabled ? "#F9FAFB" : "#FFFFFF",
+            borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
+            borderRadius: "0.5rem",
+            minHeight: "38px",
+            padding: "0 2px",
+            boxShadow: state.isFocused
+                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: state.isDisabled ? "not-allowed" : "pointer",
+            "&:hover": {
+                borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
+            },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0 6px",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "0.875rem",
+            fontWeight: "normal",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#1F2937",
+            fontSize: "0.875rem",
+            fontWeight: "600",
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "0.875rem",
+            fontWeight: "500",
+            cursor: "pointer",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+    };
 
     // --- LIFECYCLE / EFFECTS ---
     useEffect(() => {
@@ -191,7 +243,7 @@ export default function TabKenaikanKelas() {
             kelas_asal_id: Number(kelasAsalId),
             tahun_ajaran_tujuan_id: Number(taTujuan),
             kelas_tujuan_id:
-                kelasTujuanId.toUpperCase() === "LULUS"
+                String(kelasTujuanId).toUpperCase() === "LULUS"
                     ? "LULUS"
                     : Number(kelasTujuanId),
             siswa_ids: selectedSiswa.map((nisn) => {
@@ -409,7 +461,7 @@ export default function TabKenaikanKelas() {
                     popover: {
                         title: "5. Eksekusi Kelas Terpilih",
                         description:
-                            "Gunakan tombol ini jika Anda ingin memproses kenaikan secara manual khusus untuk kelas dan siswa yang Anda pilih di layar ini.",
+                            "Gunakan tombol ini jika ingin memproses kenaikan secara manual khusus untuk kelas dan siswa yang Anda pilih.",
                         side: "top",
                         align: "end",
                     },
@@ -419,7 +471,7 @@ export default function TabKenaikanKelas() {
                     popover: {
                         title: "6. Mode Otomatis",
                         description:
-                            "Fitur super cepat. Cukup pilih Tahun Lama & Baru, klik tombol ini, dan sistem akan memproses perpindahan SELURUH kelas secara berurutan.",
+                            "Fitur super cepat untuk memproses perpindahan SELURUH kelas secara berurutan.",
                         side: "top",
                         align: "start",
                     },
@@ -429,9 +481,55 @@ export default function TabKenaikanKelas() {
         driverObj.drive();
     };
 
+    // --- COMPUTED OPTIONS UNTUK REACT-SELECT ---
+    const tahunAjaranAsalOptions = (dataTahunAjaran || []).map((ta) => ({
+        value: ta.id || ta.value,
+        label: `${ta.tahun_ajaran || ta.label} ${
+            ta.status === "active" ? "(Aktif)" : "(Tidak Aktif)"
+        }`,
+    }));
+    const selectedTaAsalOption =
+        tahunAjaranAsalOptions.find(
+            (opt) => String(opt.value) === String(taAsal),
+        ) || null;
+
+    const kelasAsalOptions = (kelasList || []).map((k) => ({
+        value: k.id,
+        label: k.nama_kelas,
+    }));
+    const selectedKelasAsalOption =
+        kelasAsalOptions.find(
+            (opt) => String(opt.value) === String(kelasAsalId),
+        ) || null;
+
+    const tahunAjaranTujuanOptions = (dataTahunAjaran || [])
+        .filter((ta) => {
+            if (!taAsal) return true;
+            return Number(ta.id || ta.value) > Number(taAsal);
+        })
+        .map((ta) => ({
+            value: ta.id || ta.value,
+            label: `${ta.tahun_ajaran || ta.label} ${
+                ta.status === "active" ? "(Aktif)" : "(Tidak Aktif)"
+            }`,
+        }));
+    const selectedTaTujuanOption =
+        tahunAjaranTujuanOptions.find(
+            (opt) => String(opt.value) === String(taTujuan),
+        ) || null;
+
+    const kelasTujuanOptions = (opsiKelasTujuan || []).map((k) => ({
+        value: k.id,
+        label: k.nama_kelas,
+    }));
+    const selectedKelasTujuanOption =
+        kelasTujuanOptions.find(
+            (opt) => String(opt.value) === String(kelasTujuanId),
+        ) || null;
+
     // --- COMPUTED LABELS ---
     const kelasNamaTujuan =
-        kelasTujuanId.toUpperCase() === "LULUS"
+        String(kelasTujuanId).toUpperCase() === "LULUS"
             ? "Lulus / Alumni"
             : opsiKelasTujuan.find(
                   (k) => String(k.id) === String(kelasTujuanId),
@@ -566,16 +664,17 @@ export default function TabKenaikanKelas() {
                         </div>
 
                         <div className="p-4 flex flex-col gap-4 flex-1">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Lama
                                     </label>
-                                    <select
-                                        className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                                        value={taAsal}
-                                        onChange={(e) => {
-                                            const selectedVal = e.target.value;
+                                    <Select
+                                        value={selectedTaAsalOption}
+                                        onChange={(option) => {
+                                            const selectedVal = option
+                                                ? option.value
+                                                : "";
                                             setTaAsal(selectedVal);
                                             setKelasAsalId("");
                                             setSiswaAsal([]);
@@ -589,52 +688,37 @@ export default function TabKenaikanKelas() {
                                                 setTaTujuan("");
                                             }
                                         }}
-                                    >
-                                        <option value="">
-                                            Pilih Tahun Ajaran
-                                        </option>
-                                        {dataTahunAjaran?.map((ta) => (
-                                            <option
-                                                key={ta.id || ta.value}
-                                                value={ta.id || ta.value}
-                                            >
-                                                {ta.tahun_ajaran || ta.label}
-                                                {(ta.status === "active" && (
-                                                    <span className="ml-1 text-xs text-gray-400">
-                                                        (Aktif)
-                                                    </span>
-                                                )) || (
-                                                    <span className="ml-1 text-xs text-gray-400">
-                                                        (Tidak Aktif)
-                                                    </span>
-                                                )}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={tahunAjaranAsalOptions}
+                                        placeholder="Pilih Tahun Ajaran"
+                                        isSearchable={true}
+                                        menuPortalTarget={document.body}
+                                        className="text-sm"
+                                        classNamePrefix="react-select"
+                                        styles={customSelectStyles}
+                                    />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
                                         Kelas Saat Ini
                                     </label>
-                                    <select
-                                        className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                        value={kelasAsalId}
-                                        disabled={!taAsal}
-                                        onChange={(e) => {
+                                    <Select
+                                        value={selectedKelasAsalOption}
+                                        onChange={(option) => {
+                                            const val = option
+                                                ? option.value
+                                                : "";
                                             setSelectedSiswa([]);
-                                            handleGetSiswaInKelas(
-                                                e.target.value,
-                                                taAsal,
-                                            );
+                                            handleGetSiswaInKelas(val, taAsal);
                                         }}
-                                    >
-                                        <option value="">Pilih Kelas</option>
-                                        {kelasList?.map((k) => (
-                                            <option key={k.id} value={k.id}>
-                                                {k.nama_kelas}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={kelasAsalOptions}
+                                        placeholder="Pilih Kelas"
+                                        isSearchable={true}
+                                        isDisabled={!taAsal}
+                                        menuPortalTarget={document.body}
+                                        className="text-sm"
+                                        classNamePrefix="react-select"
+                                        styles={customSelectStyles}
+                                    />
                                 </div>
                             </div>
 
@@ -776,73 +860,47 @@ export default function TabKenaikanKelas() {
                         </div>
 
                         <div className="p-5 flex flex-col gap-4 flex-1">
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Baru
                                     </label>
-                                    <select
-                                        className="text-sm border border-gray-200 rounded-lg px-3 py-2.5 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
-                                        value={taTujuan}
-                                        onChange={(e) =>
-                                            setTaTujuan(e.target.value)
+                                    <Select
+                                        value={selectedTaTujuanOption}
+                                        onChange={(option) =>
+                                            setTaTujuan(
+                                                option ? option.value : "",
+                                            )
                                         }
-                                    >
-                                        <option value="">
-                                            Pilih tahun ajaran…
-                                        </option>
-                                        {dataTahunAjaran
-                                            ?.filter((ta) => {
-                                                if (!taAsal) return true;
-                                                return (
-                                                    Number(ta.id || ta.value) >
-                                                    Number(taAsal)
-                                                );
-                                            })
-                                            .map((ta) => (
-                                                <option
-                                                    key={ta.id || ta.value}
-                                                    value={ta.id || ta.value}
-                                                >
-                                                    {ta.tahun_ajaran ||
-                                                        ta.label}
-                                                    {(ta.status ===
-                                                        "active" && (
-                                                        <span className="ml-1 text-xs text-gray-400">
-                                                            (Aktif)
-                                                        </span>
-                                                    )) || (
-                                                        <span className="ml-1 text-xs text-gray-400">
-                                                            (Tidak Aktif)
-                                                        </span>
-                                                    )}
-                                                </option>
-                                            ))}
-                                    </select>
+                                        options={tahunAjaranTujuanOptions}
+                                        placeholder="Pilih tahun ajaran..."
+                                        isSearchable={true}
+                                        menuPortalTarget={document.body}
+                                        className="text-sm"
+                                        classNamePrefix="react-select"
+                                        styles={customSelectStyles}
+                                    />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Kelas Selanjutnya
                                     </label>
-                                    <select
-                                        className="text-sm border border-gray-200 rounded-lg px-3 py-2.5 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none cursor-pointer disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                        value={kelasTujuanId}
-                                        disabled={!kelasAsalId}
-                                        onChange={(e) =>
+                                    <Select
+                                        value={selectedKelasTujuanOption}
+                                        onChange={(option) =>
                                             handleChangeKelasTujuan(
-                                                e.target.value,
+                                                option ? option.value : "",
                                             )
                                         }
-                                    >
-                                        <option value="">
-                                            Pilih kelas target…
-                                        </option>
-                                        {opsiKelasTujuan.map((k) => (
-                                            <option key={k.id} value={k.id}>
-                                                {k.nama_kelas}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={kelasTujuanOptions}
+                                        placeholder="Pilih kelas target..."
+                                        isSearchable={true}
+                                        isDisabled={!kelasAsalId}
+                                        menuPortalTarget={document.body}
+                                        className="text-sm"
+                                        classNamePrefix="react-select"
+                                        styles={customSelectStyles}
+                                    />
                                 </div>
                             </div>
 
@@ -908,7 +966,8 @@ export default function TabKenaikanKelas() {
                                     )}
                                     {kelasAsalId &&
                                         kelasTujuanId &&
-                                        kelasTujuanId !== "LULUS" && (
+                                        String(kelasTujuanId).toUpperCase() !==
+                                            "LULUS" && (
                                             <SummaryRow
                                                 label="Siswa di kelas target"
                                                 value={

@@ -1,6 +1,8 @@
+import React from "react";
 import GuruChip from "./GuruChip";
 import { useDroppable } from "@dnd-kit/core";
-export default function DroppableMapelRow({
+
+function DroppableMapelRow({
     mapel,
     index,
     kelasList,
@@ -9,7 +11,7 @@ export default function DroppableMapelRow({
 }) {
     const { setNodeRef, isOver } = useDroppable({ id: String(mapel.id) });
 
-    // 🌟 PERBAIKAN 2: Mengumpulkan ID Kelas yang sudah terpakai di mata pelajaran ini
+    // Mengumpulkan ID Kelas yang sudah terpakai di mata pelajaran ini
     const takenKelasIds = mapel.guru
         .map((g) => String(g.kelas_id))
         .filter((id) => id !== "");
@@ -39,7 +41,7 @@ export default function DroppableMapelRow({
                             guru={guru}
                             mapelId={mapel.id}
                             kelasList={kelasList}
-                            takenKelasIds={takenKelasIds} // 👈 Kirim data kelas yang sudah terpakai
+                            takenKelasIds={takenKelasIds}
                             onRemove={removeGuru}
                             onChangeData={handleGuruDataChange}
                         />
@@ -58,3 +60,12 @@ export default function DroppableMapelRow({
         </tr>
     );
 }
+
+// Gunakan React.memo dengan fungsi pembanding agar baris lain tidak ikut re-render
+export default React.memo(DroppableMapelRow, (prevProps, nextProps) => {
+    return (
+        prevProps.mapel === nextProps.mapel &&
+        prevProps.index === nextProps.index &&
+        prevProps.kelasList === nextProps.kelasList
+    );
+});

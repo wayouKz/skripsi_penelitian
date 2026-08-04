@@ -11,7 +11,7 @@ export default forwardRef(function TextInput(
         type = "text",
         className = "",
         isFocused = false,
-        icon = "user",
+        icon = "",
         error,
         width = "w-full",
         ...props

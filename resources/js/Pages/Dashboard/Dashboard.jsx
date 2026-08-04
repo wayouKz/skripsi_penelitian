@@ -18,7 +18,7 @@ export default function Dashboard() {
     return (
         <AuthenticatedLayout header="Dashboard">
             <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
-                {role == "Super Admin" ? (
+                {role === "Super Admin" || role === "Developer" ? (
                     <SuperAdmin user={user} tglStr={tglStr} total={total} />
                 ) : (
                     <GuruDashboard user={user} tglStr={tglStr} />

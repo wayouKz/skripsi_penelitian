@@ -1,9 +1,11 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Link } from "@inertiajs/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InformasiKelasDiAmpu from "./InformasiKelasDiAmpu";
 import JurnalMengajar from "./JurnalMengajar";
 import TabsMenus from "@/Components/TabMenus";
+import Dropdown from "@/Components/Dropdown";
+import ModalPdf from "@/Components/ModalPdf";
 
 export default function Detail({ dataKelas }) {
     const menus = [
@@ -16,6 +18,64 @@ export default function Detail({ dataKelas }) {
             component: <JurnalMengajar dataKelas={dataKelas} />,
         },
     ];
+
+    const [openDropdown, setOpenDropdown] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Menutup dropdown ketika pengguna mengklik di luar area komponen
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setOpenDropdown(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    const [openPdfModal, setOpenPdfModal] = useState({
+        open: false,
+        url: "",
+        title: "",
+    });
+    const openPdf = (type, kelasID, tahunAjaranId, nama_kelas) => {
+        setOpenDropdown(false); // Menutup dropdown secara pasti saat opsi diklik
+
+        const pdfConfig = {
+            absensi_pdf: {
+                title: "Absensi" + " " + nama_kelas,
+                routeName: "pdf.absensi_pdf",
+            },
+            raport_pdf: {
+                title: "Raport Siswa" + " " + nama_kelas,
+                routeName: "pdf.raport_pdf",
+            },
+            kartu_tugas_pdf: {
+                title: "Jadwal Mengajar" + " " + nama_kelas,
+                routeName: "pdf.kartu_tugas_pdf",
+            },
+        };
+
+        const config = pdfConfig[type];
+
+        if (config) {
+            setOpenPdfModal({
+                open: true, // Sesuaikan dengan properti ModalPdf Anda (bisa 'show' atau 'open')
+                pdfUrl: route(config.routeName, {
+                    kelas_id: kelasID,
+                    tahun_ajaran_id: tahunAjaranId,
+                }),
+                title: config.title,
+            });
+        }
+    };
+
     return (
         <AuthenticatedLayout header={`Kelas ` + dataKelas?.nama_kelas}>
             <div className=" min-h-screen bg-gray-50/50">
@@ -29,7 +89,7 @@ export default function Detail({ dataKelas }) {
                         >
                             <i className="fa fa-arrow-left transform group-hover:-translate-x-1 transition-transform"></i>
                         </Link>
-                        <div>
+                        <div className="flex-1">
                             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
                                 Detail Kelas
                             </h2>
@@ -43,10 +103,84 @@ export default function Detail({ dataKelas }) {
                     {/* Card Informasi Utama */}
                     <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden mb-6">
                         <div className="p-3">
-                            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-                                <i className="fa fa-info-circle text-green-500"></i>
-                                Informasi Umum Kelas
-                            </h3>
+                            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <i className="fa fa-info-circle text-green-500"></i>
+                                    Informasi Umum Kelas
+                                </h3>
+                                <div
+                                    className="relative inline-block text-left"
+                                    ref={dropdownRef}
+                                >
+                                    {/* Tombol Utama */}
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setOpenDropdown(!openDropdown)
+                                        }
+                                        className="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded-lg text-xs font-semibold inline-flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+                                    >
+                                        <i className="fa fa-print"></i>
+                                        Cetak
+                                        <i
+                                            className={`fa fa-chevron-down text-[10px] transition-transform duration-200 ${openDropdown ? "rotate-180" : ""}`}
+                                        ></i>
+                                    </button>
+
+                                    {/* Menu Dropdown */}
+                                    {openDropdown && (
+                                        <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1.5 animate-in fade-in duration-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    // Logika cetak PDF di sini
+                                                    openPdf(
+                                                        "raport_pdf",
+                                                        dataKelas?.kelas_id,
+                                                        dataKelas?.tahun_ajaran_id,
+                                                        dataKelas?.nama_kelas,
+                                                    );
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 font-medium transition-colors"
+                                            >
+                                                <i className="fa fa-file-pdf text-red-600 w-4"></i>{" "}
+                                                Cetak Raport
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    openPdf(
+                                                        "absensi_pdf",
+                                                        dataKelas?.kelas_id,
+                                                        dataKelas?.tahun_ajaran_id,
+                                                        dataKelas?.nama_kelas,
+                                                    );
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 font-medium transition-colors"
+                                            >
+                                                <i className="fa fa-file-pdf text-red-600 w-4"></i>{" "}
+                                                Cetak Absensi
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    // Logika cetak Excel di sini
+                                                    openPdf(
+                                                        "kartu_tugas_pdf",
+                                                        dataKelas?.kelas_id,
+                                                        dataKelas?.tahun_ajaran_id,
+                                                        dataKelas?.nama_kelas,
+                                                    );
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 font-medium transition-colors"
+                                            >
+                                                <i className="fa fa-file-pdf text-red-600 w-4"></i>{" "}
+                                                Cetak Kartu Tugas
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {/* Item 1: Nama Kelas */}
@@ -114,6 +248,14 @@ export default function Detail({ dataKelas }) {
                     <TabsMenus menus={menus} />
                 </div>
             </div>
+            <ModalPdf
+                isOpen={openPdfModal.open}
+                onClose={() =>
+                    setOpenPdfModal({ ...openPdfModal, open: false })
+                }
+                pdfUrl={openPdfModal.pdfUrl}
+                title={openPdfModal.title}
+            />
         </AuthenticatedLayout>
     );
 }

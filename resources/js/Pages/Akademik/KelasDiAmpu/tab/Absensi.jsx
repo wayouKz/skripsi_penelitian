@@ -4,6 +4,7 @@ import HistoryAbsensi from "./modal/HistoryAbsensi";
 import { useAlert } from "@/Components/AlertContext";
 import axios from "axios";
 import Offcanvas from "@/Components/Offcanvas";
+import Select from "react-select";
 
 export default function Absensi({ dataKelas }) {
     const [open, setOpen] = useState(false);
@@ -26,6 +27,58 @@ export default function Absensi({ dataKelas }) {
     const [msg, setMsg] = useState("");
     const [pertemuan, setPertemuan] = useState(0);
 
+<<<<<<< HEAD
+=======
+    // Styling custom untuk React Select (Mata Pelajaran)
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: "#FFFFFF",
+            borderColor: state.isFocused ? "#10B981" : "#E2E8F0",
+            borderRadius: "0.5rem",
+            minHeight: "38px",
+            padding: "0 2px",
+            boxShadow: state.isFocused
+                ? "0 0 0 2px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: "pointer",
+            "&:hover": {
+                borderColor: "#10B981",
+            },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0 6px",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "0.875rem",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#334155",
+            fontSize: "0.875rem",
+            fontWeight: "500",
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#334155",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+    };
+
+>>>>>>> main
     useEffect(() => {
         // Membuat jam berjalan otomatis setiap 1 detik (1000 milidetik)
         const timer = setInterval(() => {
@@ -58,7 +111,7 @@ export default function Absensi({ dataKelas }) {
                 setTidakAdaJadwal(true);
                 setMsg(res.data.msg);
             } else {
-                // PERBAIKAN: Suntikkan status_kehadiran default "hadir" ke setiap siswa
+                // Suntikkan status_kehadiran default "hadir" ke setiap siswa
                 const siswaWithDefaultStatus = res.data.data.map((s) => ({
                     ...s,
                     status_kehadiran: "hadir",
@@ -116,7 +169,6 @@ export default function Absensi({ dataKelas }) {
     };
 
     // Handle submit form absensi
-
     const submitAbsensi = async (e) => {
         e.preventDefault();
 
@@ -179,10 +231,26 @@ export default function Absensi({ dataKelas }) {
         );
     };
 
-    const handleGetSiswa = async (e) => {
-        setSelectedMapel(e.target.value);
-        setNamaMapel(e.target.options[e.target.selectedIndex].text);
-        // Hapus pemanggilan getSiswa() di sini, kita akan gunakan useEffect untuk memantaunya
+    // Mapping opsi untuk React Select Mata Pelajaran
+    const mapelOptions = (dataMapel || []).map((mapel) => ({
+        value: mapel.kode_jadwal,
+        label: mapel.nama_mapel,
+    }));
+
+    const selectedMapelOption =
+        mapelOptions.find(
+            (opt) => String(opt.value) === String(selectedMapel),
+        ) || null;
+
+    const handleSelectMapelChange = (option) => {
+        if (option) {
+            setSelectedMapel(option.value);
+            setNamaMapel(option.label);
+        } else {
+            setSelectedMapel("");
+            setNamaMapel("");
+            setSiswa([]);
+        }
     };
 
     // Gunakan useEffect untuk memanggil getSiswa saat selectedMapel berubah
@@ -197,9 +265,8 @@ export default function Absensi({ dataKelas }) {
     }, []);
 
     /* ─────────────────────────────────────────────
-       STATUS BUTTON CONFIG  (pure UI helper)
+        STATUS BUTTON CONFIG  (pure UI helper)
     ───────────────────────────────────────────── */
-    // Konfigurasi dinamis untuk setiap status kehadiran
     const STATUS_OPTIONS = [
         {
             value: "hadir",
@@ -247,9 +314,9 @@ export default function Absensi({ dataKelas }) {
                 </div>
 
                 {/* Filter controls */}
-                <div className="flex flex-col sm:flex-row gap-1 w-full md:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 items-end w-full md:w-auto">
                     {/* Tanggal */}
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 w-full sm:w-auto">
                         <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                             Tanggal
                         </label>
@@ -262,37 +329,27 @@ export default function Absensi({ dataKelas }) {
                         />
                     </div>
 
-                    {/* Mata Pelajaran */}
-                    <div className="flex flex-col gap-1">
+                    {/* Mata Pelajaran (React Select) */}
+                    <div className="flex flex-col gap-1 w-full sm:w-[260px]">
                         <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                             Mata Pelajaran
                         </label>
-                        <div className="relative w-full sm:w-[220px]">
-                            <select
-                                className="block w-full appearance-none bg-white border border-slate-200 text-slate-700 py-2 pl-3 pr-9 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-400 text-sm transition-shadow"
-                                value={selectedMapel}
-                                onChange={handleGetSiswa}
-                            >
-                                <option value="" disabled>
-                                    [ Pilih Mata Pelajaran ]
-                                </option>
-                                {dataMapel.map((mapel) => (
-                                    <option
-                                        key={mapel.kode_jadwal}
-                                        value={mapel.kode_jadwal}
-                                    >
-                                        {mapel.nama_mapel}
-                                    </option>
-                                ))}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                <i className="fa fa-chevron-down text-[10px]"></i>
-                            </div>
-                        </div>
+                        <Select
+                            value={selectedMapelOption}
+                            onChange={handleSelectMapelChange}
+                            options={mapelOptions}
+                            placeholder="[ Pilih Mata Pelajaran ]"
+                            isSearchable={true}
+                            menuPortalTarget={document.body}
+                            className="text-sm"
+                            classNamePrefix="react-select"
+                            styles={customSelectStyles}
+                        />
                     </div>
-                    <div className="flex flex-col gap-1 my-6">
+
+                    <div className="flex flex-col gap-1">
                         <button
-                            className="inline-flex items-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 font-semibold py-2 px-4 rounded-lg text-xs transition-all shadow-sm"
+                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 font-semibold py-2 px-4 rounded-lg text-xs transition-all shadow-sm h-[38px]"
                             type="button"
                             title="Lihat Riwayat Absensi"
                             onClick={() => {
@@ -341,7 +398,13 @@ export default function Absensi({ dataKelas }) {
                                 ].map((h, i) => (
                                     <th
                                         key={h}
-                                        className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ${i === 0 ? "w-12 text-center" : ""} ${i === 1 ? "w-36" : ""} ${i === 3 ? "text-center min-w-[320px]" : ""}`}
+                                        className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ${
+                                            i === 0 ? "w-12 text-center" : ""
+                                        } ${i === 1 ? "w-36" : ""} ${
+                                            i === 3
+                                                ? "text-center min-w-[320px]"
+                                                : ""
+                                        }`}
                                     >
                                         {h}
                                     </th>
@@ -451,7 +514,6 @@ export default function Absensi({ dataKelas }) {
                                     <tbody className="divide-y divide-slate-100 bg-white">
                                         {siswa.map((item, index) => (
                                             <tr
-                                                // Gunakan fallback ke nisn jika id tidak ada untuk mencegah duplicate key
                                                 key={item.id || item.nisn}
                                                 className="hover:bg-slate-50/70 transition-colors"
                                             >
@@ -475,7 +537,6 @@ export default function Absensi({ dataKelas }) {
                                                     <div className="flex items-center justify-center gap-1.5">
                                                         {STATUS_OPTIONS.map(
                                                             (opt) => {
-                                                                // Cek apakah opsi ini adalah status yang sedang terpilih
                                                                 const isActive =
                                                                     item.status_kehadiran ===
                                                                     opt.value;
@@ -502,7 +563,6 @@ export default function Absensi({ dataKelas }) {
                                                                                 isActive
                                                                             }
                                                                             onChange={() =>
-                                                                                // PERBAIKAN: Gunakan fallback ke nisn saat mengirim argumen
                                                                                 handleStatusChange(
                                                                                     item.id ||
                                                                                         item.nisn,
@@ -510,7 +570,6 @@ export default function Absensi({ dataKelas }) {
                                                                                 )
                                                                             }
                                                                         />
-                                                                        {/* Menampilkan titik indikator hanya jika aktif */}
                                                                         {isActive && (
                                                                             <span
                                                                                 className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${opt.dot}`}

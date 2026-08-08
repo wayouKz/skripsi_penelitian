@@ -155,7 +155,7 @@ export default function Add({
             setOpen={setOpen}
             onSubmit={submit}
         >
-            <div className="flex justify-center ">
+            <div className="flex justify-center hidden">
                 <label className="relative cursor-pointer group">
                     <div className=" w-12 h-12 rounded-full bg-gray-100 border flex items-center justify-center overflow-hidden">
                         {previewImage ? (

@@ -8,6 +8,7 @@ import Menu from "@/Components/Menu";
 import PrimaryButton from "@/Components/PrimaryButton";
 import DataTable from "@/Components/Datatables";
 import SiswaKelas from "./SiswaKelas";
+import Select from "react-select";
 
 export default function Siswa() {
     const [show, setShow] = useState(false);
@@ -27,7 +28,6 @@ export default function Siswa() {
     const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
 
     const columns = [
-        // ... (Kolom tabel tetap sama seperti kode Anda sebelumnya)
         {
             header: "No",
             render: (_, i) => (
@@ -84,8 +84,8 @@ export default function Siswa() {
             ),
         },
     ];
+
     const columnsSiswaPerKelas = [
-        // ... (Kolom tabel tetap sama seperti kode Anda sebelumnya)
         {
             header: "No",
             render: (_, i) => (
@@ -94,7 +94,6 @@ export default function Siswa() {
                 </span>
             ),
         },
-
         { header: "Nisn", accessor: "value" },
         { header: "Nama Siswa", accessor: "label" },
         { header: "Kelas", accessor: "nama_kelas" },
@@ -102,7 +101,6 @@ export default function Siswa() {
         { header: "Semester", accessor: "semester" },
     ];
 
-    // Struktur jika berada di bawah satu kategori (misal: Kesiswaan)
     const menus = [
         {
             nama_menu: "Data Profil & Biodata",
@@ -118,7 +116,6 @@ export default function Siswa() {
         },
     ];
 
-    // ... (Fungsi handleDelete, handleEdit, getSiswa, handleTambah tetap sama)
     const handleDelete = (id) => {
         showQuestion("Apakah anda yakin ingin menghapus data ini?", () => {
             axios
@@ -156,6 +153,7 @@ export default function Siswa() {
         setShow(true);
         setIsEdit(false);
     };
+
     const handleMappingKelas = () => {
         setShowMapping(true);
     };
@@ -178,6 +176,7 @@ export default function Siswa() {
             console.error("Gagal mengambil data tahun ajaran:", error);
         }
     };
+
     const getDataAlumni = async (e) => {
         try {
             const res = await axios.get(
@@ -185,12 +184,12 @@ export default function Siswa() {
                     tahun_ajaran: e,
                 }),
             );
-            const data = res.data.data;
             setResultSiswaAlumni(res.data.data || []);
         } catch (error) {
             console.error("Gagal mengambil data alumni:", error);
         }
     };
+
     const handleKelasChange = async (e) => {
         setKelasAsalId(e);
         const res = await axios.get(
@@ -223,12 +222,26 @@ export default function Siswa() {
             header: "Nama",
             accessor: "nama_siswa",
         },
-
         {
             header: "Tahun Ajaran",
             accessor: "tahun_ajaran",
         },
     ];
+
+    // Format Opsi untuk React Select pada Filter Alumni
+    const alumniOptions = [
+        { value: "all", label: "Semua Tahun Ajaran" },
+        ...(dataTahunAjaran || []).map((ta) => ({
+            value: ta.id || ta.value,
+            label: ta.tahun_ajaran || ta.label,
+        })),
+    ];
+
+    const selectedAlumniOption =
+        alumniOptions.find(
+            (opt) => String(opt.value) === String(taAlumniAsal),
+        ) || null;
+
     return (
         <AuthenticatedLayout header={"Daftar Siswa"}>
             <div className="flex flex-col md:flex-row bg-gray-50 items-start gap-4 p-4 md:p-0">
@@ -238,18 +251,16 @@ export default function Siswa() {
                 <div className="flex-1 min-w-0 md:p-6 w-full mt-4 md:mt-0">
                     {/* TAMPILAN 1: Jika menu yang dipilih adalah 'master_siswa' */}
                     {menu === "master_siswa" && (
-                        <>
-                            <MasterSiswa
-                                dataSiswa={dataSiswa}
-                                columns={columns}
-                                loading={loading}
-                                show={show}
-                                setShow={setShow}
-                                isEdit={isEdit}
-                                selectedSiswa={selectedSiswa}
-                                handleTambah={handleTambah}
-                            />
-                        </>
+                        <MasterSiswa
+                            dataSiswa={dataSiswa}
+                            columns={columns}
+                            loading={loading}
+                            show={show}
+                            setShow={setShow}
+                            isEdit={isEdit}
+                            selectedSiswa={selectedSiswa}
+                            handleTambah={handleTambah}
+                        />
                     )}
 
                     {menu === "siswa_aktif" && (
@@ -268,6 +279,7 @@ export default function Siswa() {
                         />
                     )}
                     {menu === "siswa_alumni" && (
+<<<<<<< HEAD
                         <>
                             <div className="bg-white shadow sm:rounded-lg p-6">
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -301,16 +313,90 @@ export default function Siswa() {
                                             ))}
                                         </select>
                                     </div>
+=======
+                        <div className="bg-white shadow sm:rounded-lg p-6">
+                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                ARSIP & KELULUSAN ALUMNI
+                            </h3>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 w-full mb-6">
+                                {/* Filter Tahun Ajaran menggunakan React Select */}
+                                <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[280px]">
+                                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                        Tahun Ajaran
+                                    </label>
+                                    <Select
+                                        value={selectedAlumniOption}
+                                        onChange={(option) => {
+                                            const value = option
+                                                ? option.value
+                                                : "all";
+                                            setTaAlumniAsal(value);
+                                            getDataAlumni(value);
+                                        }}
+                                        options={alumniOptions}
+                                        placeholder="-- Pilih Tahun Ajaran --"
+                                        isSearchable={true}
+                                        menuPortalTarget={document.body}
+                                        className="w-full text-sm"
+                                        classNamePrefix="react-select"
+                                        styles={{
+                                            control: (base, state) => ({
+                                                ...base,
+                                                backgroundColor: "#FFFFFF",
+                                                borderColor: state.isFocused
+                                                    ? "#10B981"
+                                                    : "#E5E7EB",
+                                                borderRadius: "0.5rem",
+                                                padding: "0.1rem 0.25rem",
+                                                boxShadow: state.isFocused
+                                                    ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                                                    : "none",
+                                                cursor: "pointer",
+                                                "&:hover": {
+                                                    borderColor: "#10B981",
+                                                },
+                                            }),
+                                            placeholder: (base) => ({
+                                                ...base,
+                                                color: "#9CA3AF",
+                                                fontWeight: "normal",
+                                            }),
+                                            singleValue: (base) => ({
+                                                ...base,
+                                                color: "#1F2937",
+                                                fontWeight: "600",
+                                            }),
+                                            option: (base, state) => ({
+                                                ...base,
+                                                backgroundColor:
+                                                    state.isSelected
+                                                        ? "#10B981"
+                                                        : state.isFocused
+                                                          ? "#ECFDF5"
+                                                          : "white",
+                                                color: state.isSelected
+                                                    ? "white"
+                                                    : "#1F2937",
+                                                fontWeight: "500",
+                                                cursor: "pointer",
+                                            }),
+                                            menuPortal: (base) => ({
+                                                ...base,
+                                                zIndex: 9999,
+                                            }),
+                                        }}
+                                    />
+>>>>>>> main
                                 </div>
-                                <DataTable
-                                    columns={columnsSiswaAlumni}
-                                    data={ResultSiswaAlumni}
-                                    loading={loading}
-                                    header={"Data Siswa Alumni"}
-                                    title="Siswa"
-                                />
                             </div>
-                        </>
+                            <DataTable
+                                columns={columnsSiswaAlumni}
+                                data={ResultSiswaAlumni}
+                                loading={loading}
+                                header={"Data Siswa Alumni"}
+                                title="Siswa"
+                            />
+                        </div>
                     )}
                 </div>
             </div>

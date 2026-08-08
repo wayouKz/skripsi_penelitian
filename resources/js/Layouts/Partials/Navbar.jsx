@@ -1,13 +1,33 @@
-import { Menu, Bell } from "lucide-react";
+import { Menu, Bell, Code2 } from "lucide-react";
 import SearchBar from "./SearchBar";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 
 export default function Navbar({ user, onToggle, startTour }) {
     const [open, setOpen] = useState(false);
+    const [devMode, setDevMode] = useState(false);
     const ref = useRef();
 
-    // klik di luar → close
+    // Load status developer mode dari localStorage saat komponen dimount (TANPA router.reload)
+    useEffect(() => {
+        const storedDevMode = localStorage.getItem("developer_mode") === "true";
+        setDevMode(storedDevMode);
+    }, []);
+
+    // Handler untuk toggle developer mode, simpan ke localStorage, dan reload/trigger event
+    const toggleDevMode = () => {
+        const nextState = !devMode;
+        setDevMode(nextState);
+        localStorage.setItem("developer_mode", nextState);
+
+        // Dispatch event agar HostingerDashboard langsung merespons perubahan tanpa perlu reload penuh (opsional)
+        window.dispatchEvent(new Event("devModeChanged"));
+
+        // Jika Anda membutuhkan reload halaman/inertia untuk sinkronisasi backend:
+        router.reload();
+    };
+
+    // klik di luar → close dropdown
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (ref.current && !ref.current.contains(e.target)) {
@@ -21,7 +41,6 @@ export default function Navbar({ user, onToggle, startTour }) {
     }, []);
 
     return (
-        /* PERBAIKAN: Menambahkan w-full, sticky top-0, dan z-30 untuk memastikan navbar mengunci posisi atas dengan presisi */
         <header className="bg-white border-b border-gray-200 px-6 py-3 sticky top-0 w-full z-30 flex-shrink-0">
             <div className="flex items-center justify-between">
                 {/* LEFT */}
@@ -41,7 +60,7 @@ export default function Navbar({ user, onToggle, startTour }) {
                 </div>
 
                 {/* RIGHT */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 md:gap-4">
                     {/* Panduan Pemakaian */}
                     <button
                         type="button"
@@ -57,8 +76,6 @@ export default function Navbar({ user, onToggle, startTour }) {
                     {/* Notification */}
                     <div className="relative cursor-pointer p-1 hover:bg-gray-50 rounded-full transition-colors hidden">
                         <Bell className="text-gray-600" size={20} />
-
-                        {/* Badge */}
                         <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 font-semibold rounded-full min-w-[18px] text-center">
                             3
                         </span>
@@ -115,6 +132,29 @@ export default function Navbar({ user, onToggle, startTour }) {
                                             <i className="fa fa-sign-out"></i>
                                             Log out
                                         </Link>
+                                    </div>
+                                    <div className="py-1 border-t border-gray-100">
+                                        <button
+                                            type="button"
+                                            onClick={toggleDevMode}
+                                            title={
+                                                devMode
+                                                    ? "Developer Mode Aktif"
+                                                    : "Developer Mode Nonaktif"
+                                            }
+                                            className={`w-full flex items-center gap-2 px-4 py-2.5 text-xs font-bold transition-all ${
+                                                devMode
+                                                    ? "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                                                    : "bg-gray-50 text-gray-600 hover:bg-gray-100"
+                                            }`}
+                                        >
+                                            <Code2 size={16} />
+                                            <span>
+                                                {devMode
+                                                    ? "Dev Mode: ON"
+                                                    : "Dev Mode"}
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             )}

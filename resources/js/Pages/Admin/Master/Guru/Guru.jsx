@@ -16,6 +16,10 @@ import MappingGuruMapel from "./MappingGuruMapel";
 import Modal from "@/Components/Modal";
 import DangerButton from "@/Components/DangerButton";
 import InputLabel from "@/Components/InputLabel";
+<<<<<<< HEAD
+=======
+import ModalPdf from "@/Components/ModalPdf";
+>>>>>>> main
 
 export default function Guru() {
     const { showAlert, showQuestion } = useAlert();
@@ -316,6 +320,38 @@ export default function Guru() {
         ],
         [],
     );
+<<<<<<< HEAD
+=======
+
+    const [title, setTitle] = useState("");
+    const [pdfUrl, setPdfUrl] = useState("");
+    const openModalPdf = (type, nip, nama_guru) => {
+        if (selectedTahunAjaran === null) {
+            showAlert("Pilih tahun ajaran terlebih dahulu", "warning");
+            return;
+        }
+        if (type === "guru_mapel") {
+            // 2. Set nilai menggunakan fungsi dari useState
+            setTitle("Daftar Guru Mata Pelajaran");
+            setPdfUrl(
+                route("pdf.pdfGuruMapel", {
+                    tahun_ajaran: selectedTahunAjaran,
+                }),
+            );
+            setOpenPdf(true);
+        } else if (type === "guru_mapel_per_guru") {
+            setTitle("Daftar Mata Pelajaran " + nama_guru);
+            setPdfUrl(
+                route("pdf.pdfGuruMapel", {
+                    tahun_ajaran: selectedTahunAjaran,
+                    nip: nip,
+                }),
+            );
+            setOpenPdf(true);
+            setModal({ show: false });
+        }
+    };
+>>>>>>> main
 
     return (
         <AuthenticatedLayout header={"Kelola Guru"}>
@@ -368,6 +404,10 @@ export default function Guru() {
                     {activeMenu === "guru_mapel" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
                             <div className="flex justify-between items-end mb-4">
+<<<<<<< HEAD
+=======
+                                {/* BAGIAN KIRI: Select Tahun Ajaran */}
+>>>>>>> main
                                 <div className="w-1/2 sm:w-1/3">
                                     <InputLabel value="Pilih Tahun Ajaran" />
                                     <Select
@@ -415,12 +455,40 @@ export default function Guru() {
                                         )}
                                     />
                                 </div>
+<<<<<<< HEAD
                                 <PrimaryButton
                                     onClick={() => openModal("map_guru_mapel")}
                                     className="h-10"
                                 >
                                     Kelola Guru Mata Pelajaran
                                 </PrimaryButton>
+=======
+
+                                {/* BAGIAN KANAN: Kumpulan Tombol */}
+                                <div className="flex items-center gap-2">
+                                    {/* Tombol Buka PDF */}
+                                    <PrimaryButton
+                                        onClick={() =>
+                                            openModalPdf("guru_mapel")
+                                        } // Sesuaikan fungsi/route onClick-nya
+                                        className="h-10 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-800" // Warna merah khas PDF (Opsional, bisa dihapus jika ingin warna default)
+                                    >
+                                        <i className="fa fa-file-pdf mr-2"></i>{" "}
+                                        {/* Pastikan FontAwesome diload, atau hapus baris ini */}
+                                    </PrimaryButton>
+
+                                    {/* Tombol Kelola Guru */}
+                                    <PrimaryButton
+                                        onClick={() =>
+                                            openModal("map_guru_mapel")
+                                        }
+                                        className="h-10"
+                                    >
+                                        <i className="fa fa-users-cog mr-2"></i>
+                                        Kelola Guru Mata Pelajaran
+                                    </PrimaryButton>
+                                </div>
+>>>>>>> main
                             </div>
                             <DataTable
                                 columns={columnsMapel}
@@ -485,6 +553,10 @@ export default function Guru() {
                                     >
                                         {/* Nama Guru Header */}
                                         <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+<<<<<<< HEAD
+=======
+                                            {/* BAGIAN KIRI: Info Guru */}
+>>>>>>> main
                                             <div>
                                                 <h3 className="font-bold text-gray-900 text-base">
                                                     {g.label}
@@ -494,6 +566,7 @@ export default function Guru() {
                                                     {g.nip || "Tidak tersedia"}
                                                 </p>
                                             </div>
+<<<<<<< HEAD
                                             {/* Badge Total Jam */}
                                             <div className="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                                                 <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
@@ -502,6 +575,37 @@ export default function Guru() {
                                                 <span className="text-lg font-black text-indigo-600">
                                                     {totalJam}
                                                 </span>
+=======
+
+                                            {/* BAGIAN KANAN: Tombol PDF & Badge Total Jam */}
+                                            <div className="flex items-center gap-3">
+                                                {/* Button Open PDF */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openModalPdf(
+                                                            "guru_mapel_per_guru",
+                                                            g.nip,
+                                                            g.label,
+                                                        )
+                                                    } // Sesuaikan nama route dan parameter id-nya
+                                                    className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                                                    title="Cetak PDF Jadwal Guru"
+                                                >
+                                                    <i className="fa fa-file-pdf text-sm"></i>
+                                                    <span> PDF</span>
+                                                </button>
+
+                                                {/* Badge Total Jam */}
+                                                <div className="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
+                                                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+                                                        Total Jam
+                                                    </p>
+                                                    <span className="text-lg font-black text-indigo-600">
+                                                        {totalJam}
+                                                    </span>
+                                                </div>
+>>>>>>> main
                                             </div>
                                         </div>
 
@@ -568,6 +672,15 @@ export default function Guru() {
                 setOpen={closeModal}
                 getGuruMapel={() => loadGuruMapel(selectedTahunAjaran)}
             />
+<<<<<<< HEAD
+=======
+            <ModalPdf
+                isOpen={openPdf}
+                onClose={() => setOpenPdf(false)}
+                pdfUrl={pdfUrl}
+                title={title}
+            />
+>>>>>>> main
         </AuthenticatedLayout>
     );
 }

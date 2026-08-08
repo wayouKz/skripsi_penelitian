@@ -249,7 +249,11 @@ $data = $this->builder($tableName)
     ->leftJoin('m_siswas', 't_list_siswas.nisn', '=', 'm_siswas.nisn')
     ->leftJoin('m_gurus', 'm_kelas.id_wali_kelas', '=', 'm_gurus.id')
     ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
+<<<<<<< HEAD
     ->where('m_kelas.tahun_ajaran_id', $tahunAjaran)
+=======
+    // ->where('m_kelas.tahun_ajaran_id', $tahunAjaran)
+>>>>>>> main
     ->get()
     ->groupBy('id')
     ->map(function ($items) {
@@ -596,7 +600,11 @@ public function getSiswaInKelas(Request $request){
         ->where('jam_selesai', '>=', $jamSekarang)
         ->exists();
          // keluarkan ! jika ingin development
+<<<<<<< HEAD
         if (!$isJadwalAktif) {
+=======
+        if ($isJadwalAktif) {
+>>>>>>> main
             return response()->json([
                 "success" => false,
                 "msg"     => "Tidak ada jadwal pelajaran yang aktif untuk kelas ini pada hari dan jam sekarang."

@@ -1,36 +1,36 @@
 export default function Menu({ menu, setMenu, menus }) {
     return (
-        // 1. Ubah w-56 menjadi w-full, lalu gunakan md:w-56 untuk layar besar
-        <div className="w-full md:w-56 shrink-0 bg-white border-gray-200 rounded-md border  overflow-hidden md:mt-6">
-            {/* Bagian Header Menu (Disembunyikan di HP agar lebih rapi seperti Tab, dimunculkan di md) */}
-            <div className="hidden md:block bg-gradient-to-r from-green-500 to-green-600 px-5 py-4">
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                    Menu
+        <div className="w-full md:w-64 shrink-0 bg-white border border-gray-200/80 rounded-2xl shadow-xs overflow-hidden">
+            {/* Header Menu (Desktop Only) - Dibuat lebih clean & modern */}
+            <div className="hidden md:block px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    Navigasi Menu
                 </h2>
             </div>
 
             {/* Bagian Daftar Menu */}
-            {/* 2. Tambahkan overflow-x-auto agar bisa digeser horizontal di HP jika menu banyak */}
-            <div className="p- md:p-3 overflow-x-auto">
-                {/* 3. Gunakan flex-row (menyamping) di HP, dan flex-col (menurun) di md */}
-                <ul className="flex flex-row md:flex-col gap-2 md:gap-1">
+            <div className="p-2 md:p-3 overflow-x-auto scrollbar-none">
+                <ul className="flex flex-row md:flex-col gap-2 md:gap-1.5">
                     {menus.map((item, index) => {
                         const isActive = menu === item.value;
                         return (
-                            // 4. Tambahkan shrink-0 agar tombol tidak gepeng saat digeser di HP
                             <li key={index} className="shrink-0 md:shrink">
                                 <button
                                     onClick={() => setMenu(item.value)}
-                                    // 5. Tambahkan text-center (HP) / md:text-left, dan whitespace-nowrap agar teks tidak turun baris
-                                    className={`w-full text-center md:text-left block px-4 py-4  border rounded-lg transition-all duration-200 ease-in-out whitespace-nowrap ${
+                                    className={`w-full text-center md:text-left flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ease-in-out whitespace-nowrap ${
                                         isActive
-                                            ? "bg-green-50 text-green-700 border-green-200 font-semibold shadow-sm ring-1 ring-green-100" // Gaya saat aktif
-                                            : " border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-green-600 " // Gaya saat tidak aktif
+                                            ? "bg-green-50 text-green-700 font-semibold shadow-xs ring-1 ring-green-500/20"
+                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                     }`}
                                 >
-                                    <span className="text-sm block">
+                                    <span className="text-sm">
                                         {item.nama_menu}
                                     </span>
+
+                                    {/* Indikator titik kecil di desktop saat menu aktif */}
+                                    {isActive && (
+                                        <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-green-600 shadow-xs"></span>
+                                    )}
                                 </button>
                             </li>
                         );

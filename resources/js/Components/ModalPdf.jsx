@@ -1,6 +1,21 @@
+<<<<<<< HEAD
 import Modal from "./Modal";
 
 export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
+=======
+import { useState, useEffect } from "react";
+import Modal from "./Modal";
+
+export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsLoading(true);
+        }
+    }, [isOpen, pdfUrl]);
+
+>>>>>>> main
     return (
         <Modal show={isOpen} onClose={onClose} maxWidth="2xl">
             <div className="flex flex-col w-full h-[85vh] p-4 bg-white rounded-lg">
@@ -14,7 +29,10 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                     </h4>
 
                     <div className="flex items-center gap-3 flex-shrink-0">
+<<<<<<< HEAD
                         {/* Tombol Buka di Tab Baru */}
+=======
+>>>>>>> main
                         {pdfUrl && (
                             <a
                                 href={pdfUrl}
@@ -39,6 +57,7 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                 </div>
 
                 {/* Body / PDF Viewer Container */}
+<<<<<<< HEAD
                 <div className="flex-1 w-full h-full mt-4 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                     {pdfUrl ? (
                         <iframe
@@ -46,6 +65,31 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                             title={title || "PDF Viewer"}
                             className="w-full h-full border-0"
                         ></iframe>
+=======
+                <div className="flex-1 w-full h-full mt-4 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 relative">
+                    {pdfUrl ? (
+                        <>
+                            {/* Indikator Loading */}
+                            {isLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 backdrop-blur-xs">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <p className="text-sm text-gray-600 font-medium">
+                                            Memuat PDF...
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Iframe PDF */}
+                            <iframe
+                                src={`${pdfUrl}#view=FitH`}
+                                title={title || "PDF Viewer"}
+                                className="w-full h-full border-0"
+                                onLoad={() => setIsLoading(false)}
+                            ></iframe>
+                        </>
+>>>>>>> main
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-500">
                             <p>File PDF tidak tersedia.</p>

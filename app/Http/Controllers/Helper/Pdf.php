@@ -45,6 +45,144 @@ class Pdf extends Controller
         $mpdf->Output("Jadwal-{$tahunAjaran->tahun_ajaran}-{$tahunAjaran->semester}.pdf", 'I');
     }
 
+<<<<<<< HEAD
+=======
+    public function guruMapel(Request $request){
+        $tahun_ajaran_id = $request->input('tahun_ajaran');
+        $nip = $request->input('nip');
+        $instansi = $this->infoInstansi();
+
+
+        $DaftarGuruMapel = DB::table('t_list_gurus')
+        ->select('m_gurus.nama_guru as nama',
+        'm_mapels.nama_mapel as mapel',
+        'm_kelas.nama_kelas as kelas',
+        't_list_guru_mapels.beban_jam as beban_jam',
+        't_jadwals.hari',
+        't_jadwals.jam_mulai',
+        't_jadwals.jam_selesai'
+        )
+        ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+        ->leftJoin('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
+        ->join('t_jadwals', 't_list_guru_mapels.id', '=', 't_jadwals.t_list_guru_mapel_id')
+        ->join('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+        ->join('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
+        ->where('t_list_gurus.tahun_ajaran_id', $tahun_ajaran_id)
+        ->when($nip, function ($query) use ($nip) {
+            return $query->where('t_list_gurus.nip', $nip);
+        })
+        ->get();
+
+        $namaTahunAjaran = DB::table('m_tahun_ajarans')->where('id', $tahun_ajaran_id)->first();
+        $title = "Daftar Guru Mata Pelajaran" . ' - ' . $namaTahunAjaran->tahun_ajaran . ' - ' . strtoupper($namaTahunAjaran->semester);
+
+        $view = view('pdf.guru_mapel.guru_mapel', compact('tahun_ajaran_id', 'instansi', 'DaftarGuruMapel', 'namaTahunAjaran','title'))->render();
+
+        // return response()->json($DaftarGuruMapel);
+        ini_set('pcre.backtrack_limit', '5000000');
+        ini_set('pcre.recursion_limit', '5000000');
+        $mpdf = new \Mpdf\Mpdf([
+        'mode' => 'utf-8',
+        'format' => 'A4',
+        'orientation' => 'P'
+        ]);
+
+        $mpdf->SetHTMLFooter($this->footerPrintUser());
+        $mpdf->WriteHTML($view);
+        $mpdf->Output($title, 'I');
+    }
+
+    public function absensiPdf(Request $request){
+        $kelas_id = $request->input('kelas_id');
+        $tahunAjaran_id = $request->input('tahun_ajaran_id');
+        $namaTahunAjaran = DB::table('m_tahun_ajarans')->where('id', $request->tahun_ajaran_id)->first();
+  $daftarAbsenSiswa = DB::table('t_list_siswas')
+    ->where('t_list_siswas.kelas_id', $kelas_id)
+    ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran_id)
+    ->leftJoin('t_absen_siswas', 't_list_siswas.nisn', '=', 't_absen_siswas.nisn')
+    ->leftJoin('t_jadwals', function ($join) use ($tahunAjaran_id) {
+        $join->on('t_absen_siswas.kode_jadwal', '=', 't_jadwals.kode_jadwal')
+             ->where('t_jadwals.tahun_ajaran_id', '=', $tahunAjaran_id);
+    })
+    ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
+    ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+    // Sesuaikan 't_list_gurus' dan kolom 'nama_guru' dengan tabel database Anda
+    ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+    ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+    ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id')
+    ->leftJoin('m_tahun_ajarans', 't_list_siswas.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
+    ->where('t_list_guru_mapels.nip', Auth::user()->nip)
+    ->select(
+        't_list_siswas.nisn',
+        't_list_siswas.nama_siswa',
+        't_absen_siswas.pertemuan',
+        't_absen_siswas.tanggal_absen',
+        't_absen_siswas.status',
+        't_absen_siswas.waktu as waktu_absen',
+        't_jadwals.kode_jadwal',
+        'm_mapels.nama_mapel',
+        'm_gurus.nama_guru', // Mengambil nama guru pengampu
+        'm_kelas.nama_kelas',
+        'm_tahun_ajarans.tahun_ajaran',
+        'm_tahun_ajarans.semester'
+    )
+    ->get()
+    ->groupBy('nama_mapel')
+    ->map(function ($siswasPerMapel) {
+        // Ambil nama guru dari baris pertama mapel tersebut
+        $namaGuru = $siswasPerMapel->first()->nama_guru ?? '-';
+        $kelas = $siswasPerMapel->first()->nama_kelas ?? '-';
+        $tahunAjaran = $siswasPerMapel->first()->tahun_ajaran ?? '-';
+        $semester = $siswasPerMapel->first()->semester ?? '-';
+        $mappedSiswa = $siswasPerMapel->groupBy('nisn')->map(function ($rows) {
+            $first = $rows->first();
+
+            $absenList = $rows->filter(function ($row) {
+                return $row->kode_jadwal !== null;
+            })->unique('kode_jadwal')->map(function ($row) {
+                return [
+                    'pertemuan' => $row->pertemuan,
+                    'kode_jadwal' => $row->kode_jadwal,
+                    'tanggal_absen' => $row->tanggal_absen,
+                    'status' => $row->status,
+                    'waktu_absen' => $row->waktu_absen,
+                ];
+            })->values();
+
+            return [
+                'nisn' => $first->nisn,
+                'nama_siswa' => $first->nama_siswa,
+                'absen' => $absenList
+            ];
+        })->values();
+
+        // Mengembalikan struktur data dengan menyertakan nama_guru di setiap mapel
+        return [
+            'nama_guru' => $namaGuru,
+            'kelas' => $kelas,
+            'tahun_ajaran' => $tahunAjaran,
+            'semester' => $semester,
+            'siswa' => $mappedSiswa
+        ];
+    });
+
+    // dd($daftarAbsenSiswa);
+        $instansi = $this->infoInstansi();
+        $title = "Absensi" . ' - ' . $namaTahunAjaran->tahun_ajaran . ' - ' . strtoupper($namaTahunAjaran->semester);
+
+        $view = view('pdf.absensi.absensi_pdf', compact('kelas_id', 'instansi', 'title', 'namaTahunAjaran', 'daftarAbsenSiswa'))->render();
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'orientation' => 'L'
+        ]);
+
+        $mpdf->SetHTMLFooter($this->footerPrintUser());
+        $mpdf->WriteHTML($view);
+        $mpdf->Output('Absensi.pdf', 'I');
+    }
+>>>>>>> main
     private function footerPrintUser(){
         $user = Auth::user();
         $namaUser = $user ? $user->name : 'Unknown User';

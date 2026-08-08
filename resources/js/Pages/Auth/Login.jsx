@@ -52,7 +52,11 @@ export default function Login({ status, canResetPassword, config }) {
                 }}
             >
                 {/* OVERLAY: Warna biru semi transparan menutupi seluruh gambar */}
+<<<<<<< HEAD
                 <div className="absolute inset-0 bg-green-700/70 mix-blend-multiply"></div>
+=======
+                <div className="absolute inset-0 bg-teal-500/70 mix-blend-multiply"></div>
+>>>>>>> main
 
                 {/* AREA TENGAH: Teks Kiri & Form Kanan */}
                 <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center container mx-auto px-6 lg:px-16 gap-10 lg:gap-24 py-12">
@@ -160,7 +164,10 @@ export default function Login({ status, canResetPassword, config }) {
                             </div>
 
                             {/* Input Captcha Inline dengan Gambar */}
+<<<<<<< HEAD
                             {/* Input Captcha Inline dengan Gambar */}
+=======
+>>>>>>> main
                             <div>
                                 {/* Set tinggi container menjadi 44px */}
                                 <div className="flex gap-3 h-[44px]">
@@ -177,7 +184,11 @@ export default function Login({ status, canResetPassword, config }) {
 
                                     {/* Gambar Captcha dengan ukuran fix 118x44 px */}
                                     <div
+<<<<<<< HEAD
                                         className="w-[200px] h-[44px] flex-shrink-0 bg-white rounded-xl overflow-hidden cursor-pointer relative border border-gray-200 group"
+=======
+                                        className="w-[198px] h-[45px] flex-shrink-0 bg-white rounded-xl overflow-hidden cursor-pointer relative border border-gray-200 group"
+>>>>>>> main
                                         onClick={refreshCaptcha}
                                         title="Klik untuk menyegarkan kode"
                                     >

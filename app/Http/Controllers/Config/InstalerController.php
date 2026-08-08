@@ -147,10 +147,17 @@ public function setUpMigrate()
         $cekConfigurasi = ModelsConfig::first();
 
         $logo = $request->file('logo_instansi');
+<<<<<<< HEAD
         $logo_name = "logo_instansi." .  'png';
 
         $sampulInstansi = $request->file('sampul_instansi');
         $sampulName = "sampul_instansi." .  'png';
+=======
+        $logo_name = "logo_instansi." . $logo->getClientOriginalExtension();
+
+        $sampulInstansi = $request->file('sampul_instansi');
+        $sampulName = "sampul_instansi." . $sampulInstansi->getClientOriginalExtension();
+>>>>>>> main
         // 2. Hapus logo lama dari storage jika ada
         if ($cekConfigurasi && $cekConfigurasi->logo_instansi) {
             $old_logo_path = 'logo/' . $cekConfigurasi->logo_instansi;

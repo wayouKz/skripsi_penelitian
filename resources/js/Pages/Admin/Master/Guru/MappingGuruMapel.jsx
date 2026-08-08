@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import FormModal from "@/Components/FormModal";
 import {
     DndContext,
@@ -16,10 +15,15 @@ import "driver.js/dist/driver.css";
 import DroppableMapelRow from "./partials/DroppableMapelRow";
 import DraggableGuru from "./partials/DraggableGuru";
 import DragGhost from "./partials/DragGhost";
+<<<<<<< HEAD
 
 // ─── Avatar Initials ──────────────────────────────────────────────────────────
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+=======
+import Select from "react-select";
+import { useEffect, useState, useCallback } from "react";
+>>>>>>> main
 export default function MappingGuruMapel({
     open,
     setOpen,
@@ -34,6 +38,61 @@ export default function MappingGuruMapel({
     const [search, setSearch] = useState("");
     const [tahunAjaranList, setTahunAjaranList] = useState([]);
     const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
+
+    // --- STYLING CUSTOM UNTUK REACT-SELECT ---
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: !selectedTahunAjaran ? "#FEF3C7" : "#F9FAFB",
+            borderColor: state.isFocused
+                ? "#10B981"
+                : !selectedTahunAjaran
+                  ? "#FCD34D"
+                  : "#D1D5DB",
+            borderRadius: "0.5rem",
+            minHeight: "36px",
+            padding: "0 2px",
+            boxShadow: state.isFocused
+                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: "pointer",
+            "&:hover": {
+                borderColor: "#10B981",
+            },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0 6px",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "0.75rem",
+            fontWeight: "500",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#1F2937",
+            fontSize: "0.75rem",
+            fontWeight: "600",
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "0.75rem",
+            fontWeight: "500",
+            cursor: "pointer",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+    };
 
     useEffect(() => {
         if (open) {
@@ -162,24 +221,26 @@ export default function MappingGuruMapel({
         );
     };
 
-    const handleGuruDataChange = (mapelId, uniqueId, field, value) => {
-        setMapelList((prev) =>
-            prev.map((mapel) =>
-                mapel.id !== mapelId
-                    ? mapel
-                    : {
-                          ...mapel,
-                          guru: mapel.guru.map((g) =>
-                              g.unique_id === uniqueId
-                                  ? { ...g, [field]: value }
-                                  : g,
-                          ),
-                      },
-            ),
-        );
-    };
-
-    const removeGuru = (mapelId, uniqueId) => {
+    const handleGuruDataChange = useCallback(
+        (mapelId, uniqueId, field, value) => {
+            setMapelList((prev) =>
+                prev.map((mapel) =>
+                    mapel.id !== mapelId
+                        ? mapel
+                        : {
+                              ...mapel,
+                              guru: mapel.guru.map((g) =>
+                                  g.unique_id === uniqueId
+                                      ? { ...g, [field]: value }
+                                      : g,
+                              ),
+                          },
+                ),
+            );
+        },
+        [],
+    );
+    const removeGuru = useCallback((mapelId, uniqueId) => {
         setMapelList((prev) =>
             prev.map((m) =>
                 m.id === mapelId
@@ -190,7 +251,7 @@ export default function MappingGuruMapel({
                     : m,
             ),
         );
-    };
+    }, []);
 
     const submit = (e) => {
         e.preventDefault();
@@ -244,6 +305,17 @@ export default function MappingGuruMapel({
         g.label.toLowerCase().includes(search.toLowerCase()),
     );
 
+    // Opsi untuk React Select Tahun Ajaran
+    const tahunAjaranOptions = (tahunAjaranList || []).map((ta) => ({
+        value: ta.value,
+        label: ta.label,
+    }));
+
+    const selectedTahunAjaranOption =
+        tahunAjaranOptions.find(
+            (opt) => String(opt.value) === String(selectedTahunAjaran),
+        ) || null;
+
     const startTour = () => {
         const driverObj = driver({
             showProgress: true,
@@ -287,27 +359,29 @@ export default function MappingGuruMapel({
         >
             <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-gray-500">
-                    Sistem pemetaan pengajar berbasis{" "}
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-gray-700 ">
                         Tarik dan Jatuh (Drag & Drop)
                     </span>
                     .
                 </p>
                 <div className="flex gap-2 items-center">
-                    <select
-                        className={`h-8 text-xs rounded border focus:ring-2 focus:outline-none transition px-2 py-0 ${!selectedTahunAjaran ? "bg-amber-50 border-amber-300 ring-1 ring-amber-200 text-amber-800" : "bg-gray-50 border-gray-300"}`}
-                        value={selectedTahunAjaran}
-                        onChange={(e) => {
-                            setSelectedTahunAjaran(e.target.value);
-                        }}
-                    >
-                        <option value="">-- Pilih Tahun Ajaran --</option>
-                        {tahunAjaranList.map((ta) => (
-                            <option key={ta.value} value={ta.value}>
-                                {ta.label}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="w-[200px]">
+                        <Select
+                            value={selectedTahunAjaranOption}
+                            onChange={(option) =>
+                                setSelectedTahunAjaran(
+                                    option ? option.value : "",
+                                )
+                            }
+                            options={tahunAjaranOptions}
+                            placeholder="-- Pilih Tahun Ajaran --"
+                            isSearchable={true}
+                            menuPortalTarget={document.body}
+                            className="text-xs"
+                            classNamePrefix="react-select"
+                            styles={customSelectStyles}
+                        />
+                    </div>
 
                     <button
                         type="button"

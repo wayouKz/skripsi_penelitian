@@ -84,6 +84,7 @@ class JadwalController extends Controller
         $hasil = $gaEngine->generate();
 
        if (!empty($hasil['jadwal'])) {
+<<<<<<< HEAD
     DB::beginTransaction();
     $insert = [];
 
@@ -122,6 +123,86 @@ class JadwalController extends Controller
 
         echo "data: " . json_encode(['type' => 'error', 'message' => $detailError]) . "\n\n";
         flush();
+=======
+        try {
+            // 1. WAJIB ADA: Mulai transaksi database
+            DB::beginTransaction();
+
+            // 2. Hapus jadwal lama berdasarkan tahun ajaran
+            DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
+
+            $insert = [];
+
+            // Buat satu kode batch yang sama untuk sesi generate ini (bukan random 100 karakter per baris)
+
+            $now = now();
+            $kodeJadwalPerBlock = [];
+
+            foreach ($hasil['jadwal'] as $jadwal) {
+                $blockKey = $jadwal['t_list_guru_mapel_id'] . '-' . $jadwal['kelas_id'] . '-' . $jadwal['mapel_id'];
+
+                // Jika kode jadwal untuk kelas/blok ini belum dibuat, buat baru
+                if (!isset($kodeJadwalPerBlock[$blockKey])) {
+                    $kodeJadwalPerBlock[$blockKey] = 'JDWL-' . strtoupper(Str::random(10));
+                }
+
+                $insert[] = [
+                    'kode_jadwal'          => $kodeJadwalPerBlock[$blockKey], // Sama untuk blok/kelas yang sama
+                    'tahun_ajaran_id'      => $params['tahun_ajaran_id'],
+                    'hari'                 => $jadwal['hari'],
+                    'jam_mulai'            => $jadwal['jam_mulai'],
+                    'jam_selesai'          => $jadwal['jam_selesai'],
+                    'kelas_id'             => $jadwal['kelas_id'],
+                    'mapel_id'             => $jadwal['mapel_id'],
+                    't_list_guru_mapel_id' => $jadwal['t_list_guru_mapel_id'],
+                    'created_at'           => $now,
+                    'updated_at'           => $now,
+                ];
+
+                echo "data: " . json_encode([
+                    'type' => 'progress',
+                    'message' => 'Menyimpan jadwal ke database...'
+                ]) . "\n\n";
+                flush();
+            }
+            // 3. Gunakan array_chunk (pecah per 500 baris) agar tidak jebol di MySQL
+            $chunks = array_chunk($insert, 500);
+            foreach ($chunks as $chunk) {
+                DB::table('t_jadwals')->insert($chunk);
+            }
+
+            // 4. Commit transaksi jika semua chunk berhasil
+            DB::commit();
+
+            echo "data: " . json_encode(['type' => 'done', 'message' => 'Berhasil!']) . "\n\n";
+            flush();
+
+        } catch (\Exception $e) {
+            // Rollback jika ada error
+            DB::rollBack();
+
+            $detailError = $e->getMessage() . ' di baris ' . $e->getLine();
+
+            echo "data: " . json_encode(['type' => 'error', 'message' => $detailError]) . "\n\n";
+            flush();
+        }
+}
+
+    // 6. Pastikan header anti-buffering ini tetap ada
+    }, 200, [
+        'Content-Type' => 'text/event-stream',
+        'Cache-Control' => 'no-cache, must-revalidate',
+        'Connection' => 'keep-alive',
+        'X-Accel-Buffering' => 'no',
+    ]);
+    }
+
+    public function pdf(Request $request){
+        return response()->view('pdf.jadwal.jadwal', [
+            'tahun_ajaran_id' => $request->input('tahun_ajaran_id'),
+            'kelas' => $request->input('kelas'),
+        ])->header('Content-Type', 'application/pdf');
+>>>>>>> main
     }
 }
 

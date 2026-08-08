@@ -10,7 +10,11 @@ $groupedByKelas = collect($jadwal)->groupBy('nama_kelas');
 <!-- Header Dokumen per Kelas -->
 <h2 style="text-align: center; margin-bottom: 5px; color: #222;">JADWAL PELAJARAN KELAS {{ $namaKelas }}</h2>
 <p style="text-align: center; margin-bottom: 20px; font-size: 12px; color: #666;">
+<<<<<<< HEAD
     Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }}
+=======
+    Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }} / {{ $tahunAjaran->semester ?? '-' }}
+>>>>>>> main
 </p>
 
 <!-- Tabel Jadwal -->
@@ -70,4 +74,8 @@ $groupedByKelas = collect($jadwal)->groupBy('nama_kelas');
 @endif
 @endforeach
 @include('pdf.format.sign_kepala_madrasah')
+<<<<<<< HEAD
 @endsection
+=======
+@endsection
+>>>>>>> main

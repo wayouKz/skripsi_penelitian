@@ -46,7 +46,11 @@ export default function DaftarJadwal({
     const titlePdf = `Jadwal Pelajaran - ${selectedNamaTahunAjaran}  ${selectedKelas && selectedKelas !== "" ? ` - Kelas ${selectedKelas}` : " - Semua Kelas"}`;
     return (
         <>
+<<<<<<< HEAD
             <div className="space-y-8">
+=======
+            <div className="h-[80vh] overflow-y-auto">
+>>>>>>> main
                 {/* BAGIAN FILTER KELAS */}
                 <div className="max-w-full pb-3">
                     <div className="flex justify-between items-center gap-2 cursor-pointer">

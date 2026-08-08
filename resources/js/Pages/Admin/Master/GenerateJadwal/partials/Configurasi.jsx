@@ -1,4 +1,8 @@
 import React, { useState } from "react";
+<<<<<<< HEAD
+=======
+import Select from "react-select";
+>>>>>>> main
 import {
     AlertCircle,
     CalendarDays,
@@ -272,6 +276,23 @@ export default function Configurasi({
         }
     };
     console.log(selectedNamaTahunAjaran);
+<<<<<<< HEAD
+=======
+
+    // Konversi tahunAjaranList untuk react-select
+    const filteredTahunAjaranOptions = tahunAjaranList
+        .filter((ta) => String(ta.value).toLowerCase() !== "all")
+        .map((ta) => ({
+            value: ta.value,
+            label: ta.label,
+        }));
+
+    const selectedTahunAjaranOption =
+        filteredTahunAjaranOptions.find(
+            (opt) => String(opt.value) === String(selectedTahunAjaran),
+        ) || null;
+
+>>>>>>> main
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header / Pemilihan Tahun Ajaran */}
@@ -293,6 +314,7 @@ export default function Configurasi({
                         </div>
                     </div>
                     <div className="w-full md:w-80">
+<<<<<<< HEAD
                         <select
                             value={selectedTahunAjaran || ""}
                             onChange={(e) => {
@@ -330,6 +352,80 @@ export default function Configurasi({
                                     </option>
                                 ))}
                         </select>
+=======
+                        <Select
+                            value={selectedTahunAjaranOption}
+                            onChange={(option) => {
+                                setSelectedTahunAjaran(
+                                    option ? option.value : "",
+                                );
+                                setSelectedNamaTahunAjaran(
+                                    option ? option.label : "",
+                                );
+                            }}
+                            options={filteredTahunAjaranOptions}
+                            placeholder="-- Klik Untuk Memilih Tahun Ajaran --"
+                            isSearchable={true}
+                            menuPortalTarget={document.body} // 🌟 Tambahkan ini agar dropdown keluar dari card overflow-hidden
+                            className="w-full text-sm font-bold"
+                            classNamePrefix="react-select"
+                            styles={{
+                                control: (base, state) => ({
+                                    ...base,
+                                    backgroundColor: !selectedTahunAjaran
+                                        ? "#FEF3C7"
+                                        : "#FFFFFF",
+                                    borderColor: !selectedTahunAjaran
+                                        ? state.isFocused
+                                            ? "#D97706"
+                                            : "#FCD34D"
+                                        : state.isFocused
+                                          ? "#16A34A"
+                                          : "#BBF7D0",
+                                    borderRadius: "0.75rem",
+                                    padding: "0.25rem 0.25rem",
+                                    boxShadow: state.isFocused
+                                        ? "0 0 0 4px rgba(34, 197, 94, 0.2)"
+                                        : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                    cursor: "pointer",
+                                    "&:hover": {
+                                        borderColor: !selectedTahunAjaran
+                                            ? "#D97706"
+                                            : "#16A34A",
+                                    },
+                                }),
+                                placeholder: (base) => ({
+                                    ...base,
+                                    color: "#6B7280",
+                                    fontWeight: "normal",
+                                }),
+                                singleValue: (base) => ({
+                                    ...base,
+                                    color: !selectedTahunAjaran
+                                        ? "#92400E"
+                                        : "#14532D",
+                                    fontWeight: "bold",
+                                }),
+                                option: (base, state) => ({
+                                    ...base,
+                                    backgroundColor: state.isSelected
+                                        ? "#16A34A"
+                                        : state.isFocused
+                                          ? "#F0FDF4"
+                                          : "white",
+                                    color: state.isSelected
+                                        ? "white"
+                                        : "#1F2937",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                }),
+                                menuPortal: (base) => ({
+                                    ...base,
+                                    zIndex: 9999, // 🌟 Pastikan z-index tinggi agar tampil di atas elemen lain (seperti modal/sidebar)
+                                }),
+                            }}
+                        />
+>>>>>>> main
                     </div>
                 </div>
             </div>
@@ -353,7 +449,11 @@ export default function Configurasi({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-6">
                     {/* Parameter Algoritma */}
+<<<<<<< HEAD
                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+=======
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow hidden">
+>>>>>>> main
                         <div className="flex items-center gap-2 mb-5">
                             <Sliders className="text-gray-400" size={18} />
                             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider">

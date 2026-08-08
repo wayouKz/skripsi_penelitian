@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\Master\SiswaController;
 use App\Http\Controllers\Akademik\AbsenController;
 use App\Http\Controllers\Akademik\PenilaianController;
 use App\Http\Controllers\Akademik\KelasDiAmpuController;
+use App\Http\Controllers\Helper\DevController;
 use App\Http\Controllers\Helper\GetDataController;
 use App\Http\Controllers\Helper\Pdf;
 use App\Http\Controllers\Master\JadwalController;
@@ -78,6 +79,11 @@ Route::middleware('auth')->group(function () {
 
     Route::controller(Pdf::class)->prefix('pdf')->name('pdf.')->group(function () {
         Route::get('/jadwal',  'jadwal')->name('jadwal');
+<<<<<<< HEAD
+=======
+        Route::get('/guru-mapel',  'guruMapel')->name('pdfGuruMapel');
+        Route::get('/absensi-pdf',  'absensiPdf')->name('absensi_pdf');
+>>>>>>> main
     });
 
 
@@ -202,6 +208,11 @@ Route::middleware('auth')->group(function () {
     });
 
 
+    Route::controller(DevController::class)->prefix('/developer', )->name('dev.')->group(function () {
+       Route::get('/cek-bentrok-jadwal',  'cekBentrokJadwal')->name('cek-bentrok-jadwal');
+       Route::get('/cek-target-jam-mengajar',  'cekTargetJamMengajar')->name('cek-target-jam-mengajar');
+       Route::get('/cek-beban-jam-mengajar-per-kelas',  'cekBebanJamMengajarPerKelas')->name('cek-beban-jam-mengajar-per-kelas');
+    });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

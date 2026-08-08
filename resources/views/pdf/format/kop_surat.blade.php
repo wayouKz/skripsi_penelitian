@@ -29,7 +29,11 @@
 
         <!-- 2. Kolom Teks Tengah (Lebar 70% - Presisi di Tengah Halaman) -->
         <td width="70%" style="text-align: center; vertical-align: middle;">
+<<<<<<< HEAD
             <h1>{{ $instansi->nama_instansi }}</h1>
+=======
+            <h1> {{ strtoupper($instansi->nama_instansi) }}</h1>
+>>>>>>> main
             <p>{{ $instansi->alamat_instansi }}</p>
             <p>Telepon: {{ $instansi->telepon_instansi }} | Website: <i>{{ $instansi->website_instansi }}</i></p>
         </td>
@@ -37,4 +41,8 @@
         <!-- 3. Kolom Penyeimbang Kanan (Lebar 15% Kosong agar Teks Tidak Tergeser) -->
         <td width="15%"></td>
     </tr>
+<<<<<<< HEAD
 </table>
+=======
+</table>
+>>>>>>> main

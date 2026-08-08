@@ -3,19 +3,16 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, usePage } from "@inertiajs/react";
 
-export default function KelasDiAmpu() {
+export default function KelasDiAmpu({
+    selectedTahunAjaran,
+    setSelectedTahunAjaran,
+}) {
     const [kelas, setKelas] = useState([]);
     const [filteredKelas, setFilteredKelas] = useState([]); // State untuk hasil pencarian
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const user = usePage().props.auth.user;
     // --- State ini bisa Anda gunakan nanti jika sudah ada data tahun ajaran dari backend ---
-    const [tahunAjaran, setTahunAjaran] = useState([]);
-    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState();
-    console.log(selectedTahunAjaran);
-    useEffect(() => {
-        fetchTahunAjaran();
-    }, []);
 
     useEffect(() => {
         if (selectedTahunAjaran) {
@@ -64,27 +61,6 @@ export default function KelasDiAmpu() {
         setSearchQuery(event.target.value);
     };
 
-    const fetchTahunAjaran = async () => {
-        try {
-            const response = await axios.get(route("getData.get-tahun-ajaran"));
-            if (response.data.success === true) {
-                setTahunAjaran(response.data.data);
-                const dataTahun = response.data.data;
-                const activeTahun = dataTahun.find(
-                    (t) => t.status === "active",
-                );
-                if (activeTahun) {
-                    // Pastikan yang diset adalah .value, bukan .status
-                    setSelectedTahunAjaran(activeTahun.value);
-                }
-            } else {
-                setTahunAjaran([]);
-            }
-        } catch (error) {
-            console.error("Gagal mengambil data tahun ajaran:", error);
-            setTahunAjaran([]);
-        }
-    };
     return (
         <div className="py-12 min-h-screen ">
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -99,29 +75,6 @@ export default function KelasDiAmpu() {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <div className="w-52">
-                            <select
-                                value={selectedTahunAjaran}
-                                onChange={(e) =>
-                                    setSelectedTahunAjaran(e.target.value)
-                                }
-                                className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5"
-                            >
-                                <option value="">[Pilih Tahun Ajaran]</option>
-                                {tahunAjaran?.map((tahunAjaran) => (
-                                    <option
-                                        key={tahunAjaran.value}
-                                        value={tahunAjaran.value}
-                                        selected={
-                                            tahunAjaran.status === "active"
-                                        }
-                                    >
-                                        {tahunAjaran.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
                         {/* Search Bar */}
                         <div className="w-full md:w-80 relative">
                             <div className="absolute inset-y-2 top-3 left-1 pl-3 flex items-center pointer-events-none">

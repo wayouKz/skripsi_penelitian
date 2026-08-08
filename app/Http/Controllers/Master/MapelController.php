@@ -20,14 +20,30 @@ class MapelController extends Controller
       $request->validate([
     'nama_mapel' => 'required|string',
 ]);
-$namaMapel = $request->nama_mapel;
+        $namaMapel = $request->nama_mapel;
+
+// 1. Hilangkan simbol kurung ()
+$namaMapel = str_replace(['(', ')'], '', $namaMapel);
+
+// 2. Hapus spasi ganda yang mungkin timbul akibat penghapusan simbol, lalu trim
+$namaMapel = trim(preg_replace('/\s+/', ' ', $namaMapel));
 
 $awalan = '';
 $pecahanKata = explode(' ', $namaMapel);
 
 if (count($pecahanKata) > 1) {
     foreach ($pecahanKata as $kata) {
-        $awalan .= strtoupper(substr($kata, 0, 1));
+        $kataKecil = strtolower($kata); // Ubah ke huruf kecil untuk pengecekan
+
+        // Pengecualian khusus untuk membedakan Indonesia dan Inggris
+        if ($kataKecil === 'indonesia') {
+            $awalan .= 'IND';
+        } elseif ($kataKecil === 'inggris') {
+            $awalan .= 'ING';
+        } else {
+            // Jika bukan kata pengecualian, tetap ambil 1 huruf pertama
+            $awalan .= strtoupper(substr($kata, 0, 1));
+        }
     }
 } else {
     $awalan = strtoupper(substr($namaMapel, 0, 3));

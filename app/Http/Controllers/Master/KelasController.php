@@ -31,6 +31,7 @@ class KelasController extends Controller
             'nama_kelas' => 'required',
             'id_wali_kelas' => 'required',
             'tingkat' => 'required',
+            // 'tahun_ajaran_id' => 'required'
         ]);
 
         $cekWaliKelas = MKelas::where('id_wali_kelas', $request->id_wali_kelas)->first();
@@ -42,7 +43,8 @@ class KelasController extends Controller
             'id_wali_kelas' => $request->id_wali_kelas,
             'tingkat' => $request->tingkat,
             'jurusan_id' => $request->jurusan_id,
-            'status' => 'active'
+            'status' => 'active',
+            // 'tahun_ajaran_id' => $request->tahun_ajaran_id
         ]);
 
         if($storeKelas){
@@ -57,6 +59,7 @@ class KelasController extends Controller
             'nama_kelas' => 'required',
             'id_wali_kelas' => 'required',
             'tingkat' => 'required',
+            // 'tahun_ajaran_id' => 'required'
         ]);
 
         $updateKelas = MKelas::where('id', $request->id)->update([
@@ -64,6 +67,7 @@ class KelasController extends Controller
             'id_wali_kelas' => $request->id_wali_kelas,
             'jurusan_id' => $request->jurusan_id,
             'tingkat' => $request->tingkat,
+            // 'tahun_ajaran_id' => $request->tahun_ajaran_id
         ]);
 
         if($updateKelas){
@@ -89,19 +93,26 @@ class KelasController extends Controller
         }
         return response()->json($json);
     }
-    public function getKelas(){
-        $kelas = MKelas::select('m_kelas.*', 'm_jurusans.nama_jurusan')->with('waliKelas')->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')->orderBy('tingkat', 'asc')->get();
+    public function getKelas(Request $request){
+        $kelas = MKelas::select('m_kelas.*', 'm_jurusans.nama_jurusan')
+        ->with('waliKelas')->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')->orderBy('tingkat', 'asc')
+;
 
+        // if($request->tahun_ajaran_id != null){
+        //     $kelas->where('tahun_ajaran_id', $request->tahun_ajaran_id);
+        // }
+        $data = $kelas->get();
+           $data = $data->sortBy('nama_kelas', SORT_NATURAL)->values();
         $json = [];
 
-        if(!empty($kelas) && count($kelas) > 0){
+        if(!empty($data) && count($data) > 0){
             $json = [
-                'data' => $kelas,
+                'data' => $data,
                 'success' => true
             ];
         }else{
             $json = [
-                'data' => $kelas,
+                'data' => $data,
                 'success' => false
             ];
         }

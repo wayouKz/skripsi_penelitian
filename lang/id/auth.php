@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 return [
-    'failed'   => 'Identitas tersebut tidak cocok dengan data kami.',
+    'failed'   => 'User Tidak Terdaftar Silahkan Hubungi Admin',
     'password' => 'Kata sandi salah.',
     'throttle' => 'Terlalu banyak upaya masuk. Silahkan coba lagi dalam :seconds detik.',
+    'captcha' => 'Captcha tidak valid.',
 ];

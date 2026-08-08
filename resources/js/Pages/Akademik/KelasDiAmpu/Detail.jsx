@@ -3,9 +3,19 @@ import { Link } from "@inertiajs/react";
 import { useState } from "react";
 import InformasiKelasDiAmpu from "./InformasiKelasDiAmpu";
 import JurnalMengajar from "./JurnalMengajar";
+import TabsMenus from "@/Components/TabMenus";
 
 export default function Detail({ dataKelas }) {
-    const [activeTab, setActiveTab] = useState("informasi");
+    const menus = [
+        {
+            nama_menu: "Informasi Siswa",
+            component: <InformasiKelasDiAmpu dataKelas={dataKelas} />,
+        },
+        {
+            nama_menu: "Jurnal Mengajar",
+            component: <JurnalMengajar dataKelas={dataKelas} />,
+        },
+    ];
     return (
         <AuthenticatedLayout header={`Kelas ` + dataKelas?.nama_kelas}>
             <div className=" min-h-screen bg-gray-50/50">
@@ -101,58 +111,7 @@ export default function Detail({ dataKelas }) {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden mb-6">
-                        {/* --- Bagian Header Tab --- */}
-                        <div className="flex border-b border-gray-200 bg-gray-50/50">
-                            <button
-                                onClick={() => setActiveTab("informasi")}
-                                className={`flex-1 py-4 px-6 text-sm font-medium transition-all duration-200 outline-none ${
-                                    activeTab === "informasi"
-                                        ? "bg-white border-b-2 border-emerald-600 text-emerald-700 shadow-sm"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                }`}
-                            >
-                                <i className="fa fa-list-ul mr-2"></i>Informasi
-                                Siswa
-                            </button>
-
-                            <button
-                                onClick={() => setActiveTab("kbm")}
-                                className={`flex-1 py-4 px-6 text-sm font-medium transition-all duration-200 outline-none ${
-                                    activeTab === "kbm"
-                                        ? "bg-white border-b-2 border-emerald-600 text-emerald-700 shadow-sm"
-                                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-                                }`}
-                            >
-                                <i className="fa fa-book-open-reader mr-2"></i>{" "}
-                                Jurnal Mengajar
-                            </button>
-                        </div>
-
-                        {/* --- Bagian Konten Tab --- */}
-                        <div className="p-6">
-                            {/* Konten untuk Tab Informasi (Menggunakan Grid bawaan Anda) */}
-                            {activeTab === "informasi" && (
-                                <InformasiKelasDiAmpu
-                                    dataKelas={dataKelas}
-                                    activeTab={activeTab}
-                                />
-                            )}
-
-                            {/* Konten untuk Tab absensi */}
-                            {activeTab === "kbm" && (
-                                <JurnalMengajar dataKelas={dataKelas} />
-                            )}
-                            {activeTab === "absensi" && (
-                                <div className="text-gray-500 text-center py-10 animate-in fade-in duration-300">
-                                    <p>
-                                        Konten halaman absensi akan ditampilkan
-                                        di sini.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    <TabsMenus menus={menus} />
                 </div>
             </div>
         </AuthenticatedLayout>

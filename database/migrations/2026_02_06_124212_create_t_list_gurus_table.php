@@ -14,9 +14,9 @@ return new class extends Migration
     Schema::create('t_list_gurus', function (Blueprint $table) {
         $table->id();
         $table->string('nip')->index();
-        $table->foreign('nip')->references('nip')->on('m_gurus');
+        $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade');
         $table->foreignId('kelas_id')->constrained('m_kelas');
-        $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans');
+        $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans')->onDelete('cascade');
         $table->timestamps();
     });
 }

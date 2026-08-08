@@ -16,9 +16,10 @@ return new class extends Migration
             $table->string('kode_absen')->unique();
             $table->string('kode_jadwal')->index();
             $table->string('nisn')->index();
-            $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals');
-            $table->foreign('nisn')->references('nisn')->on('m_siswas');
-            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans');
+            $table->integer('pertemuan')->nullable();
+            $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals')->onDelete('cascade');
+            $table->foreign('nisn')->references('nisn')->on('m_siswas')->onDelete('cascade');
+            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans')->onDelete('cascade');
             $table->enum('status', ['hadir', 'izin', 'sakit', 'alpha'])->nullable();
             $table->string('keterangan')->nullable();
             $table->string('foto')->nullable();

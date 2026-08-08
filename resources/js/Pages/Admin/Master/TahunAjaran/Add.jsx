@@ -12,8 +12,9 @@ export default function Add({
     TahunAjaran = null,
     isEdit = false,
     getTahunAjaran,
+    loading,
 }) {
-    const { data, post, reset, errors, setData } = useForm({
+    const { data, post, reset, errors, setData, processing } = useForm({
         tahun_ajaran: "",
         semester: "",
         status: "active",
@@ -95,6 +96,7 @@ export default function Add({
             onClose={() => setOpen(false)}
             setOpen={setOpen}
             onSubmit={submit}
+            loading={processing}
         >
             <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-1">

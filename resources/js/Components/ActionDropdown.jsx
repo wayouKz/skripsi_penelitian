@@ -8,47 +8,45 @@ export default function ActionDropdown({ actions = [] }) {
     const buttonRef = useRef(null);
     const menuRef = useRef(null);
 
-    const [pos, setPos] = useState({
-        top: 0,
-        left: 0,
-    });
+    const [pos, setPos] = useState({ top: 0, left: 0 });
 
     const { auth } = usePage().props;
-
     const features = auth?.list_features || [];
-
     const currentRoute = route().current();
 
     const currentFeature = features.find(
         (feature) => feature.route === currentRoute,
     );
+
     const permissionMap = {
         Hapus: "can_delete",
         Edit: "can_update",
     };
-    // filter action berdasarkan permission
+
+    // Filter action berdasarkan permission
     const filteredActions = actions.filter((action) => {
         if (!action.label) return true;
 
         const permissionField = permissionMap[action.label];
 
+        // PERBAIKAN 1: Jika aksi (seperti "Import SK") tidak ada di permissionMap,
+        // izinkan tampil secara default (return true).
+        if (!permissionField) return true;
+
         return !!currentFeature?.pivot?.[permissionField];
     });
-
-    if (filteredActions.length === 0) return null;
 
     useEffect(() => {
         if (open && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect();
-
             setPos({
                 top: rect.bottom + window.scrollY + 5,
-
                 left: rect.right + window.scrollX - 170,
             });
         }
     }, [open]);
 
+    // Deteksi klik di luar & scroll
     useEffect(() => {
         const close = (e) => {
             if (
@@ -59,10 +57,24 @@ export default function ActionDropdown({ actions = [] }) {
             }
         };
 
-        document.addEventListener("mousedown", close);
+        // PERBAIKAN 3: Tutup dropdown otomatis jika user men-scroll tabel/halaman
+        // agar menu tidak melayang jauh dari tombolnya.
+        const handleScroll = () => {
+            if (open) setOpen(false);
+        };
 
-        return () => document.removeEventListener("mousedown", close);
-    }, []);
+        if (open) {
+            document.addEventListener("mousedown", close);
+            window.addEventListener("scroll", handleScroll, true); // true = capture phase untuk elemen ber-scroll
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", close);
+            window.removeEventListener("scroll", handleScroll, true);
+        };
+    }, [open]);
+
+    if (filteredActions.length === 0) return null;
 
     return (
         <>
@@ -90,7 +102,9 @@ export default function ActionDropdown({ actions = [] }) {
                                 <button
                                     key={i}
                                     onClick={() => {
-                                        a.onClick();
+                                        // PERBAIKAN 2: Gunakan Optional Chaining (?.)
+                                        // agar tidak error jika onClick belum di-set
+                                        a.onClick?.();
                                         setOpen(false);
                                     }}
                                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm transition hover:bg-gray-100 ${

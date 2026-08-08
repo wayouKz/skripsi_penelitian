@@ -134,27 +134,7 @@ export default function GuruDashboard({
             </div>
 
             {/* ── Menu Cepat ── */}
-            <div className="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight mb-6">
-                    Akses Cepat
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                    {menuCepat.map((m, i) => (
-                        <a
-                            key={i}
-                            href={m.href}
-                            className="group flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-                        >
-                            <span className="text-3xl group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
-                                {m.icon}
-                            </span>
-                            <span className="text-sm font-semibold text-slate-600 group-hover:text-emerald-700">
-                                {m.label}
-                            </span>
-                        </a>
-                    ))}
-                </div>
-            </div>
+           
         </div>
     );
 }

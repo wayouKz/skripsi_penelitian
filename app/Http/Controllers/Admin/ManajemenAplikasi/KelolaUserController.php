@@ -101,4 +101,19 @@ class KelolaUserController extends Controller
             return redirect()->back()->with('error', 'Data User Tidak Ditemukan');
         }
     }
+
+    public function update_status(Request $request){
+    $cariUser = User::find($request->id);
+
+    if($cariUser){
+        $cariUser->update([
+            'status' => $request->status
+        ]);
+     $json = ["msg" => "Status User Berhasil Diubah", "success" => true];
+    }else{
+        $json = ["msg" => "Status User Gagal Diubah", "success" => false];
+    }
+
+    return response()->json($json);
+    }
 }

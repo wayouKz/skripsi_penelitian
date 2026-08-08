@@ -22,7 +22,7 @@ class GuruController extends Controller
     }
 
     public function getGuru(){
-        $data = MGuru::GetAllGuru()->get();
+        $data = MGuru::GetAllGuru()->orderBy('created_at', 'desc')->get();
         if($data->isEmpty()){
             $json = [
                 'data' => $data,
@@ -37,58 +37,62 @@ class GuruController extends Controller
         return response()->json($json);
     }
 
-    public function getWaliKelas(Request $request){
-        if($request->kelas_id == "all" || $request->kelas_id == null){
-            $data = MKelas::with('waliKelas')
-            ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
-            ->get();
-        }else{
-            $data = MKelas::with('waliKelas')->where('m_kelas.id', $request->kelas_id)
-            ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
-            ->get();
-        }
-        $json = [];
-        if($data->isEmpty()){
-            $json = [
-                'data' => $data,
-                'success' => false
-            ];
-        }else{
-            $json = [
-                'data' => $data,
-                'success' => true
-            ];
-        }
+public function getWaliKelas(Request $request)
+{
+    // 1. Buat base query dengan menambahkan select()
+    $query = MKelas::with('waliKelas')
+        ->select('m_kelas.*', 'm_jurusans.nama_jurusan') // <-- INI KUNCINYA
+        ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
+        ->orderBy('m_kelas.nama_kelas', 'asc');
 
-        return response()->json($json);
+    if ($request->kelas_id && $request->kelas_id !== "all") {
+        $query->where('m_kelas.id', $request->kelas_id);
     }
 
+    // if($request->tahun_ajaran){
+    //     $query->where('m_kelas.tahun_ajaran_id', $request->tahun_ajaran);
+    // }
+
+$data = $query->get();
+
+    // Urutkan secara natural setelah data diambil dari database
+    $data = $data->sortBy('nama_kelas', SORT_NATURAL)->values();
+
+    // 4. Return response
+    return response()->json([
+        'data' => $data,
+        'success' => $data->isNotEmpty() // isNotEmpty() mengembalikan true jika ada data, false jika kosong
+    ]);
+}
     public function store(Request $request){
         $request->validate([
             'nip' => 'required|numeric',
             'nama_guru' => 'required',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
-            'tempat_lahir' => 'required',
-            'tanggal_lahir' => 'required',
-            'alamat' => 'required',
-            'no_telp' => 'required|numeric',
+            // 'tempat_lahir' => 'required',
+            // 'tanggal_lahir' => 'required',
+            // 'alamat' => 'required',
+            // 'no_telp' => 'required|numeric',
         ],[
             'nip.required' => 'NIP Tidak Boleh Kosong',
             'nip.numeric' => 'NIP Harus Angka',
             'nama_guru.required' => 'Nama Guru Tidak Boleh Kosong',
             'jenis_kelamin.required' => 'Jenis Kelamin Tidak Boleh Kosong',
-            'tempat_lahir.required' => 'Tempat Lahir Tidak Boleh Kosong',
-            'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
-            'alamat.required' => 'Alamat Tidak Boleh Kosong',
-            'no_telp.required' => 'No Telp Tidak Boleh Kosong',
-            'no_telp.numeric' => 'No Telp Harus Angka',
+            // 'tempat_lahir.required' => 'Tempat Lahir Tidak Boleh Kosong',
+            // 'tanggal_lahir.required' => 'Tanggal Lahir Tidak Boleh Kosong',
+            // 'alamat.required' => 'Alamat Tidak Boleh Kosong',
+            // 'no_telp.required' => 'No Telp Tidak Boleh Kosong',
+            // 'no_telp.numeric' => 'No Telp Harus Angka',
             'jenis_kelamin.in' => 'Jenis Kelamin Harus Laki-Laki atau Perempuan',
         ]);
     $RoleGuru = Role::where('nama_roles', 'Guru')->first()->id ?? null;
    if($RoleGuru == null){
             return redirect()->route('master.guru.index')->with('error', 'Data Guru Gagal Ditambahkan dikarenakan Role Guru Tidak Ditemukan');
         }
-
+    $cekNip = MGuru::where('nip', $request->nip)->first();
+        if($cekNip){
+            return redirect()->route('master.guru.index')->with('error', 'Data Guru Gagal Ditambahkan dikarenakan NIP Sudah Terdaftar');
+        }
         $data = [
             'nip' => $request->nip,
             'nama_guru' => $request->nama_guru,
@@ -138,10 +142,10 @@ public function update(Request $request)
         'nip'             => 'required',
         'nama_guru'       => 'required',
         'jenis_kelamin'   => 'required',
-        'tempat_lahir'    => 'required',
-        'tanggal_lahir'   => 'required',
-        'alamat'          => 'required',
-        'no_telp'         => 'required',
+        // 'tempat_lahir'    => 'required',
+        // 'tanggal_lahir'   => 'required',
+        // 'alamat'          => 'required',
+        // 'no_telp'         => 'required',
     ]);
 
     DB::beginTransaction();
@@ -316,50 +320,55 @@ public function mappingGuruMapel(Request $request)
         }
     }
 
-public function DataGuruMapel()
+public function DataGuruMapel(Request $request)
     {
-        $data = MMapel::leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
-            // 1. Tambahkan JOIN ke tabel t_list_gurus untuk mendapatkan kelas_id
-            ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-            // 2. Ambil data guru menggunakan nip dari tabel t_list_gurus
-            ->leftJoin('m_gurus as guru', 'guru.nip', '=', 't_list_gurus.nip')
-            ->select(
-                'm_mapels.id',
-                'm_mapels.nama_mapel',
-                'm_mapels.kode_mapel',
-                'guru.id as guru_id',
-                'guru.nama_guru',
-                'guru.nip',
-                't_list_guru_mapels.beban_jam',
-                't_list_guru_mapels.id as unique_id', // ID unik pivot (penting untuk React Dnd-Kit)
-                't_list_gurus.kelas_id'               // Ambil kelas_id
-            )
-            ->get()
-            ->groupBy('id')
-            ->map(function ($items) {
-                return [
-                    'id'         => $items->first()->id,
-                    'mapel'      => $items->first()->nama_mapel,
-                    'kode_mapel' => $items->first()->kode_mapel,
-                    'guru'       => $items->filter(function ($item) {
-                                        return !empty($item->nama_guru);
-                                    })->map(function ($item) {
-                                        return [
-                                            // Sisipkan ID unik ini agar bisa dipakai di front-end
-                                            'id'        => $item->unique_id,
-                                            'value'     => $item->guru_id,
-                                            'label'     => $item->nama_guru,
-                                            'nip'       => $item->nip,
-                                            'beban_jam' => $item->beban_jam ?? 0,
-                                            'kelas_id'  => $item->kelas_id ?? '', // Lempar kelas_id ke JSON
-                                        ];
-                                    })
-                                    ->values()
-                                    ->toArray(),
-                ];
-            })
-            ->values();
-        // Logika IF bisa dipersingkat menjadi seperti ini:
+        $tahun_ajaran_id = $request->tahun_ajaran_id;
+    $data = MMapel::leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
+    ->leftJoin('t_list_gurus',function ($q) use ($tahun_ajaran_id){
+        $q->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+        ->where('t_list_gurus.tahun_ajaran_id', $tahun_ajaran_id);
+    })
+    ->leftJoin('m_gurus as guru', 'guru.nip', '=', 't_list_gurus.nip')
+    ->leftJoin('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
+    ->select(
+        'm_mapels.id',
+        'm_mapels.nama_mapel',
+        'm_mapels.kode_mapel',
+        'guru.id as guru_id',
+        'guru.nama_guru',
+        'guru.nip',
+        't_list_guru_mapels.beban_jam',
+        't_list_guru_mapels.id as unique_id',
+        't_list_gurus.kelas_id',
+        'm_kelas.nama_kelas'
+    )
+    ->get()
+    ->groupBy('id') // Grup berdasarkan Mapel
+    ->map(function ($items) {
+        return [
+            'id'         => $items->first()->id,
+            'mapel'      => $items->first()->nama_mapel,
+            'kode_mapel' => $items->first()->kode_mapel,
+            'guru'       => $items->filter(fn($i) => !empty($i->guru_id))
+                ->groupBy('guru_id')
+                ->map(function ($guruItems) {
+                    return [
+                        'value'    => $guruItems->first()->guru_id,
+                        'label'    => $guruItems->first()->nama_guru,
+                        'nip'      => $guruItems->first()->nip,
+                        'mengajar' => $guruItems->map(function ($item) {
+                            return [
+                                'id'        => $item->unique_id,
+                                'beban_jam' => $item->beban_jam ?? 0,
+                                'kelas_id'  => $item->kelas_id ?? '',
+                                'kelas'     => $item->nama_kelas
+                            ];
+                        })->values()->toArray()
+                    ];
+                })->values()->toArray(),
+        ];
+    })
+    ->values();
         return response()->json([
             'data'    => $data,
             'success' => $data->isNotEmpty()

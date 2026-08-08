@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('kode_jadwal')->unique();
             // $table->foreignId('t_list_guru_id')->constrained('t_list_gurus');
-            $table->foreignId('t_list_guru_mapel_id')->constrained('t_list_guru_mapels');
-            $table->foreignId('mapel_id')->constrained('m_mapels');
-            $table->foreignId('kelas_id')->constrained('m_kelas');
+            $table->foreignId('t_list_guru_mapel_id')->constrained('t_list_guru_mapels')->onDelete('cascade');
+            $table->foreignId('mapel_id')->constrained('m_mapels')->onDelete('cascade');
+            $table->foreignId('kelas_id')->constrained('m_kelas')->onDelete('cascade');
             $table->string('hari');
             $table->time('jam_mulai');
             $table->time('jam_selesai');
-            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans');
+            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans')->onDelete('cascade');
             $table->timestamps();
         });
     }

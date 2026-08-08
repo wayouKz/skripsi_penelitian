@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\WAHYU\MGuru;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -57,4 +59,10 @@ public function role()
 {
     return $this->belongsTo(Role::class);
 }
+
+public function guru()
+{
+    return $this->hasOne(MGuru::class, 'nip', 'nip');
+}
+
 }

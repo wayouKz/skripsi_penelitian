@@ -1,248 +1,368 @@
 import { useAlert } from "@/Components/AlertContext";
-import DangerButton from "@/Components/DangerButton";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
-export default function HistoryAbsensi({ title, kode_jadwal, onClose }) {
+export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
     const { showAlert } = useAlert();
     const [history, setHistory] = useState([]);
-
-    // State baru untuk loading
     const [isLoading, setIsLoading] = useState(true);
-
-    // State untuk menyimpan SATU item history yang sedang dilihat detailnya
     const [selectedItem, setSelectedItem] = useState(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    const nextMonth = () =>
+        setCurrentDate(
+            new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+        );
+    const prevMonth = () =>
+        setCurrentDate(
+            new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+        );
+    const goToday = () => setCurrentDate(new Date());
+
+    const formatDate = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const historyByDate = useMemo(() => {
+        const map = new Map();
+        history.forEach((item) => map.set(formatDate(item.waktu_absen), item));
+        return map;
+    }, [history]);
 
     const getHistory = async () => {
-        setIsLoading(true); // Mulai loading
+        setIsLoading(true);
         try {
-            axios
-                .get(route("getData.get-history-absensi"), {
-                    params: {
-                        kode_jadwal: kode_jadwal,
-                    },
-                })
-                .then((res) => {
-                    const data = res.data;
-                    if (data.success === true) {
-                        setHistory(data.data);
-                    } else {
-                        setHistory([]);
-                    }
-                })
-                .finally(() => {
-                    setIsLoading(false); // Matikan loading setelah selesai (sukses/gagal)
-                });
+            const res = await axios.get(route("getData.get-history-absensi"), {
+                params: { kode_jadwal: kode_jadwal },
+            });
+            const data = res.data;
+            setHistory(data.success === true ? data.data : []);
         } catch (e) {
             showAlert(e.message, "error");
-            setIsLoading(false); // Matikan loading jika error catch
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
+        if (!open) return;
         getHistory();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, kode_jadwal]);
 
-    return (
-        <div className="flex flex-col h-full overflow-hidden">
-            {/* Header Utama Modal */}
+    const monthTotal = useMemo(() => {
+        const y = currentDate.getFullYear();
+        const m = currentDate.getMonth();
+        return history.filter((item) => {
+            const d = new Date(item.waktu_absen);
+            return d.getFullYear() === y && d.getMonth() === m;
+        }).length;
+    }, [history, currentDate]);
 
-            {/* Container Konten */}
-            <div className="w-full overflow-y-auto px-5 py-5 bg-gray-50/50 flex-1 relative">
-                {isLoading ? (
-                    /* ================= AREA SKELETON LOADING ================= */
-                    <div className="space-y-3">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((skeleton) => (
-                            <div
-                                key={skeleton}
-                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-pulse"
-                            >
-                                <div className="space-y-3 w-full sm:w-auto">
-                                    {/* Placeholder Kode Absen */}
-                                    <div className="h-4 bg-gray-200 rounded-md w-32"></div>
-                                    {/* Placeholder Tanggal */}
-                                    <div className="h-3 bg-gray-200 rounded-md w-48"></div>
-                                </div>
+    const renderCalendar = () => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const namaHari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
-                                <div className="flex items-center gap-4 justify-between sm:justify-end w-full sm:w-auto mt-2 sm:mt-0">
-                                    {/* Placeholder Badge Waktu */}
-                                    <div className="h-8 bg-gray-200 rounded-lg w-24"></div>
-                                    {/* Placeholder Chevron */}
-                                    <div className="h-4 bg-gray-200 rounded-md w-4 hidden sm:block"></div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : history.length === 0 ? (
-                    /* Kosong */
-                    <div className="w-full flex flex-col items-center justify-center py-16 px-4">
-                        <div className="bg-gray-100 p-4 rounded-full mb-4">
-                            {/* Ikon Jam (Bisa diganti FontAwesome jika ada) */}
-                            <svg
-                                className="w-8 h-8 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                        </div>
-                        <h3 className="text-gray-700 text-base font-semibold mb-1">
-                            Tidak ada data
-                        </h3>
-                        <p className="text-sm text-gray-500 text-center max-w-sm">
-                            Belum ada history absensi yang tercatat untuk saat
-                            ini.
+        const cells = [];
+
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            cells.push(<div key={`empty-${i}`} className="aspect-square" />);
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const absenData = historyByDate.get(dateStr);
+            const isToday = formatDate(new Date()) === dateStr;
+
+            cells.push(
+                <button
+                    key={`day-${day}`}
+                    type="button"
+                    disabled={!absenData}
+                    onClick={() => absenData && setSelectedItem(absenData)}
+                    className={`group relative aspect-square rounded-2xl border p-2 text-left transition-all duration-150
+                        ${
+                            absenData
+                                ? "border-emerald-200 bg-emerald-50 hover:border-emerald-400 hover:bg-emerald-100 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                                : "border-gray-300 bg-gray-50/40 cursor-default"
+                        }
+                    `}
+                >
+                    <span
+                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold
+                            ${
+                                isToday
+                                    ? "bg-emerald-900 text-white"
+                                    : absenData
+                                      ? "text-emerald-800"
+                                      : "text-gray-600"
+                            }
+                        `}
+                    >
+                        {day}
+                    </span>
+
+                    {absenData && (
+                        <span className="absolute bottom-2 left-2 right-2 flex items-center gap-1 rounded-md bg-white/70 px-1.5 py-1 text-[10px] font-bold text-emerald-700 backdrop-blur-sm">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                            <span className="truncate">{absenData.waktu}</span>
+                        </span>
+                    )}
+                </button>,
+            );
+        }
+
+        return (
+            <div className="w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <div className="mb-5 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-900">
+                            {currentDate.toLocaleDateString("id-ID", {
+                                month: "long",
+                                year: "numeric",
+                            })}
+                        </h2>
+                        <p className="text-xs text-gray-400">
+                            {monthTotal > 0
+                                ? `${monthTotal} sesi absensi tercatat`
+                                : "Tidak ada sesi bulan ini"}
                         </p>
                     </div>
-                ) : selectedItem ? (
-                    /* ================= AREA DETAIL (HANYA TABEL SISWA) ================= */
-                    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        {/* Info & Tombol Kembali */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                            <button
-                                onClick={() => setSelectedItem(null)}
-                                className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-emerald-600 transition-colors w-fit"
-                            >
-                                <i className="fa fa-arrow-left"></i> Kembali
-                            </button>
 
-                            <div className="text-left sm:text-right">
-                                <h3 className="text-sm font-bold text-gray-900">
-                                    {selectedItem.kode_absen}
-                                </h3>
-                                <p className="text-xs text-gray-500 mt-0.5">
-                                    {new Date(
-                                        selectedItem.waktu_absen,
-                                    ).toLocaleDateString("id-ID", {
-                                        weekday: "long",
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })}{" "}
-                                    •{" "}
-                                    <span className="font-bold text-blue-600">
-                                        {selectedItem.waktu} WITA
-                                    </span>
-                                </p>
-                            </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={prevMonth}
+                            aria-label="Bulan sebelumnya"
+                            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+                        >
+                            <i className="fa fa-chevron-left text-xs" />
+                        </button>
+                        <button
+                            onClick={goToday}
+                            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+                        >
+                            Hari ini
+                        </button>
+                        <button
+                            onClick={nextMonth}
+                            aria-label="Bulan berikutnya"
+                            className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+                        >
+                            <i className="fa fa-chevron-right text-xs" />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mb-2 grid grid-cols-7 gap-2">
+                    {namaHari.map((hari) => (
+                        <div
+                            key={hari}
+                            className="py-1 text-center text-[11px] font-bold uppercase tracking-wide text-gray-400"
+                        >
+                            {hari}
                         </div>
+                    ))}
+                </div>
 
-                        {/* Tabel Siswa */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead>
-                                        <tr className="border-b border-gray-200 bg-gray-50/50 text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                                            <th className="py-3 px-3 text-center w-12">
-                                                No
-                                            </th>
-                                            <th className="py-3 px-4 w-32">
-                                                NISN
-                                            </th>
-                                            <th className="py-3 px-4">
-                                                Nama Lengkap
-                                            </th>
-                                            <th className="py-3 px-4 text-center w-32">
-                                                Status
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
-                                        {selectedItem.list_siswa &&
-                                        selectedItem.list_siswa.length > 0 ? (
-                                            selectedItem.list_siswa.map(
-                                                (siswa, idx) => (
-                                                    <tr
-                                                        key={siswa.nisn || idx}
-                                                        className="hover:bg-gray-50/80 transition-colors"
+                <div className="grid grid-cols-7 gap-2">{cells}</div>
+            </div>
+        );
+    };
+
+    const renderDetail = () => {
+        const siswaList = selectedItem.list_siswa || [];
+        const hadirCount = siswaList.filter(
+            (s) => s.status?.toLowerCase() === "hadir",
+        ).length;
+
+        return (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="mb-4 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                        onClick={() => setSelectedItem(null)}
+                        className="flex w-fit items-center gap-2 rounded-lg bg-gray-50 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:text-emerald-700"
+                    >
+                        <i className="fa fa-arrow-left" /> Kembali ke Kalender
+                    </button>
+
+                    <div className="text-left sm:text-right">
+                        <h3 className="text-sm font-bold text-gray-900">
+                            {selectedItem.kode_absen}
+                        </h3>
+                        <p className="mt-0.5 text-xs text-gray-500">
+                            {new Date(
+                                selectedItem.waktu_absen,
+                            ).toLocaleDateString("id-ID", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                            })}{" "}
+                            •{" "}
+                            <span className="font-bold text-emerald-600">
+                                {selectedItem.waktu} WITA
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mb-4 grid grid-cols-3 gap-3">
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 text-center shadow-sm">
+                        <p className="text-lg font-extrabold text-gray-900">
+                            {siswaList.length}
+                        </p>
+                        <p className="text-[11px] font-medium text-gray-400">
+                            Total Siswa
+                        </p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center shadow-sm">
+                        <p className="text-lg font-extrabold text-emerald-700">
+                            {hadirCount}
+                        </p>
+                        <p className="text-[11px] font-medium text-emerald-600">
+                            Hadir
+                        </p>
+                    </div>
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-center shadow-sm">
+                        <p className="text-lg font-extrabold text-red-700">
+                            {siswaList.length - hadirCount}
+                        </p>
+                        <p className="text-[11px] font-medium text-red-600">
+                            Tidak Hadir
+                        </p>
+                    </div>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse text-left">
+                            <thead>
+                                <tr className="border-b border-gray-200 bg-gray-50/50 text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                                    <th className="w-12 px-3 py-3 text-center">
+                                        No
+                                    </th>
+                                    <th className="w-32 px-4 py-3">NISN</th>
+                                    <th className="px-4 py-3">Nama Lengkap</th>
+                                    <th className="w-32 px-4 py-3 text-center">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
+                                {siswaList.length > 0 ? (
+                                    siswaList.map((siswa, idx) => {
+                                        const status =
+                                            siswa.status?.toLowerCase();
+                                        return (
+                                            <tr
+                                                key={siswa.nisn || idx}
+                                                className="transition-colors hover:bg-gray-50/80"
+                                            >
+                                                <td className="px-3 py-3 text-center font-medium text-gray-400">
+                                                    {idx + 1}
+                                                </td>
+                                                <td className="px-4 py-3 font-mono font-medium text-gray-600">
+                                                    {siswa.nisn}
+                                                </td>
+                                                <td className="px-4 py-3 font-semibold text-gray-900">
+                                                    {siswa.nama_siswa}
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <span
+                                                        className={`inline-block rounded-md border px-3 py-1 text-[10px] font-bold uppercase tracking-widest
+                                                            ${
+                                                                status ===
+                                                                "hadir"
+                                                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                                                    : status ===
+                                                                        "alpha"
+                                                                      ? "border-red-200 bg-red-50 text-red-700"
+                                                                      : "border-amber-200 bg-amber-50 text-amber-700"
+                                                            }
+                                                        `}
                                                     >
-                                                        <td className="py-3 px-3 text-center text-gray-400 font-medium">
-                                                            {idx + 1}
-                                                        </td>
-                                                        <td className="py-3 px-4 font-mono font-medium text-gray-600">
-                                                            {siswa.nisn}
-                                                        </td>
-                                                        <td className="py-3 px-4 font-semibold text-gray-900">
-                                                            {siswa.nama_siswa}
-                                                        </td>
-                                                        <td className="py-3 px-4 text-center">
-                                                            <span
-                                                                className={`inline-block px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest border ${
-                                                                    siswa.status.toLowerCase() ===
-                                                                    "hadir"
-                                                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                                        : siswa.status.toLowerCase() ===
-                                                                            "alpha"
-                                                                          ? "bg-red-50 text-red-700 border-red-200"
-                                                                          : "bg-amber-50 text-amber-700 border-amber-200"
-                                                                }`}
-                                                            >
-                                                                {siswa.status}
-                                                            </span>
-                                                        </td>
-                                                    </tr>
-                                                ),
-                                            )
-                                        ) : (
-                                            <tr>
-                                                <td
-                                                    colSpan="4"
-                                                    className="py-6 text-center text-gray-400 italic"
-                                                >
-                                                    Tidak ada data siswa pada
-                                                    absensi ini.
+                                                        {siswa.status}
+                                                    </span>
                                                 </td>
                                             </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="4"
+                                            className="py-6 text-center italic text-gray-400"
+                                        >
+                                            Tidak ada data siswa pada absensi
+                                            ini.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div className="flex h-full flex-col overflow-hidden">
+            <div className="relative flex-1 overflow-y-auto bg-gray-50/50 px-5 py-5">
+                {isLoading ? (
+                    /* ================= AREA SKELETON KALENDER ================= */
+                    <div className="w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm animate-pulse">
+                        {/* Skeleton Header Kalender */}
+                        <div className="mb-5 flex items-center justify-between">
+                            <div className="space-y-2">
+                                <div className="h-5 w-40 rounded-lg bg-gray-200" />
+                                <div className="h-3 w-28 rounded-lg bg-gray-100" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="h-8 w-8 rounded-lg bg-gray-100" />
+                                <div className="h-8 w-16 rounded-lg bg-gray-100" />
+                                <div className="h-8 w-8 rounded-lg bg-gray-100" />
                             </div>
                         </div>
+
+                        {/* Skeleton Header Hari */}
+                        <div className="mb-2 grid grid-cols-7 gap-2">
+                            {[...Array(7)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="mx-auto h-3 w-8 rounded bg-gray-200"
+                                />
+                            ))}
+                        </div>
+
+                        {/* Skeleton Grid Tanggal (35 hari) */}
+                        <div className="grid grid-cols-7 gap-2">
+                            {[...Array(35)].map((_, i) => (
+                                <div
+                                    key={i}
+                                    className="aspect-square rounded-2xl bg-gray-50 border border-gray-100"
+                                />
+                            ))}
+                        </div>
                     </div>
+                ) : selectedItem ? (
+                    renderDetail()
                 ) : (
-                    /* ================= AREA MASTER (LIST HISTORY SAJA) ================= */
-                    <div className="space-y-3">
-                        {history.map((item) => (
-                            <div
-                                key={item.kode_absen}
-                                onClick={() => setSelectedItem(item)}
-                                className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 cursor-pointer hover:shadow-md hover:border-emerald-300 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
-                            >
-                                <div>
-                                    <h2 className="text-sm font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">
-                                        {item.kode_absen}
-                                    </h2>
-                                    <p className="text-xs text-gray-500 mt-1 font-medium">
-                                        {new Date(
-                                            item.waktu_absen,
-                                        ).toLocaleDateString("id-ID", {
-                                            weekday: "long",
-                                            year: "numeric",
-                                            month: "long",
-                                            day: "numeric",
-                                        })}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-4 justify-between sm:justify-end">
-                                    <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-blue-100">
-                                        <i className="fa fa-clock-o mr-1"></i>{" "}
-                                        {item.waktu} WITA
-                                    </span>
-
-                                    {/* Indikator klik */}
-                                    <div className="text-gray-400 group-hover:text-emerald-500 transition-colors">
-                                        <i className="fa fa-chevron-right text-sm"></i>
-                                    </div>
-                                </div>
+                    <div className="space-y-4">
+                        {history.length === 0 && (
+                            <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+                                <i className="fa fa-info-circle text-lg" />
+                                Belum ada riwayat absensi yang tercatat.
                             </div>
-                        ))}
+                        )}
+                        {renderCalendar()}
                     </div>
                 )}
             </div>

@@ -36,8 +36,8 @@ export default function Kelas() {
             header: "Jurusan",
             render(row) {
                 return (
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
-                        {row.nama_jurusan || "-"}
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm whitespace-nowrap">
+                        {row.nama_jurusan || "Tidak Ada Jurusan"}
                     </span>
                 );
             },
@@ -168,7 +168,6 @@ export default function Kelas() {
                             setShow={setShow}
                             isEdit={isEdit}
                             Kelas={Kelas}
-                            getKelas={getKelas}
                         />
                     )}
                 </div>

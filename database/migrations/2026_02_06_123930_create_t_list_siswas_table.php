@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('t_list_siswas', function (Blueprint $table) {
             $table->id();
             $table->string('nisn')->index();
-            $table->foreign('nisn')->references('nisn')->on('m_siswas');
-            $table->foreignId('kelas_id')->constrained('m_kelas');
-            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans');
+            $table->foreign('nisn')->references('nisn')->on('m_siswas')->onDelete('cascade');
+            $table->foreignId('kelas_id')->constrained('m_kelas')->onDelete('cascade');
+            $table->foreignId('tahun_ajaran_id')->constrained('m_tahun_ajarans')->onDelete('cascade');
             $table->string('nama_siswa');
             $table->enum('status', ['siswa_aktif', 'alumni'])->default('siswa_aktif');
             // $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);

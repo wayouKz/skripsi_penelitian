@@ -23,6 +23,9 @@ export default function Absensi({ dataKelas }) {
     const [waktu, setWaktu] = useState(new Date());
     const [dataMapel, setDataMapel] = useState([]);
 
+    const [msg, setMsg] = useState("");
+    const [pertemuan, setPertemuan] = useState(0);
+
     useEffect(() => {
         // Membuat jam berjalan otomatis setiap 1 detik (1000 milidetik)
         const timer = setInterval(() => {
@@ -53,6 +56,7 @@ export default function Absensi({ dataKelas }) {
             if (res.data.success === false) {
                 setSiswa([]);
                 setTidakAdaJadwal(true);
+                setMsg(res.data.msg);
             } else {
                 // PERBAIKAN: Suntikkan status_kehadiran default "hadir" ke setiap siswa
                 const siswaWithDefaultStatus = res.data.data.map((s) => ({
@@ -62,6 +66,8 @@ export default function Absensi({ dataKelas }) {
 
                 setSiswa(siswaWithDefaultStatus);
                 setTidakAdaJadwal(false);
+                setMsg("");
+                setPertemuan(res.data.pertemuan); // Set pertemuan dari response
             }
         } catch (e) {
             // Tangkap pesan error dari HTTP 400 (Jadwal tidak aktif)
@@ -72,6 +78,7 @@ export default function Absensi({ dataKelas }) {
             }
             setSiswa([]);
             setTidakAdaJadwal(true);
+            setMsg("");
         } finally {
             setIsLoadingSiswa(false); // Matikan loading skeleton setelah selesai
         }
@@ -134,12 +141,13 @@ export default function Absensi({ dataKelas }) {
                 id_siswa: s.id,
                 nisn: s.nisn,
                 status_kehadiran: s.status_kehadiran,
+                pertemuan: pertemuan,
             })),
             tahun_ajaran_id: dataKelas.tahun_ajaran_id,
             kelas_id: dataKelas.kelas_id,
         };
         showQuestion(
-            "Apakah Anda yakin ingin menyimpan absensi ini?",
+            `Apakah Anda yakin ingin menyimpan absensi untuk Mata Pelajaran ${namaMapel} pada pertemuan ke ${pertemuan}`,
             async () => {
                 try {
                     const res = await axios.post(
@@ -380,8 +388,8 @@ export default function Absensi({ dataKelas }) {
                             Jadwal Tidak Aktif
                         </p>
                         <p className="text-xs text-yellow-500 mt-0.5 leading-relaxed">
-                            Tidak ada jadwal pelajaran yang aktif untuk kelas
-                            ini pada hari dan jam saat ini.
+                            {msg ||
+                                "Tidak ada jadwal pelajaran yang aktif untuk kelas ini pada hari dan jam sekarang."}
                         </p>
                     </div>
                 </div>
@@ -531,9 +539,10 @@ export default function Absensi({ dataKelas }) {
                 open={open}
                 onClose={() => setOpen(false)}
                 title={"Absensi " + namaMapel}
-                width="w-1/3"
+                width="w-1/2"
             >
                 <HistoryAbsensi
+                    open={open}
                     onClose={() => setOpen(false)}
                     kode_jadwal={selectedMapel}
                 />

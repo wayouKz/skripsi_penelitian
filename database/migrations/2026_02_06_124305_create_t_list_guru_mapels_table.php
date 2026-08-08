@@ -14,12 +14,12 @@ return new class extends Migration
     Schema::create('t_list_guru_mapels', function (Blueprint $table) {
         $table->id();
         $table->string('nip')->index();
-        $table->foreign('nip')->references('nip')->on('m_gurus');
+        $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade');
 
         // MENGGUNAKAN ID DARI T_LIST_GURUS SEBAGAI PENGHUBUNG UTAMA
         $table->foreignId('t_list_guru_id')->constrained('t_list_gurus')->onDelete('cascade');
 
-        $table->foreignId('mapel_id')->constrained('m_mapels');
+        $table->foreignId('mapel_id')->constrained('m_mapels')->onDelete('cascade');
         $table->integer('beban_jam');
         $table->timestamps();
     });

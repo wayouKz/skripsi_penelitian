@@ -1,33 +1,43 @@
 import React, { useState, useMemo, useEffect } from "react";
 
-export default function TabsMenus({ menus, id = "main-tabs" }) {
-    // 1. Inisialisasi state dengan membaca localStorage terlebih dahulu
+export default function TabMenus({ menus = [], id = "main-tabs" }) {
+    // 1. Inisialisasi state dengan membaca localStorage
     const [activeTab, setActiveTab] = useState(() => {
-        // Pengecekan typeof window berguna jika Anda menggunakan framework SSR seperti Next.js
         if (typeof window !== "undefined") {
             const savedTab = localStorage.getItem(`activeTab_${id}`);
-            // Pastikan nilai yang tersimpan valid dan tidak melebihi panjang menu saat ini
-            if (savedTab !== null && parseInt(savedTab) < menus.length) {
-                return parseInt(savedTab);
+            if (savedTab !== null) {
+                return parseInt(savedTab, 10);
             }
         }
-        return 0; // Default ke tab pertama jika tidak ada data tersimpan
+        return 0;
     });
 
-    // 2. Gunakan useEffect untuk menyimpan ke localStorage setiap kali activeTab berubah
+    // 2. Pastikan activeTab selalu berada dalam batas index menus yang valid
     useEffect(() => {
-        localStorage.setItem(`activeTab_${id}`, activeTab);
-    }, [activeTab, id]);
+        if (menus.length > 0 && activeTab >= menus.length) {
+            setActiveTab(0);
+        }
+    }, [menus, activeTab]);
+
+    // 3. Simpan ke localStorage setiap kali activeTab berubah
+    useEffect(() => {
+        if (typeof window !== "undefined" && menus.length > 0) {
+            // Hanya simpan jika index-nya valid
+            if (activeTab < menus.length) {
+                localStorage.setItem(`activeTab_${id}`, activeTab);
+            }
+        }
+    }, [activeTab, id, menus.length]);
 
     // Header Tabs di-memoize
     const tabHeaders = useMemo(() => {
-        if (!menus) return null;
+        if (!menus || menus.length === 0) return null;
 
         return menus.map((menu, index) => (
             <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`flex-1 py-4 px-6 text-sm font-medium transition-all duration-200 outline-none ${
+                className={`flex-1 text-md py-4 px-6  font-medium transition-all duration-200 outline-none ${
                     activeTab === index
                         ? "bg-white border-b-2 border-emerald-600 text-emerald-700 shadow-sm"
                         : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
@@ -39,7 +49,7 @@ export default function TabsMenus({ menus, id = "main-tabs" }) {
         ));
     }, [menus, activeTab]);
 
-    // Konten Tab di-memoize
+    // Konten Tab di-memoize dengan aman terhadap out-of-bounds index
     const activeContent = useMemo(() => {
         if (!menus || menus.length === 0) {
             return (
@@ -49,17 +59,18 @@ export default function TabsMenus({ menus, id = "main-tabs" }) {
             );
         }
 
-        return menus[activeTab].component;
+        // Ambil aman jika activeTab melebihi panjang menu saat ini
+        const safeIndex = activeTab < menus.length ? activeTab : 0;
+        return menus[safeIndex].component;
     }, [menus, activeTab]);
 
     return (
         <div className="bg-white shadow-sm border border-gray-200 rounded-2xl overflow-hidden mb-6">
             {/* --- Bagian Header Tab --- */}
-            <div className="flex border-b border-gray-200 bg-gray-50/50">
+            <div className="flex border-b border-gray-200 bg-gray-50/50 text-xs">
                 {tabHeaders}
             </div>
 
-            {/* --- Bagian Konten Tab --- */}
             <div className="p-6 bg-white shadow-sm sm:rounded-b-lg border-x border-b border-gray-200 min-h-[200px]">
                 <div className="text-gray-900 animate-in fade-in duration-300">
                     {activeContent}

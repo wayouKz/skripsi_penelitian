@@ -29,8 +29,7 @@ export default function Add({
     const [waliKelas, setWaliKelas] = useState([]);
     const [showJurusan, setShowJurusan] = useState(false);
     const [ListJurusan, setListJurusan] = useState([]);
-    const [TahunAjaran, setTahunAjaran] = useState([]);
-    // Memoize options agar tidak melakukan kalkulasi ulang setiap render
+
     const waliOptions = useMemo(
         () =>
             waliKelas.map((item) => ({
@@ -66,7 +65,7 @@ export default function Add({
         try {
             const res = await axios.get(route("master.kelas.getWaliKelas"));
             setWaliKelas(res.data.status === "success" ? res.data.data : []);
-        } catch (error) {
+        } catch {
             setWaliKelas([]);
         }
     };
@@ -75,27 +74,11 @@ export default function Add({
         try {
             const res = await axios.get(route("master.jurusan.getJurusan"));
             setListJurusan(res.data.status === "success" ? res.data.data : []);
-        } catch (error) {
-            return [];
+        } catch {
+            setListJurusan([]);
         }
     };
 
-    // const getTahunAjaran = async () => {
-    //     try {
-    //         const res = await axios.get(
-    //             route("master.tahun-ajaran.getTahunAjaran"),
-    //         );
-    //         setTahunAjaran(res.data.data ?? []);
-    //     } catch (error) {
-    //         return [];
-    //     }
-    // };
-    // const tahunAjaranOptions = TahunAjaran.map((ta) => ({
-    //     value: ta.id,
-    //     label: ta.tahun_ajaran, // misal: "2023/2024"
-    //     semester: ta.semester, // misal: "Ganjil" / "Genap" (opsional)
-    //     status: ta.status, // misal: "Aktif" (opsional)
-    // }));
     useEffect(() => {
         if (open) getWaliKelas();
     }, [open]);
@@ -103,6 +86,7 @@ export default function Add({
     useEffect(() => {
         if (showJurusan) getJurusan();
     }, [showJurusan]);
+
     useEffect(() => {
         if (isEdit && Kelas) {
             setData({
@@ -110,7 +94,6 @@ export default function Add({
                 id_wali_kelas: Kelas.id_wali_kelas || "",
                 tingkat: Kelas.tingkat || "",
                 jurusan_id: Kelas.jurusan_id || "",
-                // tahun_ajaran_id: Kelas.tahun_ajaran_id || "",
             });
             if (Kelas.jurusan) setShowJurusan(true);
         } else {
@@ -126,12 +109,20 @@ export default function Add({
             onClose={() => setOpen(false)}
             onSubmit={submit}
         >
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
                 {/* Field Wali Kelas */}
-                <div className="col-span-2">
-                    <InputLabel value="Pilih Guru Wali Kelas" />
+                <div>
+                    <InputLabel
+                        value="Pilih Guru Wali Kelas"
+                        className="text-xs font-medium text-gray-700"
+                    />
                     <Select
                         styles={{
+                            control: (base) => ({
+                                ...base,
+                                minHeight: "32px",
+                                fontSize: "12px",
+                            }),
                             menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                         }}
                         menuPortalTarget={document.body}
@@ -142,13 +133,14 @@ export default function Add({
                             ) || null
                         }
                         onChange={(val) => setData("id_wali_kelas", val?.value)}
+                        placeholder="Pilih Wali Kelas..."
                         formatOptionLabel={(option) => (
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-center text-xs">
                                 <span>
                                     {option.label} - {option.nip}
                                 </span>
                                 <span
-                                    className={`text-xs font-semibold ${option.kelas ? "text-red-600" : "text-green-600"}`}
+                                    className={`text-[10px] font-semibold ${option.kelas ? "text-red-600" : "text-green-600"}`}
                                 >
                                     {option.kelas
                                         ? `Dipakai ${option.kelas.nama_kelas}`
@@ -157,95 +149,78 @@ export default function Add({
                             </div>
                         )}
                     />
-                    <InputError message={errors.id_wali_kelas} />
+                    <InputError
+                        message={errors.id_wali_kelas}
+                        className="mt-1 text-[10px]"
+                    />
                 </div>
-                {/* <div className="col-span-2"> */}
-                {/* <InputLabel value="Pilih Tahun Ajaran" /> */}
-                {/* <Select
-                        styles={{
-                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                        }}
-                        menuPortalTarget={document.body}
-                        options={tahunAjaranOptions}
-                        placeholder="Pilih Tahun Ajaran..."
-                        value={
-                            tahunAjaranOptions.find(
-                                (o) => o.value == data.tahun_ajaran_id, // Pastikan state form Anda bernama tahun_ajaran_id
-                            ) || null
-                        }
-                        onChange={(val) =>
-                            setData("tahun_ajaran_id", val?.value)
-                        }
-                        formatOptionLabel={(option) => (
-                            <div className="flex justify-between items-center">
-                                <span>
-                                    {option.label}{" "}
-                                    {option.semester
-                                        ? `- ${option.semester}`
-                                        : ""}
-                                </span>
-                                {/* Opsional: Jika Anda punya field status aktif/tidak aktif */}
-                {/* {option.status && (
-                                    <span
-                                        className={`text-xs font-semibold ${
-                                            option.status === "Aktif"
-                                                ? "text-green-600"
-                                                : "text-gray-500"
-                                        }`}
-                                    >
-                                        {option.status}
-                                    </span>
-                                )}
-                            </div> */}
-                {/* )} */}
-                {/* /> */}
-                {/* <InputError message={errors.tahun_ajaran_id} /> */}
-                {/* </div> */}
 
                 {/* Field Nama & Tingkat */}
-                <div className="col-span-1">
-                    <InputLabel value="Nama Kelas" />
-                    <TextInput
-                        icon="door-open"
-                        type="text"
-                        placeholder="Nama Kelas"
-                        value={data.nama_kelas}
-                        onChange={(e) => setData("nama_kelas", e.target.value)}
-                    />
-                    <InputError message={errors.nama_kelas} />
-                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    <div>
+                        <InputLabel
+                            value="Nama Kelas"
+                            className="text-xs font-medium text-gray-700"
+                        />
+                        <TextInput
+                            icon="door-open"
+                            type="text"
+                            placeholder="Nama Kelas"
+                            value={data.nama_kelas}
+                            onChange={(e) =>
+                                setData("nama_kelas", e.target.value)
+                            }
+                            className="mt-1 w-full text-xs py-1.5"
+                        />
+                        <InputError
+                            message={errors.nama_kelas}
+                            className="mt-1 text-[10px]"
+                        />
+                    </div>
 
-                <div className="col-span-1">
-                    <InputLabel value="Tingkat" />
-                    <select
-                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                        value={data.tingkat}
-                        onChange={(e) => setData("tingkat", e.target.value)}
-                    >
-                        <option value="">[Pilih tingkat]</option>
-                        {["10", "11", "12"].map((t) => (
-                            <option key={t} value={t}>
-                                {t}
-                            </option>
-                        ))}
-                    </select>
-                    <InputError message={errors.tingkat} />
+                    <div>
+                        <InputLabel
+                            value="Tingkat"
+                            className="text-xs font-medium text-gray-700"
+                        />
+                        <select
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-xs text-xs py-1.5 focus:border-indigo-500 focus:ring-indigo-500"
+                            value={data.tingkat}
+                            onChange={(e) => setData("tingkat", e.target.value)}
+                        >
+                            <option value="">[Pilih tingkat]</option>
+                            {["10", "11", "12"].map((t) => (
+                                <option key={t} value={t}>
+                                    {t}
+                                </option>
+                            ))}
+                        </select>
+                        <InputError
+                            message={errors.tingkat}
+                            className="mt-1 text-[10px]"
+                        />
+                    </div>
                 </div>
 
                 {/* Jurusan Checkbox */}
-                <div className="col-span-2 flex items-center">
+                <div className="flex items-center pt-1">
                     <Checkbox
                         checked={showJurusan}
                         onChange={() => setShowJurusan(!showJurusan)}
                     />
-                    <span className="ml-2">Gunakan Jurusan</span>
+                    <span className="ml-2 text-xs text-gray-700">
+                        Gunakan Jurusan
+                    </span>
                 </div>
 
                 {showJurusan && (
-                    <div className="col-span-2">
-                        <InputLabel value="Jurusan" />
+                    <div>
+                        <InputLabel
+                            value="Jurusan"
+                            className="text-xs font-medium text-gray-700"
+                        />
                         <select
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-xs text-xs py-1.5 focus:border-indigo-500 focus:ring-indigo-500"
                             value={data.jurusan_id}
                             onChange={(e) =>
                                 setData("jurusan_id", e.target.value)
@@ -253,13 +228,15 @@ export default function Add({
                         >
                             <option value="">[Pilih jurusan]</option>
                             {ListJurusan.map((j) => (
-                                <option key={j} value={j.id}>
+                                <option key={j.id} value={j.id}>
                                     {j.nama_jurusan}
                                 </option>
                             ))}
                         </select>
-                        <InputError message={errors.jurusan} />
-                        {/* ... select input untuk jurusan ... */}
+                        <InputError
+                            message={errors.jurusan}
+                            className="mt-1 text-[10px]"
+                        />
                     </div>
                 )}
             </div>

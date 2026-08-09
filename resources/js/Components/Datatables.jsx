@@ -110,36 +110,36 @@ export default function DataTable({
         <div className="w-full">
             {/* TOPBAR */}
             {/* <div className="flex items-center gap-4 p-2 mb-4">
-                <h2 className="text-xl font-bold text-gray-800">{header}</h2>
-                {title && (
-                    <span className="px-2.5 py-1 text-xs font-semibold uppercase rounded-full bg-green-100 text-green-700">
-                        {sortedData.length} {title}
-                    </span>
-                )}
-            </div> */}
+        <h2 className="text-base font-bold text-gray-800">{header}</h2>
+        {title && (
+            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full bg-green-100 text-green-700">
+                {sortedData.length} {title}
+            </span>
+        )}
+    </div> */}
 
-            <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="mb-4 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
                 {searchable && (
-                    <div className="relative w-full md:w-72">
-                        <i className="fa fa-search absolute left-3.5 top-3.5 text-sm text-gray-400"></i>
+                    <div className="relative w-full md:w-64">
+                        <i className="fa fa-search absolute left-3 top-2.5 text-xs text-gray-400"></i>
                         <input
                             type="text"
                             placeholder="Cari..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-green-500 focus:bg-white focus:shadow-sm"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs outline-none transition focus:border-green-500 focus:bg-white focus:shadow-sm"
                         />
                     </div>
                 )}
 
-                <div className="flex items-center gap-2 text-sm text-gray-500 justify-end">
+                <div className="flex items-center gap-2 text-xs text-gray-500 justify-end">
                     <select
                         value={rowsPerPage}
                         onChange={(e) => {
                             setRowsPerPage(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className="rounded-xl border border-gray-200 px-7 py-2 outline-none focus:border-green-500 bg-white"
+                        className="rounded-xl border border-gray-200 px-6 py-1.5 text-xs outline-none focus:border-green-500 bg-white"
                     >
                         <option value={10}>10</option>
                         <option value={15}>15</option>
@@ -161,13 +161,13 @@ export default function DataTable({
                                             col.accessor &&
                                             handleSort(col.accessor)
                                         }
-                                        className={`px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-400 select-none ${
+                                        className={`px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider text-gray-400 select-none ${
                                             col.accessor && sortable
                                                 ? "cursor-pointer hover:bg-gray-100/70 transition"
                                                 : ""
                                         }`}
                                     >
-                                        <div className="flex items-center gap-1.5">
+                                        <div className="flex items-center gap-1">
                                             <span>{col.header}</span>
                                             {sortable &&
                                                 col.accessor &&
@@ -179,7 +179,7 @@ export default function DataTable({
                                                             "asc"
                                                                 ? "fa-sort-up"
                                                                 : "fa-sort-down"
-                                                        } text-green-500`}
+                                                        } text-green-500 text-xs`}
                                                     />
                                                 )}
                                         </div>
@@ -196,16 +196,16 @@ export default function DataTable({
                                         {columns.map((_, colIndex) => (
                                             <td
                                                 key={`skeleton-col-${colIndex}`}
-                                                className="px-4 py-4"
+                                                className="px-3 py-3"
                                             >
                                                 <div
-                                                    className={`h-4 bg-gray-200 rounded-lg animate-pulse ${
+                                                    className={`h-3.5 bg-gray-200 rounded-lg animate-pulse ${
                                                         colIndex === 0
-                                                            ? "w-12"
+                                                            ? "w-10"
                                                             : colIndex ===
                                                                 columns.length -
                                                                     1
-                                                              ? "w-20"
+                                                              ? "w-16"
                                                               : "w-3/4"
                                                     }`}
                                                 ></div>
@@ -217,7 +217,7 @@ export default function DataTable({
                                 <tr>
                                     <td
                                         colSpan={columns.length}
-                                        className="py-12 text-center text-sm text-gray-400"
+                                        className="py-8 text-center text-xs text-gray-400"
                                     >
                                         Tidak ada data
                                     </td>
@@ -231,7 +231,7 @@ export default function DataTable({
                                         {columns.map((col, colIndex) => (
                                             <td
                                                 key={colIndex}
-                                                className="px-4 py-3.5 text-sm text-gray-600 max-w-sm truncate"
+                                                className="px-3 py-2.5 text-xs text-gray-600 max-w-sm truncate"
                                             >
                                                 {col.render
                                                     ? col.render(row, rowIndex)
@@ -249,8 +249,8 @@ export default function DataTable({
 
             {/* PAGINATION FOOTER */}
             {!loading && totalPages > 0 && (
-                <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-1">
-                    <div className="text-xs text-gray-400 font-medium text-center sm:text-left">
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
+                    <div className="text-[11px] text-gray-400 font-medium text-center sm:text-left">
                         Menampilkan{" "}
                         {sortedData.length === 0
                             ? 0
@@ -266,7 +266,7 @@ export default function DataTable({
                             onClick={() =>
                                 setCurrentPage((p) => Math.max(p - 1, 1))
                             }
-                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white select-none"
+                            className="rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white select-none"
                         >
                             Prev
                         </button>
@@ -275,7 +275,7 @@ export default function DataTable({
                             page === "..." ? (
                                 <span
                                     key={`ellipsis-${index}`}
-                                    className="px-2 py-2 text-xs text-gray-400 select-none"
+                                    className="px-1.5 py-1.5 text-[11px] text-gray-400 select-none"
                                 >
                                     ...
                                 </span>
@@ -283,7 +283,7 @@ export default function DataTable({
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`min-w-[36px] h-9 rounded-xl text-xs font-bold transition select-none ${
+                                    className={`min-w-[30px] h-7 rounded-xl text-[11px] font-bold transition select-none ${
                                         currentPage === page
                                             ? "bg-green-600 text-white shadow-sm shadow-green-100"
                                             : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
@@ -301,7 +301,7 @@ export default function DataTable({
                                     Math.min(p + 1, totalPages),
                                 )
                             }
-                            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white select-none"
+                            className="rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-white select-none"
                         >
                             Next
                         </button>

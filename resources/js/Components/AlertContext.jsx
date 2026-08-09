@@ -41,18 +41,18 @@ const TOAST_STYLES = {
 };
 
 const LABELS = {
-    success: "Sukses",
-    error: "Gagal",
-    info: "Info",
-    warning: "Peringatan",
+    success: "Sukses!",
+    error: "Gagal!",
+    info: "Informasi",
+    warning: "Peringatan!",
 };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 
-const ToastIcon = ({ type }) => {
+const ToastIcon = ({ type, size = 18 }) => {
     const props = {
-        width: 18,
-        height: 18,
+        width: size,
+        height: size,
         viewBox: "0 0 24 24",
         fill: "none",
         strokeWidth: 2.5,
@@ -65,7 +65,8 @@ const ToastIcon = ({ type }) => {
         info: "#2563eb",
         warning: "#d97706",
     };
-    const stroke = colors[type];
+    const stroke = colors[type] || colors.info;
+
     if (type === "success")
         return (
             <svg {...props} stroke={stroke}>
@@ -133,7 +134,7 @@ const BTN_STYLES = {
         background: "#16a34a",
         color: "#fff",
         border: "none",
-        boxShadow: "0 4px 16px rgba(124,58,237,.3)",
+        boxShadow: "0 4px 16px rgba(22, 163, 74, .3)",
     },
     cancel: {
         background: "#f3f4f6",
@@ -142,14 +143,14 @@ const BTN_STYLES = {
     },
 };
 
-function ModalButton({ onClick, variant, children }) {
+function ModalButton({ onClick, variant, children, customColor }) {
     return (
         <button
             onClick={onClick}
             style={{
                 flex: 1,
                 padding: "12px 24px",
-                borderRadius: 14,
+                borderRadius: 12,
                 fontFamily: "inherit",
                 fontSize: 14,
                 fontWeight: 600,
@@ -157,6 +158,10 @@ function ModalButton({ onClick, variant, children }) {
                 letterSpacing: ".01em",
                 transition: "all .15s",
                 ...BTN_STYLES[variant],
+                ...(customColor && {
+                    background: customColor,
+                    boxShadow: `0 4px 16px ${customColor}40`, // Transparansi 25% untuk shadow
+                }),
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.filter = "brightness(1.08)";
@@ -183,10 +188,9 @@ export function AlertProvider({ children }) {
         setTimeout(() => setAlert(null), duration);
     };
 
-    // 2. Alert Center (Tengah Layar) - FUNGSI BARU DITAMBAHKAN
-    const showCenterAlert = (message, type = "info", duration = 3000) => {
+    // 2. Alert Center bergaya SweetAlert2 (Tidak auto-close kecuali diatur manual)
+    const showCenterAlert = (message, type = "info") => {
         setAlert({ type: "center_alert", message, alertType: type });
-        setTimeout(() => setAlert(null), duration);
     };
 
     // 3. Question (Modal Yes/No)
@@ -225,7 +229,6 @@ export function AlertProvider({ children }) {
 
     const ts = TOAST_STYLES[alert?.alertType] ?? TOAST_STYLES.info;
 
-    // Jangan lupa mengekspor showCenterAlert agar bisa dipanggil di komponen lain
     return (
         <AlertContext.Provider
             value={{ showAlert, showCenterAlert, showQuestion }}
@@ -248,8 +251,8 @@ export function AlertProvider({ children }) {
                         }}
                         style={{
                             position: "fixed",
-                            bottom: 24, // Tetap di bawah
-                            right: 24, // Tetap di kanan
+                            bottom: 24,
+                            right: 24,
                             zIndex: 9999,
                             display: "flex",
                             alignItems: "center",
@@ -303,36 +306,26 @@ export function AlertProvider({ children }) {
                                 {alert.message}
                             </div>
                         </div>
-                        <motion.div
-                            initial={{ scaleX: 1 }}
-                            animate={{ scaleX: 0 }}
-                            transition={{ duration: 3, ease: "linear" }}
-                            style={{
-                                position: "absolute",
-                                bottom: 0,
-                                left: 0,
-                                height: 3,
-                                width: "100%",
-                                transformOrigin: "left",
-                                borderRadius: "0 0 16px 16px",
-                                background: ts.progress,
-                            }}
-                        />
                     </motion.div>
                 )}
 
-                {/* ── 2. CENTER ALERT (Pop up di tengah) ── */}
+                {/* ── 2. CENTER ALERT (Pop up bergaya SweetAlert2) ── */}
                 {alert?.type === "center_alert" && (
                     <motion.div
                         key="alert-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget) setAlert(null); // Tutup saat klik di luar area card
+                        }}
                         style={{
                             position: "fixed",
                             inset: 0,
                             zIndex: 9998,
-                            background: "rgba(0,0,0,0.45)",
+                            background: "rgba(15,15,20,.72)", // Latar gelap
+                            backdropFilter: "blur(8px)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -340,13 +333,13 @@ export function AlertProvider({ children }) {
                     >
                         <motion.div
                             key="alert-modal"
-                            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                            initial={{ opacity: 0, y: 24, scale: 0.85 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                            exit={{ opacity: 0, y: 24, scale: 0.85 }}
                             transition={{
                                 type: "spring",
-                                stiffness: 380,
-                                damping: 30,
+                                stiffness: 360,
+                                damping: 26,
                             }}
                             style={{
                                 position: "relative",
@@ -355,73 +348,73 @@ export function AlertProvider({ children }) {
                                 flexDirection: "column",
                                 alignItems: "center",
                                 textAlign: "center",
-                                gap: 12,
-                                padding: 24,
-                                borderRadius: 16,
-                                minWidth: 320,
-                                maxWidth: 380,
-                                overflow: "hidden",
-                                background: ts.bg,
-                                border: ts.border,
-                                boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+                                background: "#fff", // Card putih bersih
+                                borderRadius: 24,
+                                padding: "40px 32px 32px",
+                                width: 360,
+                                boxShadow:
+                                    "0 32px 64px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04)",
                                 fontFamily:
                                     "'Plus Jakarta Sans', system-ui, sans-serif",
                             }}
                         >
+                            {/* Icon Besar di Tengah */}
                             <div
                                 style={{
-                                    width: 48,
-                                    height: 48,
-                                    borderRadius: 12,
+                                    width: 80,
+                                    height: 80,
+                                    borderRadius: "50%",
                                     background: ts.iconBg,
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
+                                    margin: "0 auto 20px",
+                                    animation:
+                                        "swal_popIn .4s .1s cubic-bezier(.34,1.56,.64,1) both",
                                 }}
                             >
-                                <ToastIcon type={alert.alertType} />
+                                <ToastIcon type={alert.alertType} size={40} />
                             </div>
 
+                            {/* Judul */}
                             <div
                                 style={{
-                                    fontSize: 16,
+                                    fontSize: 22,
                                     fontWeight: 700,
-                                    color: ts.titleColor,
+                                    color: "#111827",
+                                    marginBottom: 12,
+                                    lineHeight: 1.3,
                                 }}
                             >
                                 {LABELS[alert.alertType] ?? alert.alertType}
                             </div>
 
+                            {/* Pesan */}
                             <div
                                 style={{
-                                    fontSize: 14,
+                                    fontSize: 15,
                                     color: "#6b7280",
-                                    lineHeight: 1.5,
+                                    lineHeight: 1.6,
+                                    marginBottom: 32,
                                 }}
                             >
                                 {alert.message}
                             </div>
 
-                            {/* <button
-                                onClick={() => setAlert(null)}
-                                style={{
-                                    marginTop: 8,
-                                    width: "100%",
-                                    padding: "10px",
-                                    borderRadius: 10,
-                                    background: ts.progress,
-                                    color: "#fff",
-                                    border: "none",
-                                    fontSize: 14,
-                                    fontWeight: 600,
-                                    cursor: "pointer",
-                                }}
-                            >
-                                OK
-                            </button> */}
+                            {/* Tombol OK */}
+                            <div style={{ display: "flex", width: "100%" }}>
+                                <ModalButton
+                                    onClick={() => setAlert(null)}
+                                    variant="confirm"
+                                    customColor={ts.progress} // Tombol menyesuaikan warna tipe (hijau/merah/biru/kuning)
+                                >
+                                    OK
+                                </ModalButton>
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}
+
                 {/* ── 3. QUESTION MODAL (Tidak Berubah) ── */}
                 {alert?.type === "question" && (
                     <motion.div

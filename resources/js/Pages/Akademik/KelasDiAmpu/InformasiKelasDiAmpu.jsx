@@ -68,8 +68,9 @@ export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
     return (
         <div className="p-6">
             <div className="mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">
-                    <i className="fa fa-users mr-2"></i> Siswa
+                <h2 className="text-sm font-semibold text-gray-800">
+                    <i className="fa fa-users mr-2"></i> List Siswa{" "}
+                    {dataKelas.nama_kelas}
                 </h2>
             </div>
             <DataTable loading={loading} columns={columns} data={dataSiswa} />

@@ -1,13 +1,10 @@
 import { useAlert } from "@/Components/AlertContext";
-import Checkbox from "@/Components/Checkbox";
 import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import { useForm, usePage } from "@inertiajs/react";
-import { useEffect, useMemo, useState } from "react";
-import Select from "react-select";
-import axios from "axios";
+import { useEffect } from "react";
 
 export default function Add({
     open,
@@ -26,36 +23,23 @@ export default function Add({
     const submit = (e) => {
         e.preventDefault();
 
-        // Tentukan route dinamis berdasarkan aksi (Tambah / Edit)
-        if (isEdit) {
-            post(route("master.jurusan.update", { id: Jurusan.id }), {
-                onSuccess: () => {
-                    if (flash.success) {
-                        showAlert(flash.success, "success");
-                    } else if (flash.error) {
-                        showAlert(flash.error, "error");
-                    }
-                    setOpen(false);
-                    getJurusan();
-                    reset();
-                },
-            });
-        } else {
-            post(route("master.jurusan.store"), {
-                onSuccess: () => {
-                    if (flash.success) {
-                        showAlert(flash.success, "success");
-                    } else if (flash.error) {
-                        showAlert(flash.error, "error");
-                    }
-                    setOpen(false);
-                    getJurusan();
-                    reset();
-                },
-            });
-        }
+        const url = isEdit
+            ? route("master.jurusan.update", { id: Jurusan.id })
+            : route("master.jurusan.store");
+
+        post(url, {
+            onSuccess: () => {
+                const message = flash.success || flash.error;
+                if (message)
+                    showAlert(message, flash.success ? "success" : "error");
+
+                setOpen(false);
+                getJurusan();
+                reset();
+            },
+        });
     };
-    // Sinkronisasi data saat mode Edit atau Reset saat Tambah Baru
+
     useEffect(() => {
         if (isEdit && Jurusan) {
             setData({
@@ -73,12 +57,12 @@ export default function Add({
             onClose={() => setOpen(false)}
             onSubmit={submit}
         >
-            <div className="grid grid-cols-2 gap-4">
-                {/* Field Wali Kelas */}
-
-                {/* Field Nama Kelas */}
-                <div className="col-span-2">
-                    <InputLabel value="Nama Jurusan" />
+            <div className="space-y-3">
+                <div>
+                    <InputLabel
+                        value="Nama Jurusan"
+                        className="text-xs font-medium text-gray-700"
+                    />
                     <TextInput
                         icon="tag"
                         type="text"
@@ -87,8 +71,12 @@ export default function Add({
                         onChange={(e) =>
                             setData("nama_jurusan", e.target.value)
                         }
+                        className="mt-1 w-full text-xs py-1.5"
                     />
-                    <InputError message={errors.nama_jurusan} />
+                    <InputError
+                        message={errors.nama_jurusan}
+                        className="mt-1 text-[10px]"
+                    />
                 </div>
             </div>
         </FormModal>

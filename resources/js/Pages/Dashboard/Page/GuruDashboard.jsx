@@ -44,7 +44,7 @@ export default function GuruDashboard({
                         <p className="text-emerald-100 text-sm md:text-base font-medium mb-2 tracking-wide uppercase">
                             Selamat datang kembali 👋
                         </p>
-                        <h1 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight">
+                        <h1 className="text-3xl md:text-2xl font-extrabold mb-4 tracking-tight">
                             {user.name}
                         </h1>
                         <span className="inline-flex items-center px-3 py-1 text-sm text-emerald-50 bg-emerald-800/50 backdrop-blur-sm rounded-lg border border-emerald-500/30">
@@ -134,7 +134,6 @@ export default function GuruDashboard({
             </div>
 
             {/* ── Menu Cepat ── */}
-           
         </div>
     );
 }

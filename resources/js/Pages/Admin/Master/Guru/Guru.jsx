@@ -9,12 +9,11 @@ import Menu from "@/Components/Menu";
 import Select from "react-select";
 import { useAlert } from "@/Components/AlertContext";
 
-// Import Modals (Pastikan path-nya sesuai di project Anda)
+// Import Modals
 import Add from "./Add";
 import EditWaliKelas from "./EditWaliKelas";
 import MappingGuruMapel from "./MappingGuruMapel";
 import Modal from "@/Components/Modal";
-import DangerButton from "@/Components/DangerButton";
 import InputLabel from "@/Components/InputLabel";
 import ModalPdf from "@/Components/ModalPdf";
 
@@ -27,8 +26,8 @@ export default function Guru() {
     const [activeMenu, setActiveMenu] = useState("master_guru");
     const [loading, setLoading] = useState(false);
     const [openPdf, setOpenPdf] = useState(false);
-    const [TahunAjaran, setTahunAjaran] = useState([]);
-    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(null); // Ditambahkan
+    const [tahunAjaran, setTahunAjaran] = useState([]);
+    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(null);
 
     const [data, setData] = useState({
         guru: [],
@@ -46,6 +45,9 @@ export default function Guru() {
         data: null,
     });
 
+    const [title, setTitle] = useState("");
+    const [pdfUrl, setPdfUrl] = useState("");
+
     const menus = [
         { value: "master_guru", nama_menu: "Master Guru" },
         { value: "wali_kelas", nama_menu: "Daftar Wali Kelas" },
@@ -53,9 +55,8 @@ export default function Guru() {
     ];
 
     // =========================================================================
-    // DATA FETCHING (DIBUNGKUS useCallback AGAR TIDAK RE-RENDER)
+    // DATA FETCHING
     // =========================================================================
-
     const loadGuru = useCallback(async () => {
         setLoading(true);
         try {
@@ -64,17 +65,17 @@ export default function Guru() {
                 ...prev,
                 guru: res.data.status !== false ? res.data.data : [],
             }));
-        } catch (error) {
+        } catch {
             setData((prev) => ({ ...prev, guru: [] }));
         } finally {
             setLoading(false);
         }
     }, []);
 
-    const loadGuruMapel = useCallback(async (ta_id = null) => {
+    const loadGuruMapel = useCallback(async (taId = null) => {
         setLoading(true);
         try {
-            const params = ta_id ? { tahun_ajaran_id: ta_id } : {};
+            const params = taId ? { tahun_ajaran_id: taId } : {};
             const res = await axios.get(
                 route("master.guru.getGuruMapel", params),
             );
@@ -82,7 +83,7 @@ export default function Guru() {
                 ...prev,
                 mapel: res.data.status !== false ? res.data.data : [],
             }));
-        } catch (error) {
+        } catch {
             setData((prev) => ({ ...prev, mapel: [] }));
         } finally {
             setLoading(false);
@@ -94,17 +95,17 @@ export default function Guru() {
         try {
             const res = await axios.get(route("getData.get-kelas"));
             setOpsiKelas(res.data.status !== false ? res.data.data : []);
-        } catch (error) {
+        } catch {
             setOpsiKelas([]);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    const loadWaliKelas = useCallback(async (kelas_id = null) => {
+    const loadWaliKelas = useCallback(async (kelasId = null) => {
         setLoading(true);
         try {
-            const params = kelas_id ? { kelas_id } : {};
+            const params = kelasId ? { kelas_id: kelasId } : {};
             const res = await axios.get(
                 route("master.guru.getWaliKelas", params),
             );
@@ -112,7 +113,7 @@ export default function Guru() {
                 ...prev,
                 wali: res.data.status !== false ? res.data.data : [],
             }));
-        } catch (error) {
+        } catch {
             setData((prev) => ({ ...prev, wali: [] }));
         } finally {
             setLoading(false);
@@ -131,7 +132,7 @@ export default function Guru() {
                 const taAktif = taData.find((ta) => ta.status === "Aktif");
                 if (taAktif) {
                     setSelectedTahunAjaran(taAktif.id);
-                    loadGuruMapel(taAktif.id); // Langsung load data mapel untuk TA aktif
+                    loadGuruMapel(taAktif.id);
                 }
             }
         } catch (error) {
@@ -143,7 +144,6 @@ export default function Guru() {
     // =========================================================================
     // EFFECTS
     // =========================================================================
-
     useEffect(() => {
         if (activeMenu === "master_guru") {
             loadGuru();
@@ -152,7 +152,6 @@ export default function Guru() {
             loadWaliKelas(filter.kelas);
         } else if (activeMenu === "guru_mapel") {
             getTahunAjaran();
-            // loadGuruMapel akan dipanggil oleh getTahunAjaran setelah mendapat TA Aktif
         }
     }, [
         activeMenu,
@@ -166,10 +165,6 @@ export default function Guru() {
     // =========================================================================
     // ACTIONS & HANDLERS
     // =========================================================================
-
-    const openModal = (type, data = null, isEdit = false) =>
-        setModal({ show: true, type, isEdit, data });
-
     const closeModal = () =>
         setModal({ show: false, type: null, isEdit: false, data: null });
 
@@ -187,8 +182,8 @@ export default function Guru() {
 
     const handleDelete = (id) => {
         showQuestion("Apakah anda yakin ingin menghapus data ini?", () => {
-            axios.post(route("master.guru.destroy", { id: id })).then((res) => {
-                if (res.data.success == true) {
+            axios.post(route("master.guru.destroy", { id })).then((res) => {
+                if (res.data.success) {
                     showAlert(res.data.message, "success");
                     loadGuru();
                 } else {
@@ -198,23 +193,19 @@ export default function Guru() {
         });
     };
 
-    const handleChangeTA = (val) => {
-        setSelectedTahunAjaran(val);
-        loadGuruMapel(val); // Reload mapel berdasarkan TA yang dipilih
-    };
-
     // =========================================================================
-    // COLUMNS & OPTIONS MEMOIZATION
+    // MEMOIZED OPTIONS & COLUMNS
     // =========================================================================
-
-    const tahunAjaranOptions = useMemo(() => {
-        return TahunAjaran.map((ta) => ({
-            value: ta.id,
-            label: ta.tahun_ajaran,
-            semester: ta.semester,
-            status: ta.status,
-        }));
-    }, [TahunAjaran]);
+    const tahunAjaranOptions = useMemo(
+        () =>
+            tahunAjaran.map((ta) => ({
+                value: ta.id,
+                label: ta.tahun_ajaran,
+                semester: ta.semester,
+                status: ta.status,
+            })),
+        [tahunAjaran],
+    );
 
     const selectStyles = {
         control: (base) => ({
@@ -227,7 +218,7 @@ export default function Guru() {
     const columnsGuru = useMemo(
         () => [
             { header: "No", render: (_, i) => i + 1 },
-            { header: "Nip", accessor: "nip" },
+            { header: "NIP", accessor: "nip" },
             { header: "Nama Guru", accessor: "nama_guru" },
             {
                 header: "Status",
@@ -247,7 +238,13 @@ export default function Guru() {
                                 edit: true,
                                 label: "Edit",
                                 icon: "edit",
-                                onClick: () => openModal("add_guru", row, true),
+                                onClick: () =>
+                                    setModal({
+                                        show: true,
+                                        type: "add_guru",
+                                        isEdit: true,
+                                        data: row,
+                                    }),
                             },
                             {
                                 label: "Hapus",
@@ -268,17 +265,11 @@ export default function Guru() {
             { header: "No", render: (_, i) => i + 1 },
             {
                 header: "Kelas",
-                render: (row) => (
-                    <span>
-                        {row.nama_kelas + " " + (row.nama_jurusan || "")}
-                    </span>
-                ),
+                render: (row) => `${row.nama_kelas} ${row.nama_jurusan || ""}`,
             },
             {
                 header: "Nama Guru",
-                render: (row) => (
-                    <span>{row.wali_kelas?.nama_guru || "Belum diatur"}</span>
-                ),
+                render: (row) => row.wali_kelas?.nama_guru || "Belum diatur",
             },
             {
                 header: "#",
@@ -289,7 +280,12 @@ export default function Guru() {
                                 edit: true,
                                 label: "Edit",
                                 onClick: () =>
-                                    openModal("edit_wali", row, true),
+                                    setModal({
+                                        show: true,
+                                        type: "edit_wali",
+                                        isEdit: true,
+                                        data: row,
+                                    }),
                             },
                         ]}
                     />
@@ -307,8 +303,15 @@ export default function Guru() {
                 render: (row) => (
                     <button
                         type="button"
-                        className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-md transition-colors"
-                        onClick={() => openModal("details", row)}
+                        className="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 p-2 rounded-md transition-colors"
+                        onClick={() =>
+                            setModal({
+                                show: true,
+                                type: "details",
+                                isEdit: false,
+                                data: row,
+                            })
+                        }
                     >
                         <i className="fa fa-eye mr-1"></i> Detail
                     </button>
@@ -318,15 +321,12 @@ export default function Guru() {
         [],
     );
 
-    const [title, setTitle] = useState("");
-    const [pdfUrl, setPdfUrl] = useState("");
-    const openModalPdf = (type, nip, nama_guru) => {
+    const openModalPdf = (type, nip, namaGuru) => {
         if (selectedTahunAjaran === null) {
             showAlert("Pilih tahun ajaran terlebih dahulu", "warning");
             return;
         }
         if (type === "guru_mapel") {
-            // 2. Set nilai menggunakan fungsi dari useState
             setTitle("Daftar Guru Mata Pelajaran");
             setPdfUrl(
                 route("pdf.pdfGuruMapel", {
@@ -335,16 +335,65 @@ export default function Guru() {
             );
             setOpenPdf(true);
         } else if (type === "guru_mapel_per_guru") {
-            setTitle("Daftar Mata Pelajaran " + nama_guru);
+            setTitle(`Daftar Mata Pelajaran ${namaGuru}`);
             setPdfUrl(
                 route("pdf.pdfGuruMapel", {
                     tahun_ajaran: selectedTahunAjaran,
-                    nip: nip,
+                    nip,
                 }),
             );
             setOpenPdf(true);
-            setModal({ show: false });
+            setModal((prev) => ({ ...prev, show: false }));
         }
+    };
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
+            borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
+            borderRadius: "0.5rem",
+            padding: "0.05rem 0.1rem",
+            minHeight: "32px",
+            boxShadow: state.isFocused
+                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: state.isDisabled ? "not-allowed" : "pointer",
+            "&:hover": {
+                borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
+            },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0px 6px",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "11px",
+            fontWeight: "normal",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#1F2937",
+            fontSize: "11px",
+            fontWeight: "600",
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "11px",
+            fontWeight: "500",
+            cursor: "pointer",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
     };
 
     return (
@@ -353,6 +402,7 @@ export default function Guru() {
                 <Menu menu={activeMenu} setMenu={setActiveMenu} menus={menus} />
 
                 <div className="flex-1 min-w-0 md:p-6 w-full mt-4 md:mt-0">
+                    {/* Master Guru */}
                     {activeMenu === "master_guru" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
                             <DataTable
@@ -363,10 +413,11 @@ export default function Guru() {
                         </div>
                     )}
 
+                    {/* Wali Kelas */}
                     {activeMenu === "wali_kelas" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
                             <div className="flex items-center gap-3 mb-6 bg-white p-4 border border-gray-100 rounded-lg">
-                                <label className="text-sm font-semibold text-gray-700">
+                                <label className="text-xs font-semibold text-gray-700">
                                     Filter Kelas:
                                 </label>
                                 <div className="w-72">
@@ -383,7 +434,7 @@ export default function Guru() {
                                             })
                                         }
                                         isClearable={true}
-                                        styles={selectStyles}
+                                        styles={customSelectStyles}
                                     />
                                 </div>
                             </div>
@@ -395,15 +446,15 @@ export default function Guru() {
                         </div>
                     )}
 
+                    {/* Guru Mapel */}
                     {activeMenu === "guru_mapel" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
                             <div className="flex justify-between items-end mb-4">
-                                {/* BAGIAN KIRI: Select Tahun Ajaran */}
                                 <div className="w-1/2 sm:w-1/3">
                                     <InputLabel value="Pilih Tahun Ajaran" />
                                     <Select
                                         styles={{
-                                            ...selectStyles,
+                                            ...customSelectStyles,
                                             menuPortal: (base) => ({
                                                 ...base,
                                                 zIndex: 9999,
@@ -414,14 +465,15 @@ export default function Guru() {
                                         placeholder="Pilih Tahun Ajaran..."
                                         value={
                                             tahunAjaranOptions.find(
-                                                (option) =>
-                                                    option.value ===
+                                                (o) =>
+                                                    o.value ===
                                                     selectedTahunAjaran,
                                             ) || null
                                         }
-                                        onChange={(val) =>
-                                            handleChangeTA(val?.value)
-                                        }
+                                        onChange={(val) => {
+                                            setSelectedTahunAjaran(val?.value);
+                                            loadGuruMapel(val?.value);
+                                        }}
                                         formatOptionLabel={(option) => (
                                             <div className="flex justify-between items-center">
                                                 <span>
@@ -447,27 +499,27 @@ export default function Guru() {
                                     />
                                 </div>
 
-                                {/* BAGIAN KANAN: Kumpulan Tombol */}
                                 <div className="flex items-center gap-2">
-                                    {/* Tombol Buka PDF */}
                                     <PrimaryButton
                                         onClick={() =>
                                             openModalPdf("guru_mapel")
-                                        } // Sesuaikan fungsi/route onClick-nya
-                                        className="h-10 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-800" // Warna merah khas PDF (Opsional, bisa dihapus jika ingin warna default)
+                                        }
+                                        className="h-10 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-800"
                                     >
-                                        <i className="fa fa-file-pdf mr-2"></i>{" "}
-                                        {/* Pastikan FontAwesome diload, atau hapus baris ini */}
+                                        <i className="fa fa-file-pdf mr-2"></i>
                                     </PrimaryButton>
-
-                                    {/* Tombol Kelola Guru */}
                                     <PrimaryButton
                                         onClick={() =>
-                                            openModal("map_guru_mapel")
+                                            setModal({
+                                                show: true,
+                                                type: "map_guru_mapel",
+                                                isEdit: false,
+                                                data: null,
+                                            })
                                         }
                                         className="h-10"
                                     >
-                                        <i className="fa fa-users-cog mr-2"></i>
+                                        <i className="fa fa-users-cog mr-2"></i>{" "}
                                         Kelola Guru Mata Pelajaran
                                     </PrimaryButton>
                                 </div>
@@ -482,6 +534,7 @@ export default function Guru() {
                 </div>
             </div>
 
+            {/* Modals */}
             <Add
                 open={modal.show && modal.type === "add_guru"}
                 setOpen={closeModal}
@@ -495,7 +548,6 @@ export default function Guru() {
                 onClose={closeModal}
                 maxWidth="2xl"
             >
-                {/* Header Modal */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white sticky top-0 z-10">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800">
@@ -503,7 +555,7 @@ export default function Guru() {
                         </h2>
                         <p className="text-sm text-gray-500 font-medium mt-1">
                             {modal.data?.mapel}{" "}
-                            <span className="text-indigo-600 font-bold">
+                            <span className="text-teal-600 font-bold">
                                 ({modal.data?.kode_mapel})
                             </span>
                         </p>
@@ -516,12 +568,10 @@ export default function Guru() {
                     </button>
                 </div>
 
-                {/* Content Modal */}
                 <div className="p-6 max-h-[70vh] overflow-y-auto bg-gray-50">
                     {modal.data?.guru?.length > 0 ? (
                         <div className="space-y-5">
                             {modal.data.guru.map((g) => {
-                                // Hitung total jam di luar return JSX untuk optimasi
                                 const totalJam = g.mengajar.reduce(
                                     (total, item) =>
                                         total + (parseInt(item.beban_jam) || 0),
@@ -533,9 +583,7 @@ export default function Guru() {
                                         key={g.value}
                                         className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
                                     >
-                                        {/* Nama Guru Header */}
                                         <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                                            {/* BAGIAN KIRI: Info Guru */}
                                             <div>
                                                 <h3 className="font-bold text-gray-900 text-base">
                                                     {g.label}
@@ -545,10 +593,7 @@ export default function Guru() {
                                                     {g.nip || "Tidak tersedia"}
                                                 </p>
                                             </div>
-
-                                            {/* BAGIAN KANAN: Tombol PDF & Badge Total Jam */}
                                             <div className="flex items-center gap-3">
-                                                {/* Button Open PDF */}
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -557,27 +602,24 @@ export default function Guru() {
                                                             g.nip,
                                                             g.label,
                                                         )
-                                                    } // Sesuaikan nama route dan parameter id-nya
+                                                    }
                                                     className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg text-xs font-bold transition-all shadow-sm"
                                                     title="Cetak PDF Jadwal Guru"
                                                 >
                                                     <i className="fa fa-file-pdf text-sm"></i>
-                                                    <span> PDF</span>
+                                                    <span>PDF</span>
                                                 </button>
-
-                                                {/* Badge Total Jam */}
                                                 <div className="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                                                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
                                                         Total Jam
                                                     </p>
-                                                    <span className="text-lg font-black text-indigo-600">
+                                                    <span className="text-lg font-black text-teal-600">
                                                         {totalJam}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Tabel Kelas */}
                                         <div className="p-0">
                                             <table className="w-full text-sm">
                                                 <thead className="text-gray-500 bg-gray-50/50">
@@ -594,13 +636,13 @@ export default function Guru() {
                                                     {g.mengajar.map((item) => (
                                                         <tr
                                                             key={item.id}
-                                                            className="hover:bg-indigo-50/30 transition-colors"
+                                                            className="hover:bg-teal-50/30 transition-colors"
                                                         >
                                                             <td className="px-5 py-3 font-semibold text-gray-700">
                                                                 {item.kelas}
                                                             </td>
                                                             <td className="px-5 py-3 text-right font-mono text-gray-600">
-                                                                <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">
+                                                                <span className="bg-teal-100 text-teal-700 px-2 py-1 rounded text-xs font-bold">
                                                                     {
                                                                         item.beban_jam
                                                                     }{" "}
@@ -640,6 +682,7 @@ export default function Guru() {
                 setOpen={closeModal}
                 getGuruMapel={() => loadGuruMapel(selectedTahunAjaran)}
             />
+
             <ModalPdf
                 isOpen={openPdf}
                 onClose={() => setOpenPdf(false)}

@@ -1,14 +1,13 @@
+import { useState, useEffect, useMemo } from "react";
+import { useForm, usePage } from "@inertiajs/react";
+import axios from "axios";
 import { useAlert } from "@/Components/AlertContext";
-import FormModal from "@/Components/FormModal";
-import InputError from "@/Components/InputError";
-import InputLabel from "@/Components/InputLabel";
 import Offcanvas from "@/Components/Offcanvas";
 import PrimaryButton from "@/Components/PrimaryButton";
-import Switch from "@/Components/Switch";
+import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
-import { router, useForm, usePage } from "@inertiajs/react";
-import axios from "axios";
-import { useEffect, useState, useMemo } from "react";
+import InputError from "@/Components/InputError";
+import Switch from "@/Components/Switch";
 
 export default function Add({
     open,
@@ -23,21 +22,15 @@ export default function Add({
     const [menus, setMenus] = useState([]);
     const [search, setSearch] = useState("");
 
-    // 1. Definisikan bentuk form awal
-    const { data, setData, post, put, processing, reset, errors } = useForm({
+    const { data, setData, processing, reset, errors } = useForm({
         id: null,
         nama_roles: "",
         activeMenu: {},
     });
 
-    // Fetch daftar fitur dari database
     const getMenuData = () => {
         axios.get(route("getData.get-list-feature")).then((res) => {
-            if (res.data?.status !== false) {
-                setMenus(res.data.data || []);
-            } else {
-                setMenus([]);
-            }
+            setMenus(res.data?.status !== false ? res.data.data || [] : []);
         });
     };
 
@@ -45,7 +38,6 @@ export default function Add({
         if (open) getMenuData();
     }, [open]);
 
-    // 2. Sinkronisasi data saat edit atau tambah baru
     useEffect(() => {
         if (!open) return;
 
@@ -70,7 +62,6 @@ export default function Add({
         }
     }, [role, open, isEdit]);
 
-    // 3. Optimasi pencarian menggunakan useMemo agar tidak re-render berat
     const filteredMenu = useMemo(() => {
         if (!search) return menus;
         return menus.filter((item) =>
@@ -78,75 +69,12 @@ export default function Add({
         );
     }, [menus, search]);
 
-    // Helper untuk mengecek apakah menu tersebut adalah Dashboard
-    const checkIsDashboard = (item) => {
-        return (
-            item.route === "dashboard" ||
-            item.label?.toLowerCase() === "dashboard"
-        );
-    };
+    const checkIsDashboard = (item) =>
+        item.route === "dashboard" || item.label?.toLowerCase() === "dashboard";
 
-    // // 4. Submit Handler (Perbaikan Payload Inertia)
-    // const submit = (e) => {
-    //     e.preventDefault();
-
-    //     // Otomatis aktifkan view untuk semua menu Dashboard yang tersedia
-    //     const dashboardMenus = {};
-    //     menus.forEach((item) => {
-    //         if (checkIsDashboard(item)) {
-    //             dashboardMenus[item.id] = {
-    //                 can_view: true,
-    //                 can_create: false,
-    //                 can_update: false,
-    //                 can_delete: false,
-    //             };
-    //         }
-    //     });
-
-    //     const finalActiveMenu = {
-    //         ...data.activeMenu,
-    //         ...dashboardMenus,
-    //     };
-
-    //     if (Object.keys(finalActiveMenu).length === 0) {
-    //         showAlert("Minimal pilih 1 hak akses menu", "warning");
-    //         return;
-    //     }
-
-    //     // Tentukan method dan rute tujuan
-    //     const submitRoute = isEdit
-    //         ? route("manajemen.kelola-hak-akses.update", { id: data.id })
-    //         : route("manajemen.kelola-hak-akses.store");
-
-    //     // MEMPERBAIKI CARA KIRIM DATA DI INERTIA
-    //     // Karena activeMenu diperbarui tepat sebelum dikirim, kita lakukan manual bypass payload
-    //     const payload = {
-    //         ...data,
-    //         activeMenu: finalActiveMenu,
-    //     };
-
-    //     router.post(submitRoute, payload, {
-    //         onSuccess: () => {
-    //             getRoles();
-    //             setOpen(false);
-    //             reset();
-    //             if (flash?.success) {
-    //                 showAlert(flash.success, "success");
-    //             }
-    //         },
-    //         onError: () => {
-    //             showAlert(
-    //                 flash?.error ||
-    //                     (isEdit ? "Data gagal diubah" : "Data gagal disimpan"),
-    //                 "error",
-    //             );
-    //         },
-    //     });
-    // };
     const submit = (e) => {
         e.preventDefault();
 
-        // 1. Ambil semua menu dashboard otomatis
         const dashboardMenus = {};
         menus.forEach((item) => {
             if (checkIsDashboard(item)) {
@@ -159,7 +87,6 @@ export default function Add({
             }
         });
 
-        // 2. Gabungkan dengan menu aktif pilihan user
         const finalActiveMenu = {
             ...data.activeMenu,
             ...dashboardMenus,
@@ -170,40 +97,33 @@ export default function Add({
             return;
         }
 
-        // 3. Siapkan payload utuh yang ter-flat dengan benar
         const payload = {
             id: data.id,
             nama_roles: data.nama_roles,
             activeMenu: finalActiveMenu,
-            // _method: isEdit ? "PUT" : "POST" // Aktifkan ini jika Route di Laravel Anda menggunakan Route::put()
         };
 
         const submitRoute = isEdit
             ? route("manajemen.kelola-hak-akses.update", { id: data.id })
             : route("manajemen.kelola-hak-akses.store");
 
-        // 4. Kirim menggunakan router.post secara eksplisit dengan payload bersih
         router.post(submitRoute, payload, {
             onSuccess: () => {
                 getRoles();
                 setOpen(false);
                 reset();
-                if (flash?.success) {
-                    showAlert(flash.success, "success");
-                }
+                if (flash?.success) showAlert(flash.success, "success");
             },
-            onError: (errors) => {
-                console.log("Error detail dari Laravel:", errors); // Untuk mempermudah debug di inspect element
+            onError: () => {
                 showAlert(
                     flash?.error ||
-                        (isEdit
-                            ? "Data gagal diubah. Periksa kembali inputan."
-                            : "Data gagal disimpan"),
+                        (isEdit ? "Data gagal diubah." : "Data gagal disimpan"),
                     "error",
                 );
             },
         });
     };
+
     return (
         <Offcanvas
             open={open}
@@ -213,41 +133,43 @@ export default function Add({
             staticBackdrop={true}
             width="w-1/2"
         >
-            <form onSubmit={submit} className="space-y-5">
-                <div className="flex items-start gap-3 rounded-2xl border border-yellow-200 bg-yellow-50 p-4 shadow-sm">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-yellow-100">
-                        <i className="fa-solid fa-triangle-exclamation text-yellow-600"></i>
+            <form onSubmit={submit} className="space-y-4">
+                {/* Warning Box */}
+                <div className="flex items-start gap-2.5 rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-xs">
+                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-yellow-100 text-yellow-600">
+                        <i className="fa-solid fa-triangle-exclamation text-xs"></i>
                     </div>
                     <div>
-                        <h4 className="text-sm font-semibold text-yellow-800">
+                        <h4 className="text-xs font-semibold text-yellow-800">
                             Perhatian
                         </h4>
-                        <p className="mt-1 text-sm leading-relaxed text-yellow-700">
-                            Jika Sudah Selesai Klik Simpan Untuk Menyimpan
-                            Perubahan Hak Akses. Pastikan Hak Akses Sudah Benar
-                            Sebelum Di {isEdit ? "Ubah" : "Simpan"}.
+                        <p className="mt-0.5 text-xs text-yellow-700 leading-normal">
+                            Pastikan hak akses sudah benar sebelum disimpan.
                         </p>
                     </div>
                 </div>
 
+                {/* Top Actions */}
                 <div className="flex justify-end">
                     <PrimaryButton
                         type="submit"
                         disabled={processing}
                         loading={processing}
+                        className="h-9 px-3 text-xs"
                     >
                         <i
-                            className={`fa fa-${isEdit ? "pen" : "plus"} me-2`}
+                            className={`fa fa-${isEdit ? "pen" : "plus"} me-1.5`}
                         ></i>
                         {isEdit ? "Ubah" : "Simpan"}
                     </PrimaryButton>
                 </div>
 
-                <div className="space-y-2">
+                {/* Nama Peran Input */}
+                <div className="space-y-1.5">
                     <InputLabel
                         value="Nama Peran"
                         htmlFor="nama_roles"
-                        className="block text-sm font-medium text-gray-700"
+                        className="text-xs font-medium text-gray-700"
                     />
                     <TextInput
                         id="nama_roles"
@@ -257,25 +179,33 @@ export default function Add({
                         value={data.nama_roles}
                         onChange={(e) => setData("nama_roles", e.target.value)}
                         error={errors.nama_roles}
+                        className="text-xs py-1.5"
                     />
-                    <InputError message={errors.nama_roles} className="mt-1" />
-                    <p className="text-gray-400 text-xs">
-                        Isi dengan nama peran fungsional dalam institusi.
-                    </p>
+                    <InputError
+                        message={errors.nama_roles}
+                        className="text-[10px]"
+                    />
                 </div>
 
-                <div className="space-y-2 border-t border-gray-100 pt-4">
-                    <InputLabel value="Cari Hak Akses Menu" htmlFor="search" />
+                {/* Search Menu Input */}
+                <div className="space-y-1.5 border-t border-gray-100 pt-3">
+                    <InputLabel
+                        value="Cari Hak Akses Menu"
+                        htmlFor="search"
+                        className="text-xs"
+                    />
                     <TextInput
                         id="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         icon="search"
                         placeholder="Ketik nama menu..."
+                        className="text-xs py-1.5"
                     />
                 </div>
 
-                <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+                {/* Menu List */}
+                <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-1">
                     {filteredMenu.map((item) => {
                         const isDashboard = checkIsDashboard(item);
                         const isActive = isDashboard
@@ -285,45 +215,43 @@ export default function Add({
                         return (
                             <div
                                 key={item.id}
-                                className={`overflow-hidden rounded-3xl border transition-all duration-300 ${
+                                className={`overflow-hidden rounded-2xl border transition-all duration-200 ${
                                     isActive
-                                        ? "border-green-200 bg-white shadow-lg shadow-green-100/40"
-                                        : "border-gray-200 bg-white hover:border-gray-300"
+                                        ? "border-green-200 bg-white shadow-xs"
+                                        : "border-gray-200 bg-white"
                                 }`}
                             >
-                                {/* HEADER MENU CARD */}
-                                <div className="flex items-center justify-between p-5">
-                                    <div className="flex items-center gap-4">
+                                <div className="flex items-center justify-between p-3.5">
+                                    <div className="flex items-center gap-3">
                                         <div
-                                            className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-all ${
+                                            className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                                                 isActive
-                                                    ? "bg-gradient-to-br from-green-500 to-green-700 text-white shadow-md"
+                                                    ? "bg-green-600 text-white shadow-xs"
                                                     : "bg-gray-100 text-gray-500"
                                             }`}
                                         >
                                             <i
-                                                className={`fa ${item.icon || "fa-folder"} text-lg`}
+                                                className={`fa ${item.icon || "fa-folder"} text-sm`}
                                             />
                                         </div>
-
                                         <div>
-                                            <div className="flex items-center gap-2">
-                                                <h3 className="text-sm font-semibold text-gray-800">
+                                            <div className="flex items-center gap-1.5">
+                                                <h3 className="text-xs font-semibold text-gray-800">
                                                     {item.label}
                                                 </h3>
                                                 {isDashboard ? (
-                                                    <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[10px] font-semibold text-yellow-700">
+                                                    <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-[9px] font-semibold text-yellow-700">
                                                         DEFAULT
                                                     </span>
                                                 ) : (
                                                     isActive && (
-                                                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+                                                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700">
                                                             ACTIVE
                                                         </span>
                                                     )
                                                 )}
                                             </div>
-                                            <p className="mt-0.5 text-xs text-gray-500 leading-relaxed">
+                                            <p className="text-[11px] text-gray-500 truncate max-w-[220px]">
                                                 {item.deskripsi}
                                             </p>
                                         </div>
@@ -331,10 +259,10 @@ export default function Add({
 
                                     <div>
                                         {isDashboard ? (
-                                            <div className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
-                                                <i className="fa fa-lock text-[10px]"></i>{" "}
-                                                Default Access
-                                            </div>
+                                            <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700 flex items-center gap-1">
+                                                <i className="fa fa-lock text-[8px]"></i>{" "}
+                                                Read-Only
+                                            </span>
                                         ) : (
                                             <Switch
                                                 checked={isActive}
@@ -354,30 +282,19 @@ export default function Add({
                                     </div>
                                 </div>
 
-                                {/* PERMISSION CRUD PANEL */}
+                                {/* CRUD Sub-Panel */}
                                 <div
-                                    className={`grid transition-all duration-300 ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
+                                    className={`grid transition-all duration-200 ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
                                 >
                                     <div className="overflow-hidden">
-                                        <div className="border-t border-gray-100 bg-gray-50/50 p-5">
-                                            <div className="mb-3 flex items-center gap-2">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
-                                                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                                                    Aktivasi Aksi Wewenang
-                                                </p>
-                                            </div>
-
+                                        <div className="border-t border-gray-100 bg-gray-50/50 p-3">
                                             {isDashboard ? (
-                                                <div className="rounded-xl border border-green-100 bg-white p-3 flex items-center gap-3 text-green-700">
-                                                    <i className="fa fa-eye"></i>
-                                                    <span className="text-xs font-medium">
-                                                        Dashboard dikonfigurasi
-                                                        otomatis sebagai
-                                                        Read-Only (Hanya Lihat).
-                                                    </span>
+                                                <div className="rounded-lg border border-green-100 bg-white p-2 text-[11px] text-green-700">
+                                                    Dashboard otomatis
+                                                    Read-Only.
                                                 </div>
                                             ) : (
-                                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                                                     {[
                                                         "can_view",
                                                         "can_create",
@@ -410,17 +327,17 @@ export default function Add({
                                                         return (
                                                             <div
                                                                 key={action}
-                                                                className="rounded-xl border border-gray-200 bg-white p-3 flex items-center justify-between shadow-sm"
+                                                                className="rounded-lg border border-gray-200 bg-white p-2 flex items-center justify-between shadow-2xs"
                                                             >
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="flex items-center gap-1.5">
                                                                     <div
-                                                                        className={`text-xs text-${colorMap[action]}-500`}
+                                                                        className={`text-[11px] text-${colorMap[action]}-500`}
                                                                     >
                                                                         <i
                                                                             className={`fa fa-${iconMap[action]}`}
                                                                         ></i>
                                                                     </div>
-                                                                    <span className="text-xs font-medium text-gray-700">
+                                                                    <span className="text-[11px] font-medium text-gray-700">
                                                                         {
                                                                             labelMap[
                                                                                 action

@@ -25,7 +25,6 @@ export default function SiswaKelas({
     const loadMasterData = useCallback(async (tahunAjaran = null) => {
         setIsConfigLoading(true);
         try {
-            // Kita fetch Tahun Ajaran di awal, dan Kelas jika TA sudah dipilih
             const [resTA, resKelas] = await Promise.all([
                 axios.get(route("getData.get-tahun-ajaran")),
                 tahunAjaran
@@ -79,7 +78,8 @@ export default function SiswaKelas({
             backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
             borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
             borderRadius: "0.5rem",
-            padding: "0.1rem 0.25rem",
+            padding: "0.05rem 0.1rem",
+            minHeight: "32px",
             boxShadow: state.isFocused
                 ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
                 : "none",
@@ -88,14 +88,20 @@ export default function SiswaKelas({
                 borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
             },
         }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0px 6px",
+        }),
         placeholder: (base) => ({
             ...base,
             color: "#9CA3AF",
+            fontSize: "11px",
             fontWeight: "normal",
         }),
         singleValue: (base) => ({
             ...base,
             color: "#1F2937",
+            fontSize: "11px",
             fontWeight: "600",
         }),
         option: (base, state) => ({
@@ -106,6 +112,7 @@ export default function SiswaKelas({
                   ? "#ECFDF5"
                   : "white",
             color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "11px",
             fontWeight: "500",
             cursor: "pointer",
         }),
@@ -116,16 +123,16 @@ export default function SiswaKelas({
     };
 
     return (
-        <div className="bg-white shadow sm:rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-4">
+            <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
                 Rombongan Belajar (Rombel)
             </h3>
 
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 p-4 mb-4 bg-gray-50 border border-gray-200 rounded-xl shadow-sm">
-                <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 p-3 mb-3 bg-gray-50/50 border border-gray-100 rounded-xl shadow-sm">
+                <div className="flex flex-col sm:flex-row items-center gap-2.5 flex-1 w-full">
                     {/* Filter Tahun Ajaran */}
-                    <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[220px]">
-                        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[200px]">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                             Tahun Ajaran
                         </label>
                         <Select
@@ -140,15 +147,15 @@ export default function SiswaKelas({
                             placeholder="-- Pilih Tahun Ajaran --"
                             isSearchable={true}
                             menuPortalTarget={document.body}
-                            className="w-full text-sm"
+                            className="w-full text-xs"
                             classNamePrefix="react-select"
                             styles={customSelectStyles}
                         />
                     </div>
 
                     {/* Filter Kelas */}
-                    <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[180px]">
-                        <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[160px]">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                             Kelas
                         </label>
                         <Select
@@ -169,7 +176,7 @@ export default function SiswaKelas({
                             isSearchable={true}
                             isDisabled={!taAsal || isConfigLoading}
                             menuPortalTarget={document.body}
-                            className="w-full text-sm"
+                            className="w-full text-xs"
                             classNamePrefix="react-select"
                             styles={customSelectStyles}
                         />
@@ -178,11 +185,11 @@ export default function SiswaKelas({
 
                 <div className="w-full sm:w-auto flex justify-end">
                     <PrimaryButton
-                        className="w-full sm:w-auto flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto flex items-center justify-center gap-1.5 text-xs px-3 py-1.5 rounded-xl shadow-sm"
                         onClick={handleMappingKelas}
                         disabled={!kelasAsalId}
                     >
-                        <i className="fa fa-plus text-xs" />
+                        <i className="fa fa-plus text-[10px]" />
                         <span>Kelola Rombel</span>
                     </PrimaryButton>
                 </div>

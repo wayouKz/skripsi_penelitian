@@ -31,7 +31,7 @@ export default function Siswa() {
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -39,7 +39,7 @@ export default function Siswa() {
         {
             header: "Foto",
             render: (row) => (
-                <div className="w-10 h-10 rounded-full overflow-hidden">
+                <div className="w-8 h-8 rounded-full overflow-hidden">
                     {row.foto != null ? (
                         <img
                             src={
@@ -51,7 +51,7 @@ export default function Siswa() {
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <i className="fas fa-user text-gray-400 text-xl"></i>
+                        <i className="fas fa-user text-gray-400 text-sm"></i>
                     )}
                 </div>
             ),
@@ -89,7 +89,7 @@ export default function Siswa() {
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -209,7 +209,7 @@ export default function Siswa() {
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -244,11 +244,11 @@ export default function Siswa() {
 
     return (
         <AuthenticatedLayout header={"Daftar Siswa"}>
-            <div className="flex flex-col md:flex-row bg-gray-50 items-start gap-4 p-4 md:p-0">
+            <div className="flex flex-col md:flex-row bg-gray-50 items-start gap-3 p-3 md:p-0">
                 <Menu menu={menu} setMenu={setMenu} menus={menus} />
 
                 {/* ===== Bagian Kanan (Main Content Berpindah) ===== */}
-                <div className="flex-1 min-w-0 md:p-6 w-full mt-4 md:mt-0">
+                <div className="flex-1 min-w-0 md:p-4 w-full mt-2 md:mt-0">
                     {/* TAMPILAN 1: Jika menu yang dipilih adalah 'master_siswa' */}
                     {menu === "master_siswa" && (
                         <MasterSiswa
@@ -279,14 +279,14 @@ export default function Siswa() {
                         />
                     )}
                     {menu === "siswa_alumni" && (
-                        <div className="bg-white shadow sm:rounded-lg p-6">
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-4">
+                            <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
                                 ARSIP & KELULUSAN ALUMNI
                             </h3>
-                            <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 w-full mb-6">
+                            <div className="flex flex-col sm:flex-row items-center gap-2.5 flex-1 w-full mb-4">
                                 {/* Filter Tahun Ajaran menggunakan React Select */}
-                                <div className="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[280px]">
-                                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                <div className="flex flex-col gap-1 w-full sm:w-auto sm:min-w-[240px]">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran
                                     </label>
                                     <Select
@@ -302,7 +302,7 @@ export default function Siswa() {
                                         placeholder="-- Pilih Tahun Ajaran --"
                                         isSearchable={true}
                                         menuPortalTarget={document.body}
-                                        className="w-full text-sm"
+                                        className="w-full text-xs"
                                         classNamePrefix="react-select"
                                         styles={{
                                             control: (base, state) => ({
@@ -312,7 +312,8 @@ export default function Siswa() {
                                                     ? "#10B981"
                                                     : "#E5E7EB",
                                                 borderRadius: "0.5rem",
-                                                padding: "0.1rem 0.25rem",
+                                                padding: "0.05rem 0.1rem",
+                                                minHeight: "32px",
                                                 boxShadow: state.isFocused
                                                     ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
                                                     : "none",
@@ -321,14 +322,20 @@ export default function Siswa() {
                                                     borderColor: "#10B981",
                                                 },
                                             }),
+                                            valueContainer: (base) => ({
+                                                ...base,
+                                                padding: "0px 6px",
+                                            }),
                                             placeholder: (base) => ({
                                                 ...base,
                                                 color: "#9CA3AF",
+                                                fontSize: "11px",
                                                 fontWeight: "normal",
                                             }),
                                             singleValue: (base) => ({
                                                 ...base,
                                                 color: "#1F2937",
+                                                fontSize: "11px",
                                                 fontWeight: "600",
                                             }),
                                             option: (base, state) => ({
@@ -342,6 +349,7 @@ export default function Siswa() {
                                                 color: state.isSelected
                                                     ? "white"
                                                     : "#1F2937",
+                                                fontSize: "11px",
                                                 fontWeight: "500",
                                                 cursor: "pointer",
                                             }),

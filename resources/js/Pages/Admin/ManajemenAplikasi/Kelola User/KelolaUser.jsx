@@ -14,6 +14,7 @@ export default function KelolaUser() {
     const [selectedData, setSelectedData] = useState(null);
     const [onSubmit, setOnSubmit] = useState("");
     const [loading, setLoading] = useState(false);
+
     const getData = async () => {
         setLoading(true);
         await axios.get(route("manajemen.kelola-user.getUser")).then((res) => {
@@ -25,6 +26,7 @@ export default function KelolaUser() {
         });
         setLoading(false);
     };
+
     const handleStatus = (row) => {
         if (row.id == 1) {
             showAlert("Data default tidak dapat diubah", "error");
@@ -44,6 +46,7 @@ export default function KelolaUser() {
                 }
             });
     };
+
     useEffect(() => {
         getData();
     }, []);
@@ -56,8 +59,7 @@ export default function KelolaUser() {
 
     const handleReset = (row) => {
         showQuestion(
-            `Anda yakin ingin mereset password ${row.name}?
-            Password akan diatur ulang ke default `,
+            `Anda yakin ingin mereset password ${row.name}? Password akan diatur ulang ke default`,
             () => {
                 axios
                     .post(route("manajemen.kelola-user.reset-password"), {
@@ -84,7 +86,7 @@ export default function KelolaUser() {
             return;
         }
         showQuestion(
-            "Anda yakin ingin menghapus data ini ?",
+            "Anda yakin ingin menghapus data ini?",
             () => {
                 axios
                     .post(route("manajemen.kelola-user.destroy", { id: row }))
@@ -98,11 +100,12 @@ export default function KelolaUser() {
             "Batal",
         );
     };
+
     const columns = [
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-6 h-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -159,11 +162,15 @@ export default function KelolaUser() {
             },
         },
     ];
+
     return (
         <AuthenticatedLayout header={"Kelola User"}>
-            <div className="bg-white shadow sm:rounded-lg p-6">
-                <div className="flex justify-end mb-4">
-                    <PrimaryButton onClick={() => setOpen(true)}>
+            <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4">
+                <div className="flex justify-end mb-3">
+                    <PrimaryButton
+                        onClick={() => setOpen(true)}
+                        className="text-xs px-3 py-1 rounded-xl"
+                    >
                         + Tambah User
                     </PrimaryButton>
                 </div>

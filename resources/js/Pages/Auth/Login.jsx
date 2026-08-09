@@ -67,7 +67,7 @@ export default function Login({ status, canResetPassword, config }) {
                         </p>
                         <p className="text-sm lg:text-base text-green-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
                             {config?.alamat_instansi ||
-                                "JL. M.H THAMRIN DESA PALOPO KEC. MARISA (96266)"}
+                                "CONTOH JALAN, CONTOH KOTA"}
                             <br className="hidden lg:block" />
                             email :{" "}
                             {config?.email_instansi || "contoh@contoh.com"}
@@ -167,7 +167,7 @@ export default function Login({ status, canResetPassword, config }) {
                                         id="captcha"
                                         type="text"
                                         value={data.captcha}
-                                        placeholder="Ketik huruf"
+                                        placeholder="Ketik Captcha"
                                         className="w-full h-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                                         onChange={(e) =>
                                             setData("captcha", e.target.value)
@@ -222,7 +222,8 @@ export default function Login({ status, canResetPassword, config }) {
 
                 {/* BAGIAN BAWAH: Footer Copyright */}
                 <div className="relative z-10 py-6 text-center text-green-100/80 text-xs font-medium tracking-wide">
-                    &copy; {currentYear} Aplikasi SIM Akademik by Mahasiswa UNG
+                    &copy; {currentYear} Aplikasi SIM Akademik by INFORMATIKA
+                    UNG
                 </div>
             </div>
         </>

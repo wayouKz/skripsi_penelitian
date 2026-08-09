@@ -35,25 +35,23 @@ export default function Sidebar({ collapsed, menuItems }) {
     }, [url]);
 
     return (
-        /* PERBAIKAN 1: Menambahkan flex flex-col h-full agar kontainer memiliki tinggi penuh yang statis */
         <aside
             className={`bg-white border-r transition-all duration-300 flex flex-col h-full ${
-                collapsed ? "w-20" : "w-64"
+                collapsed ? "w-16" : "w-56"
             }`}
         >
             {/* Logo */}
-            {/* flex-shrink-0 menjaga bagian logo agar tetap di atas (tidak ikut tergulung) */}
-            <div className="p-4 border-b border-gray-200 flex-shrink-0">
-                <div className="flex items-center space-x-3">
+            <div className="p-3 border-b border-gray-200 flex-shrink-0">
+                <div className="flex items-center space-x-2.5">
                     {logo ? (
                         <img
                             src={`/storage/public/logo/${logo}`}
                             alt="Logo"
-                            className="w-10 h-10 object-contain"
+                            className="w-8 h-8 object-contain"
                         />
                     ) : (
-                        <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">
+                        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
                                 {appName?.charAt(0)?.toUpperCase() || "A"}
                             </span>
                         </div>
@@ -61,8 +59,8 @@ export default function Sidebar({ collapsed, menuItems }) {
                 </div>
             </div>
 
-            {/* PERBAIKAN 2: Menambahkan overflow-y-auto dan min-h-0 supaya menu daftar list bisa di-scroll */}
-            <nav className="flex-1 py-4 space-y-2 p-4 overflow-y-auto min-h-0 content-scrollbar">
+            {/* Menu Navigation */}
+            <nav className="flex-1 py-6 space-y-3.5 px-2.5 overflow-y-auto min-h-0 content-scrollbar">
                 {menuItems.map((item) => {
                     const parentActive = isActive(item.route);
                     return (
@@ -75,21 +73,21 @@ export default function Sidebar({ collapsed, menuItems }) {
                                         className={`flex items-center ${
                                             collapsed
                                                 ? "justify-center"
-                                                : " space-x-3"
-                                        } py-2 px-2 rounded-full transition ${
+                                                : "space-x-2.5"
+                                        } py-1.5 px-2.5 rounded-xl transition ${
                                             parentActive
-                                                ? "bg-green-600 text-white"
-                                                : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                                                ? "bg-green-600 text-white shadow-sm"
+                                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                                         }`}
                                     >
                                         {/* ICON */}
                                         <i
-                                            className={`fa ${item.icon} text-lg`}
+                                            className={`fa ${item.icon} text-sm`}
                                         />
 
                                         {/* TEXT */}
                                         {!collapsed && (
-                                            <span className="text-sm font-medium">
+                                            <span className="text-xs font-medium">
                                                 {item.label}
                                             </span>
                                         )}
@@ -99,49 +97,50 @@ export default function Sidebar({ collapsed, menuItems }) {
                                         className={`flex items-center ${
                                             collapsed
                                                 ? "justify-center"
-                                                : "mx-auto p-2"
-                                        }  text-gray-300  border-b border-gray-200 rounded-lg `}
+                                                : "mx-auto px-2 py-1.5"
+                                        } text-gray-400 border-b border-gray-100 rounded-lg text-[10px] font-bold uppercase tracking-wider`}
                                     >
-                                        <i className={`fa ${item.icon}`} />
+                                        <i
+                                            className={`fa ${item.icon} text-xs`}
+                                        />
 
                                         {!collapsed && (
-                                            <span className="text-sm ">
+                                            <span className="ml-2">
                                                 {item.label}
                                             </span>
                                         )}
                                     </div>
                                 ))}
-
-                            {/* TOOLTIP */}
                         </div>
                     );
                 })}
             </nav>
 
             {/* Bagian Kontrol Akun */}
-            {/* flex-shrink-0 menjaga bagian profile/kontrol akun agar paku statis di dasar sidebar */}
             <div className="p-2 border-t border-gray-200 flex-shrink-0">
                 <div className="relative group">
                     <Link
                         href={route("profile.edit")}
-                        className={`flex items-center py-3 rounded-lg transition ${
+                        className={`flex items-center py-2 rounded-xl transition ${
                             route().current("profile.edit")
-                                ? "bg-green-600 text-white"
-                                : "text-gray-600 hover:bg-gray-100"
-                        } ${collapsed ? "justify-center" : "px-4 space-x-3"}`}
+                                ? "bg-green-600 text-white shadow-sm"
+                                : "text-gray-600 hover:bg-gray-50"
+                        } ${collapsed ? "justify-center" : "px-3 space-x-2.5"}`}
                     >
                         {/* ICON */}
-                        <i className="fa fa-user-cog text-lg"></i>
+                        <i className="fa fa-user-cog text-sm"></i>
 
                         {/* TEXT */}
                         {!collapsed && (
-                            <span className="text-sm">Kontrol akun</span>
+                            <span className="text-xs font-medium">
+                                Kontrol akun
+                            </span>
                         )}
                     </Link>
 
                     {/* TOOLTIP */}
                     {collapsed && (
-                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:block bg-gray-900 text-white text-xs px-2 py-1 rounded shadow whitespace-nowrap z-50">
+                        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 hidden group-hover:block bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow whitespace-nowrap z-50">
                             Kontrol akun
                         </div>
                     )}

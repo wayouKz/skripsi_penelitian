@@ -65,6 +65,55 @@ export default function Add({
             reset();
         }
     }, [isEdit, Kelas]);
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
+            borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
+            borderRadius: "0.5rem",
+            padding: "0.05rem 0.1rem",
+            minHeight: "32px",
+            boxShadow: state.isFocused
+                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: state.isDisabled ? "not-allowed" : "pointer",
+            "&:hover": {
+                borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
+            },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0px 6px",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "11px",
+            fontWeight: "normal",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#1F2937",
+            fontSize: "11px",
+            fontWeight: "600",
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "11px",
+            fontWeight: "500",
+            cursor: "pointer",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+    };
     return (
         <FormModal
             title={"Ubah Wali Kelas" + " " + Kelas?.nama_kelas}
@@ -82,6 +131,7 @@ export default function Add({
                     <Select
                         // Tambahkan props styles ini untuk menaikkan z-index menu dropdown-nya
                         styles={{
+                            ...customSelectStyles,
                             menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                         }}
                         menuPortalTarget={document.body}

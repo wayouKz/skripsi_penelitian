@@ -9,63 +9,44 @@ import { useEffect, useState } from "react";
 export default function Add({
     open,
     setOpen,
-    Mapel = null, // Mengubah dari Kelas menjadi Mapel
+    Mapel = null,
     isEdit = false,
-    getMapel, // Mengubah dari getKelas menjadi getMapel
+    getMapel,
 }) {
-    // Hanya butuh nama_mapel di useForm
     const { data, post, reset, errors, setData } = useForm({
         nama_mapel: "",
     });
 
     const { showAlert } = useAlert();
     const flash = usePage().props.flash;
-
     const [loading, setLoading] = useState(false);
+
     const submit = (e) => {
         e.preventDefault();
         setLoading(true);
 
-        if (isEdit) {
-            post(
-                // Pastikan route ini sesuai dengan route di Laravel Anda
-                route("master.mapel.update", {
-                    id: Mapel.id,
-                }),
-                {
-                    onSuccess: () => {
-                        if (flash.success) {
-                            showAlert(flash.success, "success");
-                        } else if (flash.error) {
-                            showAlert(flash.error, "error");
-                        }
+        const url = isEdit
+            ? route("master.mapel.update", { id: Mapel.id })
+            : route("master.mapel.store");
 
-                        setLoading(false);
-                        setOpen(false);
-                        getMapel(); // Panggil ulang data mapel
-                        reset();
-                    },
-                },
-            );
-        } else {
-            // Pastikan route ini sesuai dengan route di Laravel Anda
-            post(route("master.mapel.store"), {
-                onSuccess: () => {
-                    if (flash.success) {
-                        showAlert(flash.success, "success");
-                    } else if (flash.error) {
-                        showAlert(flash.error, "error");
-                    }
-                    setLoading(false);
-                    setOpen(false);
-                    getMapel(); // Panggil ulang data mapel
-                    reset();
-                },
-            });
-        }
+        post(url, {
+            onSuccess: () => {
+                if (flash.success) {
+                    showAlert(flash.success, "success");
+                } else if (flash.error) {
+                    showAlert(flash.error, "error");
+                }
+                setLoading(false);
+                setOpen(false);
+                getMapel();
+                reset();
+            },
+            onError: () => {
+                setLoading(false);
+            },
+        });
     };
 
-    // Mengatur nilai input jika sedang dalam mode Edit
     useEffect(() => {
         if (isEdit && Mapel) {
             setData({
@@ -85,22 +66,27 @@ export default function Add({
             setOpen={setOpen}
             onSubmit={submit}
         >
-            <div className="grid grid-cols-1 gap-4">
-                <div className="col-span-1">
-                    <InputLabel for="nama_mapel" value="Nama Mata Pelajaran" />
+            <div className="space-y-3">
+                <div>
+                    <InputLabel
+                        for="nama_mapel"
+                        value="Nama Mata Pelajaran"
+                        className="text-xs font-medium text-gray-700"
+                    />
                     <TextInput
                         placeholder="Contoh : Matematika"
-                        icon="book" // Mengubah icon menjadi buku (opsional, sesuaikan dengan library icon Anda)
+                        icon="book"
                         type="text"
                         name="nama_mapel"
                         id="nama_mapel"
                         value={data.nama_mapel}
-                        onChange={(e) => {
-                            setData("nama_mapel", e.target.value);
-                        }}
-                        className="w-full mt-1"
+                        onChange={(e) => setData("nama_mapel", e.target.value)}
+                        className="w-full mt-1 text-xs py-1.5"
                     />
-                    <InputError message={errors.nama_mapel} />
+                    <InputError
+                        message={errors.nama_mapel}
+                        className="mt-1 text-[10px]"
+                    />
                 </div>
             </div>
         </FormModal>

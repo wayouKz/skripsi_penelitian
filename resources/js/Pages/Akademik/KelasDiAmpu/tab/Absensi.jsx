@@ -27,15 +27,15 @@ export default function Absensi({ dataKelas }) {
     const [msg, setMsg] = useState("");
     const [pertemuan, setPertemuan] = useState(0);
 
-    // Styling custom untuk React Select (Mata Pelajaran)
+    // Styling custom untuk React Select (Mata Pelajaran) - Diperkecil
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
             backgroundColor: "#FFFFFF",
             borderColor: state.isFocused ? "#10B981" : "#E2E8F0",
-            borderRadius: "0.5rem",
-            minHeight: "38px",
-            padding: "0 2px",
+            borderRadius: "0.375rem",
+            minHeight: "30px", // Diperkecil dari 38px
+            padding: "0",
             boxShadow: state.isFocused
                 ? "0 0 0 2px rgba(16, 185, 129, 0.15)"
                 : "none",
@@ -51,12 +51,12 @@ export default function Absensi({ dataKelas }) {
         placeholder: (base) => ({
             ...base,
             color: "#9CA3AF",
-            fontSize: "0.875rem",
+            fontSize: "11px", // Diperkecil
         }),
         singleValue: (base) => ({
             ...base,
             color: "#334155",
-            fontSize: "0.875rem",
+            fontSize: "11px", // Diperkecil
             fontWeight: "500",
         }),
         option: (base, state) => ({
@@ -67,8 +67,17 @@ export default function Absensi({ dataKelas }) {
                   ? "#ECFDF5"
                   : "white",
             color: state.isSelected ? "white" : "#334155",
-            fontSize: "0.875rem",
+            fontSize: "11px", // Diperkecil
+            padding: "4px 8px", // Padding opsi diperkecil
             cursor: "pointer",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: "2px", // Panah diperkecil
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            padding: "2px",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -196,7 +205,7 @@ export default function Absensi({ dataKelas }) {
             kelas_id: dataKelas.kelas_id,
         };
         showQuestion(
-            `Apakah Anda yakin ingin menyimpan absensi untuk Mata Pelajaran ${namaMapel} pada pertemuan ke ${pertemuan}`,
+            `Apakah Anda yakin ingin menyimpan absensi untuk Mata Pelajaran ${namaMapel} pada pertemuan ke ${pertemuan}?`,
             async () => {
                 try {
                     const res = await axios.post(
@@ -293,19 +302,19 @@ export default function Absensi({ dataKelas }) {
 
     return (
         <>
-            {/* ── HEADER ─────────────────────────────────── */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-6 pb-5 border-b border-slate-100">
+            {/* ── HEADER (Diperkecil gap dan padding) ─────────────────────────────────── */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
                 {/* Title block */}
-                <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-green-600 flex items-center justify-center shadow-sm">
-                        <i className="fa fa-user-check text-white text-base"></i>
+                <div className="flex items-center gap-2.5">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center shadow-sm">
+                        <i className="fa fa-user-check text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 className="text-base font-bold text-slate-800 leading-tight m-0">
-                            Catat Absensi Siswa
+                        <h3 className="text-sm font-bold text-slate-800 leading-tight m-0">
+                            Catat Absensi
                         </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                            Catat kehadiran siswa untuk pelajaran hari ini
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                            Catat kehadiran siswa hari ini
                         </p>
                     </div>
                 </div>
@@ -314,31 +323,31 @@ export default function Absensi({ dataKelas }) {
                 <div className="flex flex-col sm:flex-row gap-2 items-end w-full md:w-auto">
                     {/* Tanggal */}
                     <div className="flex flex-col gap-1 w-full sm:w-auto">
-                        <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                        <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                             Tanggal
                         </label>
                         <input
                             type="date"
                             readOnly
-                            className="block w-full sm:w-[148px] bg-slate-100 border border-slate-200 text-slate-400 py-2 px-3 rounded-lg text-sm cursor-not-allowed select-none"
+                            className="block w-full sm:w-[130px] h-[30px] bg-slate-100 border border-slate-200 text-slate-500 py-1 px-2 rounded-md text-xs cursor-not-allowed select-none"
                             value={tanggal}
                             onChange={(e) => setTanggal(e.target.value)}
                         />
                     </div>
 
                     {/* Mata Pelajaran (React Select) */}
-                    <div className="flex flex-col gap-1 w-full sm:w-[260px]">
-                        <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                    <div className="flex flex-col gap-1 w-full sm:w-[220px]">
+                        <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                             Mata Pelajaran
                         </label>
                         <Select
                             value={selectedMapelOption}
                             onChange={handleSelectMapelChange}
                             options={mapelOptions}
-                            placeholder="[ Pilih Mata Pelajaran ]"
+                            placeholder="Pilih Mapel..."
                             isSearchable={true}
                             menuPortalTarget={document.body}
-                            className="text-sm"
+                            className="text-xs"
                             classNamePrefix="react-select"
                             styles={customSelectStyles}
                         />
@@ -346,7 +355,7 @@ export default function Absensi({ dataKelas }) {
 
                     <div className="flex flex-col gap-1">
                         <button
-                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 font-semibold py-2 px-4 rounded-lg text-xs transition-all shadow-sm h-[38px]"
+                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 font-semibold px-3 rounded-md text-[11px] transition-all shadow-sm h-[30px]"
                             type="button"
                             title="Lihat Riwayat Absensi"
                             onClick={() => {
@@ -360,6 +369,7 @@ export default function Absensi({ dataKelas }) {
                             }}
                         >
                             <i className="fa fa-history text-slate-400"></i>
+                            Riwayat
                         </button>
                     </div>
                 </div>
@@ -367,24 +377,23 @@ export default function Absensi({ dataKelas }) {
 
             {/* ── KONDISI 1 : Belum pilih mapel ─────────── */}
             {!selectedMapel && (
-                <div className="flex flex-col items-center justify-center py-16 px-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mb-4 shadow-sm">
-                        <i className="fa fa-book-open text-xl text-slate-300"></i>
+                <div className="flex flex-col items-center justify-center py-10 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3 shadow-sm">
+                        <i className="fa fa-book-open text-lg text-slate-300"></i>
                     </div>
-                    <p className="text-sm font-semibold text-slate-500">
+                    <p className="text-xs font-semibold text-slate-500">
                         Pilih mata pelajaran terlebih dahulu
                     </p>
-                    <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                        Daftar siswa akan muncul setelah Anda memilih pelajaran
-                        dari dropdown di atas.
+                    <p className="text-[10px] text-slate-400 mt-1 max-w-xs">
+                        Daftar siswa akan muncul setelah Anda memilih pelajaran.
                     </p>
                 </div>
             )}
 
             {/* ── KONDISI 2 : Loading skeleton ──────────── */}
             {selectedMapel && isLoadingSiswa && (
-                <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="min-w-full divide-y divide-slate-100 text-sm text-left">
+                <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                    <table className="min-w-full divide-y divide-slate-100 text-xs text-left">
                         <thead className="bg-slate-50">
                             <tr>
                                 {[
@@ -395,11 +404,11 @@ export default function Absensi({ dataKelas }) {
                                 ].map((h, i) => (
                                     <th
                                         key={h}
-                                        className={`px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 ${
-                                            i === 0 ? "w-12 text-center" : ""
-                                        } ${i === 1 ? "w-36" : ""} ${
+                                        className={`px-3 py-2 text-[9px] font-semibold uppercase tracking-widest text-slate-400 ${
+                                            i === 0 ? "w-10 text-center" : ""
+                                        } ${i === 1 ? "w-28" : ""} ${
                                             i === 3
-                                                ? "text-center min-w-[320px]"
+                                                ? "text-center min-w-[240px]"
                                                 : ""
                                         }`}
                                     >
@@ -411,21 +420,21 @@ export default function Absensi({ dataKelas }) {
                         <tbody className="divide-y divide-slate-50 bg-white">
                             {[...Array(5)].map((_, index) => (
                                 <tr key={index} className="animate-pulse">
-                                    <td className="px-4 py-4 text-center">
-                                        <div className="h-3.5 bg-slate-100 rounded w-4 mx-auto"></div>
+                                    <td className="px-3 py-2 text-center">
+                                        <div className="h-3 bg-slate-100 rounded w-4 mx-auto"></div>
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <div className="h-3.5 bg-slate-100 rounded w-24"></div>
+                                    <td className="px-3 py-2">
+                                        <div className="h-3 bg-slate-100 rounded w-20"></div>
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <div className="h-3.5 bg-slate-100 rounded w-48"></div>
+                                    <td className="px-3 py-2">
+                                        <div className="h-3 bg-slate-100 rounded w-40"></div>
                                     </td>
-                                    <td className="px-4 py-4">
-                                        <div className="flex justify-center gap-2">
+                                    <td className="px-3 py-2">
+                                        <div className="flex justify-center gap-1.5">
                                             {[...Array(4)].map((_, i) => (
                                                 <div
                                                     key={i}
-                                                    className="h-8 w-16 bg-slate-100 rounded-lg"
+                                                    className="h-6 w-10 bg-slate-100 rounded-md"
                                                 ></div>
                                             ))}
                                         </div>
@@ -439,15 +448,15 @@ export default function Absensi({ dataKelas }) {
 
             {/* ── KONDISI 3 : Tidak ada jadwal ──────────── */}
             {selectedMapel && !isLoadingSiswa && tidakAdaJadwal === true && (
-                <div className="flex items-start gap-3.5 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center mt-0.5">
-                        <i className="fa fa-calendar-times text-yellow-500 text-sm"></i>
+                <div className="flex items-start gap-2.5 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-md bg-yellow-100 flex items-center justify-center mt-0.5">
+                        <i className="fa fa-calendar-times text-yellow-500 text-xs"></i>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-yellow-700">
+                        <p className="text-xs font-semibold text-yellow-700">
                             Jadwal Tidak Aktif
                         </p>
-                        <p className="text-xs text-yellow-500 mt-0.5 leading-relaxed">
+                        <p className="text-[10px] text-yellow-600 mt-0.5 leading-relaxed">
                             {msg ||
                                 "Tidak ada jadwal pelajaran yang aktif untuk kelas ini pada hari dan jam sekarang."}
                         </p>
@@ -462,14 +471,14 @@ export default function Absensi({ dataKelas }) {
                 siswa.length > 0 && (
                     <form onSubmit={submitAbsensi}>
                         {/* Action bar */}
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex justify-between items-center mb-3">
                             {/* Live clock */}
-                            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-lg px-3.5 py-2">
+                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                <span className="text-[11px] text-slate-400 font-medium">
+                                <span className="text-[10px] text-slate-400 font-medium hidden sm:block">
                                     Waktu
                                 </span>
-                                <span className="text-sm font-bold text-slate-700 font-mono tracking-wider tabular-nums">
+                                <span className="text-xs font-bold text-slate-700 font-mono tracking-wider tabular-nums">
                                     {jam}:{menit}:{detik}
                                 </span>
                             </div>
@@ -478,7 +487,7 @@ export default function Absensi({ dataKelas }) {
                             <div className="flex items-center gap-2">
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-2 px-5 rounded-lg text-xs transition-all shadow-sm"
+                                    className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-1.5 px-4 rounded-md text-[11px] transition-all shadow-sm"
                                 >
                                     <i className="fa fa-save"></i>
                                     Simpan Absensi
@@ -487,22 +496,22 @@ export default function Absensi({ dataKelas }) {
                         </div>
 
                         {/* Table */}
-                        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                            <div className="overflow-x-auto overflow-y-auto h-[500px]">
-                                <table className="min-w-full text-sm text-left">
+                        <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                            <div className="overflow-x-auto overflow-y-auto max-h-[60vh] custom-scrollbar">
+                                <table className="min-w-full text-xs text-left">
                                     {/* Sticky header */}
                                     <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
                                         <tr>
-                                            <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 w-12 text-center">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 w-10 text-center">
                                                 No
                                             </th>
-                                            <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 w-36">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 w-28">
                                                 NISN
                                             </th>
-                                            <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
                                                 Nama Lengkap
                                             </th>
-                                            <th className="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400 text-center min-w-[320px]">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 text-center min-w-[240px]">
                                                 Status Kehadiran
                                             </th>
                                         </tr>
@@ -515,23 +524,23 @@ export default function Absensi({ dataKelas }) {
                                                 className="hover:bg-slate-50/70 transition-colors"
                                             >
                                                 {/* No */}
-                                                <td className="px-4 py-3 text-center text-xs text-slate-400 font-medium tabular-nums">
+                                                <td className="px-3 py-1.5 text-center text-[11px] text-slate-400 font-medium tabular-nums">
                                                     {index + 1}
                                                 </td>
 
                                                 {/* NISN */}
-                                                <td className="px-4 py-3 font-mono text-xs text-slate-500 tracking-wider">
+                                                <td className="px-3 py-1.5 font-mono text-[11px] text-slate-500 tracking-wider">
                                                     {item.nisn}
                                                 </td>
 
                                                 {/* Nama */}
-                                                <td className="px-4 py-3 font-medium text-slate-800">
+                                                <td className="px-3 py-1.5 font-medium text-[11px] text-slate-800">
                                                     {item.nama_siswa}
                                                 </td>
 
                                                 {/* Status Toggle Dinamis */}
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center justify-center gap-1.5">
+                                                <td className="px-3 py-1.5">
+                                                    <div className="flex items-center justify-center gap-1">
                                                         {STATUS_OPTIONS.map(
                                                             (opt) => {
                                                                 const isActive =
@@ -543,7 +552,7 @@ export default function Absensi({ dataKelas }) {
                                                                         key={
                                                                             opt.value
                                                                         }
-                                                                        className={`cursor-pointer border rounded-md py-1.5 px-3 font-bold text-xs transition-all select-none flex items-center justify-center gap-1.5 min-w-[40px] ${
+                                                                        className={`cursor-pointer border rounded-[4px] py-1 px-2 font-bold text-[10px] transition-all select-none flex items-center justify-center gap-1 min-w-[32px] ${
                                                                             isActive
                                                                                 ? opt.active
                                                                                 : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
@@ -569,7 +578,7 @@ export default function Absensi({ dataKelas }) {
                                                                         />
                                                                         {isActive && (
                                                                             <span
-                                                                                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${opt.dot}`}
+                                                                                className={`w-1 h-1 rounded-full flex-shrink-0 ${opt.dot}`}
                                                                             ></span>
                                                                         )}
                                                                         {

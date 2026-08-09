@@ -1,6 +1,7 @@
 import DataTable from "@/Components/Datatables";
 import PrimaryButton from "@/Components/PrimaryButton";
 import Add from "../modals/Add";
+
 export default function MasterSiswa({
     dataSiswa,
     columns,
@@ -13,14 +14,13 @@ export default function MasterSiswa({
 }) {
     return (
         <>
-            {" "}
-            <div className="bg-white shadow sm:rounded-lg p-6">
-                <div className="flex justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+            <div className="bg-white shadow-sm border border-gray-100 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-bold text-gray-800 uppercase ">
                         Data Profil & Biodata
-                    </h3>
+                    </h4>
                     <PrimaryButton
-                        className="mb-2"
+                        className="text-xs px-3 py-1.5 rounded-xl shadow-sm"
                         onClick={() => handleTambah()}
                     >
                         + Tambah Siswa
@@ -39,7 +39,6 @@ export default function MasterSiswa({
                 isEdit={isEdit}
                 Siswa={selectedSiswa}
             />
-            ;
         </>
     );
 }

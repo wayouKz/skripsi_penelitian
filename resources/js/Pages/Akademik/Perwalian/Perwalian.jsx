@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 export default function Perwalian({ selectedTahunAjaran }) {
     const [dataSiswa, setDataSiswa] = useState([]);
     const [loading, setLoading] = useState(false);
+
     const columns = [
-        // ... (Kolom tabel tetap sama seperti kode Anda sebelumnya)
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -17,7 +17,7 @@ export default function Perwalian({ selectedTahunAjaran }) {
         {
             header: "Foto",
             render: (row) => (
-                <div className="w-10 h-10 rounded-full overflow-hidden">
+                <div className="w-8 h-8 rounded-full overflow-hidden">
                     {row.foto != null ? (
                         <img
                             src={
@@ -29,7 +29,7 @@ export default function Perwalian({ selectedTahunAjaran }) {
                             className="w-full h-full object-cover"
                         />
                     ) : (
-                        <i className="fas fa-user text-gray-400 text-xl"></i>
+                        <i className="fas fa-user text-gray-400 text-sm"></i>
                     )}
                 </div>
             ),
@@ -40,6 +40,7 @@ export default function Perwalian({ selectedTahunAjaran }) {
         { header: "Tempat Lahir", accessor: "tempat_lahir" },
         { header: "Tanggal Lahir", accessor: "tanggal_lahir" },
     ];
+
     const getSiswa = () => {
         setLoading(true);
         axios
@@ -55,18 +56,23 @@ export default function Perwalian({ selectedTahunAjaran }) {
                 } else if (res.data.success == false) {
                     showAlert(res.data.msg, "info");
                 }
+            })
+            .catch(() => {
+                setLoading(false);
             });
     };
+
     useEffect(() => {
         getSiswa();
     }, [selectedTahunAjaran]);
+
     return (
-        <div className="space-y-12">
+        <div className="space-y-6">
             {dataSiswa.length === 0 && !loading && (
-                <div className="flex justify-center py-2">
+                <div className="flex justify-center py-6">
                     <div className="text-center">
-                        <i className="fas fa-user-friends text-4xl text-gray-300"></i>
-                        <p className="mt-2 text-gray-500">
+                        <i className="fas fa-user-friends text-3xl text-gray-300"></i>
+                        <p className="mt-2 text-xs text-gray-500">
                             Tidak ada siswa yang menjadi perwalian anda.
                         </p>
                     </div>

@@ -46,8 +46,8 @@ class Pdf extends Controller
     }
 
     public function guruMapel(Request $request){
-        $tahun_ajaran_id = $request->input('tahun_ajaran');
-        $nip = $request->input('nip');
+        $tahun_ajaran_id = $request->tahun_ajaran;
+        $nip = $request->nip;
         $instansi = $this->infoInstansi();
 
 
@@ -56,21 +56,18 @@ class Pdf extends Controller
         'm_mapels.nama_mapel as mapel',
         'm_kelas.nama_kelas as kelas',
         't_list_guru_mapels.beban_jam as beban_jam',
-        't_jadwals.hari',
-        't_jadwals.jam_mulai',
-        't_jadwals.jam_selesai'
+
         )
-        ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+        ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
         ->leftJoin('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
-        ->join('t_jadwals', 't_list_guru_mapels.id', '=', 't_jadwals.t_list_guru_mapel_id')
-        ->join('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-        ->join('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
+        // ->leftJoin('t_jadwals', 't_list_guru_mapels.id', '=', 't_jadwals.t_list_guru_mapel_id')
+        ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+        ->leftJoin('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
         ->where('t_list_gurus.tahun_ajaran_id', $tahun_ajaran_id)
         ->when($nip, function ($query) use ($nip) {
             return $query->where('t_list_gurus.nip', $nip);
         })
         ->get();
-
         $namaTahunAjaran = DB::table('m_tahun_ajarans')->where('id', $tahun_ajaran_id)->first();
         $title = "Daftar Guru Mata Pelajaran" . ' - ' . $namaTahunAjaran->tahun_ajaran . ' - ' . strtoupper($namaTahunAjaran->semester);
 

@@ -94,6 +94,7 @@ export default function Add({
             : data.foto
               ? `/storage/public/foto/${data.foto}`
               : null;
+
     const fields = [
         {
             label: "Nama Siswa",
@@ -146,6 +147,7 @@ export default function Add({
             type: "phone",
         },
     ];
+
     return (
         <FormModal
             title={isEdit ? "Edit Siswa" : "Tambah Siswa"}
@@ -157,7 +159,7 @@ export default function Add({
         >
             <div className="flex justify-center hidden">
                 <label className="relative cursor-pointer group">
-                    <div className=" w-12 h-12 rounded-full bg-gray-100 border flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 border flex items-center justify-center overflow-hidden">
                         {previewImage ? (
                             <img
                                 src={previewImage}
@@ -166,13 +168,13 @@ export default function Add({
                             />
                         ) : (
                             <div className="flex flex-col items-center text-gray-400">
-                                <i className="fa fa-camera text-2xl"></i>
+                                <i className="fa fa-camera text-xl"></i>
                             </div>
                         )}
                     </div>
 
-                    <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-white border flex items-center justify-center shadow">
-                        <i className="fa fa-plus text-xs"></i>
+                    <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-white border flex items-center justify-center shadow">
+                        <i className="fa fa-plus text-[10px]"></i>
                     </div>
 
                     <input
@@ -185,13 +187,13 @@ export default function Add({
             </div>
 
             {/* FORM */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {fields.map((field, index) => (
                     <div
                         key={index}
-                        className={`flex flex-col gap-2 ${field.colSpan || ""}`}
+                        className={`flex flex-col gap-1 ${field.colSpan || ""}`}
                     >
-                        <label className="text-sm font-medium text-gray-700">
+                        <label className="text-xs font-semibold text-gray-700">
                             {field.label}
                         </label>
 
@@ -204,7 +206,7 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             />
                         )}
 
@@ -216,7 +218,7 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             />
                         )}
 
@@ -227,10 +229,9 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             >
                                 <option value="">Pilih Jenis Kelamin</option>
-
                                 {field.options.map((item, i) => (
                                     <option key={i} value={item.value}>
                                         {item.label}
@@ -242,23 +243,22 @@ export default function Add({
                         {/* TEXTAREA */}
                         {field.type === "textarea" && (
                             <textarea
-                                rows={3}
+                                rows={2}
                                 value={data[field.name]}
                                 placeholder={field.placeholder}
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
                             />
                         )}
 
                         {/* PHONE */}
                         {field.type === "phone" && (
-                            <div className="flex rounded-lg border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
-                                <div className="px-3 bg-gray-100 flex items-center text-sm text-gray-500 border-r">
+                            <div className="flex rounded-xl border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
+                                <div className="px-2.5 bg-gray-100 flex items-center text-xs text-gray-500 border-r">
                                     +62
                                 </div>
-
                                 <input
                                     type="text"
                                     value={data[field.name]}
@@ -266,14 +266,14 @@ export default function Add({
                                     onChange={(e) =>
                                         setData(field.name, e.target.value)
                                     }
-                                    className="w-full px-4 py-3 text-sm border-none focus:ring-0"
+                                    className="w-full px-3 py-1.5 text-xs border-none focus:ring-0"
                                 />
                             </div>
                         )}
 
                         {/* ERROR */}
                         {errors[field.name] && (
-                            <p className="text-sm text-red-500">
+                            <p className="text-[10px] text-red-500">
                                 {errors[field.name]}
                             </p>
                         )}

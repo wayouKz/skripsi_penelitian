@@ -24,7 +24,7 @@ import Configurasi from "./partials/Configurasi";
 import Proses from "./partials/Proses";
 import HistoryJadwal from "./partials/HistoryJadwal";
 import Menu from "@/Components/Menu";
-
+import { useAlert } from "@/Components/AlertContext";
 // Fungsi darurat untuk menebak slot urutan jam ke-berapa
 // berdasarkan jam_mulai dan hari.
 // SILAKAN SESUAIKAN JAM-JAM DI BAWAH INI DENGAN BEL SEKOLAH ANDA!
@@ -52,31 +52,56 @@ export default function GenerateJadwal() {
     const [fitness, setFitness] = useState(0);
     const [logs, setLogs] = useState([]);
 
+    const { showCenterAlert } = useAlert();
+
+    const fetchDataTa = async () => {
+        try {
+            const response = await axios.get(route("getData.get-tahun-ajaran"));
+            setTahunAjaranList(response.data.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     // 5. Fetch Data API Awal
     const fetchDataAwal = async () => {
         try {
-            const [dataGuru, DataTA, DataJadwal] = await Promise.all([
+            const [dataGuru, DataJadwal] = await Promise.all([
                 axios.get(route("getData.get-mapel-guru"), {
                     params: { tahun_ajaran_id: selectedTahunAjaran },
                 }),
-                axios.get(route("getData.get-tahun-ajaran")),
                 axios.get(route("getData.get-history-jadwal"), {
                     params: { tahun_ajaran_id: selectedTahunAjaran },
                 }),
             ]);
 
-            setTahunAjaranList(DataTA.data.data);
             setListMapelGuru(dataGuru.data.data);
             setHistoryJadwal(DataJadwal.data.data || []);
+
+            const guruList = dataGuru.data.data;
+
+            guruList.forEach((data) => {
+                if (data.guru.length == 0) {
+                    showCenterAlert(
+                        "Tidak ada data guru pada tahun ajaran ini! Silahkan Kelola guru mata pelajaran terlebih dahulu.",
+                        "warning",
+                        4000,
+                    );
+                }
+            });
         } catch (error) {
             console.error("Gagal mengambil data inisial:", error);
         }
     };
 
     useEffect(() => {
-        fetchDataAwal();
-    }, [selectedTahunAjaran, activeTab]);
+        fetchDataTa();
+    }, [activeTab]);
 
+    useEffect(() => {
+        if (selectedTahunAjaran) {
+            fetchDataAwal();
+        }
+    }, [selectedTahunAjaran]);
     // Data Mapping & Grouping (Berdasarkan NIP, lalu mengumpulkan Kelas)
 
     // FUNGSI MANIPULASI JAM PELAJARAN

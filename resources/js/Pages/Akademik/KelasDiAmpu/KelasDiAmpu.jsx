@@ -8,11 +8,10 @@ export default function KelasDiAmpu({
     setSelectedTahunAjaran,
 }) {
     const [kelas, setKelas] = useState([]);
-    const [filteredKelas, setFilteredKelas] = useState([]); // State untuk hasil pencarian
+    const [filteredKelas, setFilteredKelas] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const user = usePage().props.auth.user;
-    // --- State ini bisa Anda gunakan nanti jika sudah ada data tahun ajaran dari backend ---
 
     useEffect(() => {
         if (selectedTahunAjaran) {
@@ -20,10 +19,9 @@ export default function KelasDiAmpu({
         }
     }, [selectedTahunAjaran]);
 
-    // Effect untuk menangani filter secara real-time saat search query berubah
     useEffect(() => {
         if (searchQuery.trim() === "") {
-            setFilteredKelas(kelas); // Tampilkan semua jika pencarian kosong
+            setFilteredKelas(kelas);
         } else {
             const lowerCaseQuery = searchQuery.toLowerCase();
             const filtered = kelas.filter((item) =>
@@ -43,7 +41,7 @@ export default function KelasDiAmpu({
             );
             if (response.data.success === true) {
                 setKelas(response.data.data);
-                setFilteredKelas(response.data.data); // Set juga ke filteredKelas
+                setFilteredKelas(response.data.data);
             } else {
                 setKelas([]);
                 setFilteredKelas([]);
@@ -62,28 +60,28 @@ export default function KelasDiAmpu({
     };
 
     return (
-        <div className="py-12 min-h-screen ">
+        <div className="py-6 min-h-screen">
             <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 {/* Header Section */}
-                <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
                     <div>
-                        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                        <h2 className="text-md font-bold text-gray-900 tracking-tight">
                             Daftar Kelas Diampu
                         </h2>
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-0.5 text-xs text-gray-500">
                             Kelola dan pantau kelas yang Anda ampu saat ini.
                         </p>
                     </div>
                     <div className="flex gap-2">
                         {/* Search Bar */}
-                        <div className="w-full md:w-80 relative">
-                            <div className="absolute inset-y-2 top-3 left-1 pl-3 flex items-center pointer-events-none">
-                                <i className="fas fa-search text-gray-400"></i>
+                        <div className="w-full md:w-72 relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i className="fas fa-search text-gray-400 text-xs"></i>
                             </div>
                             <input
                                 type="text"
-                                placeholder="Cari kelas "
-                                className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-300 shadow-sm"
+                                placeholder="Cari kelas..."
+                                className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-xs transition-all shadow-sm"
                                 value={searchQuery}
                                 onChange={handleSearch}
                             />
@@ -93,47 +91,46 @@ export default function KelasDiAmpu({
 
                 {/* Loading State */}
                 {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((skeleton) => (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[1, 2, 3, 4, 5, 6].map((skeleton) => (
                             <div
                                 key={skeleton}
-                                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-pulse"
+                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse"
                             >
-                                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                                <div className="space-y-3">
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                <div className="h-5 bg-gray-200 rounded w-1/3 mb-3"></div>
+                                <div className="space-y-2">
+                                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                                 </div>
-                                <div className="h-10 bg-gray-200 rounded-xl mt-6 w-full"></div>
+                                <div className="h-8 bg-gray-200 rounded-lg mt-4 w-full"></div>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <>
-                        {/* Grid Container (Gunakan filteredKelas, bukan kelas) */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Grid Container */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {filteredKelas.map((item) => (
                                 <div
                                     key={item.id || item.nama_kelas}
-                                    className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group overflow-hidden"
+                                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group overflow-hidden text-xs"
                                 >
                                     {/* Card Header */}
-                                    <div className="p-5 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+                                    <div className="p-4 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
                                         <div>
-                                            <p className="text-xs font-semibold text-green-600 tracking-wider uppercase mb-1">
+                                            <p className="text-[10px] font-semibold text-green-600 tracking-wider uppercase mb-0.5">
                                                 Ruang Kelas
                                             </p>
-                                            <h3 className="text-2xl font-bold text-gray-800 group-hover:text-green-600 transition-colors">
+                                            <h3 className="text-sm font-bold text-gray-800 group-hover:text-green-600 transition-colors">
                                                 {item.nama_kelas}
                                             </h3>
                                         </div>
-                                        <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                                             <svg
-                                                className="w-4 h-4"
+                                                className="w-3.5 h-3.5"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
-                                                xmlns="http://www.w3.org/2000/svg"
                                             >
                                                 <path
                                                     strokeLinecap="round"
@@ -147,11 +144,11 @@ export default function KelasDiAmpu({
                                     </div>
 
                                     {/* Card Body */}
-                                    <div className="p-5 flex-grow space-y-4">
+                                    <div className="p-4 flex-grow space-y-3">
                                         <div>
-                                            <p className="text-sm text-gray-500 mb-1.5 flex items-center gap-2">
+                                            <div className="text-gray-500 mb-1 flex items-center gap-1.5 font-medium">
                                                 <svg
-                                                    className="w-4 h-4"
+                                                    className="w-3.5 h-3.5 text-gray-400"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -164,19 +161,19 @@ export default function KelasDiAmpu({
                                                     ></path>
                                                 </svg>
                                                 Mata Pelajaran
-                                            </p>
-                                            <p className="font-semibold text-gray-900 bg-gray-100 inline-block px-3 py-1.5 rounded-lg text-sm border border-gray-200">
-                                                <ul>
+                                            </div>
+                                            <div>
+                                                <ul className="flex flex-wrap gap-1">
                                                     {item.mapel.map(
                                                         (mapel, index) => (
                                                             <li
-                                                                className="inline-flex items-center pb-2 mb-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-50 text-green-700 border border-green-100 shadow-sm"
-                                                                // Gunakan mapel.id jika ada, jika tidak ada fallback ke index
+                                                                className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100 shadow-2xs"
                                                                 key={
-                                                                    mapel.index
+                                                                    mapel.id ||
+                                                                    index
                                                                 }
                                                             >
-                                                                <i className="fa fa-book"></i>{" "}
+                                                                <i className="fa fa-book mr-1 text-[10]"></i>
                                                                 {
                                                                     mapel.nama_mapel
                                                                 }
@@ -184,13 +181,13 @@ export default function KelasDiAmpu({
                                                         ),
                                                     )}
                                                 </ul>
-                                            </p>
+                                            </div>
                                         </div>
 
                                         <div>
-                                            <p className="text-sm text-gray-500 mb-1.5 flex items-center gap-2">
+                                            <div className="text-gray-500 mb-1 flex items-center gap-1.5 font-medium">
                                                 <svg
-                                                    className="w-4 h-4"
+                                                    className="w-3.5 h-3.5 text-gray-400"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -203,23 +200,27 @@ export default function KelasDiAmpu({
                                                     ></path>
                                                 </svg>
                                                 Wali Kelas
-                                            </p>
-                                            <div className="flex items-center justify-between pl-6">
+                                            </div>
+                                            <div className="flex items-center justify-between pl-5">
                                                 <p
-                                                    className={`font-medium text-sm ${item.nip_perwalian === user.nip ? "text-yellow-600" : "text-gray-900"}`}
+                                                    className={`text-xs flex items-center ${
+                                                        item.nip_perwalian ===
+                                                        user.nip
+                                                            ? "text-yellow-600 font-semibold"
+                                                            : "text-gray-900"
+                                                    }`}
                                                 >
                                                     {item.nip_perwalian ===
                                                         user.nip && (
-                                                        <i className="fa fa-star text-yellow-300 mr-1.5"></i>
+                                                        <i className="fa fa-star text-yellow-400 mr-1"></i>
                                                     )}
                                                     {item.nama_perwalian}
                                                 </p>
 
-                                                {/* PERBAIKAN: Dibuat menjadi badge kecil di sebelah kanan nama */}
                                                 {item.nip_perwalian ===
                                                     user.nip && (
-                                                    <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                        Kelas Perwalian
+                                                    <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 text-[9px] font-bold px-1.5 py-0.5 rounded-full">
+                                                        Perwalian
                                                     </span>
                                                 )}
                                             </div>
@@ -227,17 +228,17 @@ export default function KelasDiAmpu({
                                     </div>
 
                                     {/* Card Footer */}
-                                    <div className="p-5 pt-0">
+                                    <div className="p-4 pt-0">
                                         <Link
                                             href={route(
                                                 "akademik.kelas-diampu.detail",
                                                 item.kelas_id,
                                             )}
-                                            className="w-full flex items-center justify-center gap-2 bg-green-50 text-green-700 border px-4 py-2.5 rounded-xl hover:bg-green-600 hover:text-white transition-all duration-300 font-semibold text-sm group-hover:shadow-md border-green-100"
+                                            className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-3 py-1 text-xs rounded-lg hover:bg-green-600 hover:text-white transition-all font-semibold  group-hover:shadow-xs"
                                         >
                                             Lihat Detail
                                             <svg
-                                                className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                                                className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -257,10 +258,10 @@ export default function KelasDiAmpu({
 
                         {/* Empty State 1: Data Backend Kosong */}
                         {kelas.length === 0 && (
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-16 text-center flex flex-col items-center justify-center ">
-                                <div className="bg-gray-100 p-4 rounded-full mb-4 ">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center flex flex-col items-center justify-center">
+                                <div className="bg-gray-100 p-3 rounded-full mb-3">
                                     <svg
-                                        className="w-12 h-12 text-gray-400"
+                                        className="w-8 h-8 text-gray-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -273,25 +274,25 @@ export default function KelasDiAmpu({
                                         ></path>
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                <h3 className="text-sm font-bold text-gray-900 mb-0.5">
                                     {selectedTahunAjaran
                                         ? "Tidak Ada Kelas"
                                         : "Tahun Ajaran Belum Dipilih"}
                                 </h3>
-                                <p className="text-gray-500 text-sm">
+                                <p className="text-gray-500 text-xs">
                                     {selectedTahunAjaran
-                                        ? "Saat ini tidak ada daftar kelas yang ditugaskan kepada Anda untuk tahun ajaran tersebut."
-                                        : "Silakan pilih tahun ajaran pada menu filter di atas untuk melihat daftar kelas."}
+                                        ? "Saat ini tidak ada daftar kelas yang ditugaskan kepada Anda."
+                                        : "Silakan pilih tahun ajaran pada menu filter di atas."}
                                 </p>
                             </div>
                         )}
 
                         {/* Empty State 2: Hasil Pencarian Tidak Ditemukan */}
                         {kelas.length > 0 && filteredKelas.length === 0 && (
-                            <div className="bg-white  rounded-2xl shadow-sm border border-gray-200 p-10 text-center flex flex-col items-center justify-center mt-6">
-                                <div className="bg-green-50 p-4 rounded-full mb-4">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center flex flex-col items-center justify-center mt-4">
+                                <div className="bg-green-50 p-3 rounded-full mb-3">
                                     <svg
-                                        className="w-12 h-12 text-green-400"
+                                        className="w-8 h-8 text-green-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -304,10 +305,10 @@ export default function KelasDiAmpu({
                                         ></path>
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                                <h3 className="text-sm font-bold text-gray-900 mb-0.5">
                                     Kelas Tidak Ditemukan
                                 </h3>
-                                <p className="text-gray-500">
+                                <p className="text-gray-500 text-xs">
                                     Pencarian untuk{" "}
                                     <span className="font-semibold text-gray-700">
                                         "{searchQuery}"
@@ -316,7 +317,7 @@ export default function KelasDiAmpu({
                                 </p>
                                 <button
                                     onClick={() => setSearchQuery("")}
-                                    className="mt-4 text-green-600 hover:text-green-800 text-sm font-medium"
+                                    className="mt-3 text-green-600 hover:text-green-800 text-xs font-medium"
                                 >
                                     Hapus Pencarian
                                 </button>

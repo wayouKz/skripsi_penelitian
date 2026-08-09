@@ -19,12 +19,13 @@ export default function TahunAjaran() {
     const [statusMessage, setStatusMessage] = useState("");
     const [openModalResponse, setOpenModalResponse] = useState(false);
     const [selectedTA, setSelectedTA] = useState(null);
-    const [isImporting, setImporting] = useState(false); // State untuk menandai proses import
+    const [isImporting, setImporting] = useState(false);
+
     const columns = [
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                <span className="inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
                     {i + 1}
                 </span>
             ),
@@ -35,28 +36,12 @@ export default function TahunAjaran() {
         },
         {
             header: "Semester",
-            render: (row) => {
-                if (row.semester == "ganjil") {
-                    return "Ganjil";
-                } else {
-                    return "Genap";
-                }
-            },
-        },
-        {
-            header: "Aktif",
-            accessor: "status",
-            render: (row) => (
-                <Switch
-                    checked={row.status == "active" ? true : false}
-                    onChange={() => handleStatus(row)}
-                />
-            ),
+            render: (row) => (row.semester == "ganjil" ? "Ganjil" : "Genap"),
         },
 
         {
             header: "#",
-            accessor: "id", // boleh apa saja, asal ada di row
+            accessor: "id",
             render: (row) => (
                 <ActionDropdown
                     actions={[
@@ -68,9 +53,8 @@ export default function TahunAjaran() {
                         },
                         {
                             edit: false,
-                            label: "Import SK ",
+                            label: "Import SK",
                             icon: "upload",
-                            // Tambahkan fungsi onClick di bawah ini
                             onClick: () => handleImportSK(row),
                         },
                     ]}
@@ -82,7 +66,6 @@ export default function TahunAjaran() {
     const fileInputRef = useRef(null);
     const handleImportSK = (row) => {
         fileInputRef.current.click();
-
         setSelectedTA(row.id);
     };
 
@@ -90,7 +73,7 @@ export default function TahunAjaran() {
         const handleBeforeUnload = (event) => {
             if (isImporting) {
                 event.preventDefault();
-                event.returnValue = ""; // Baris ini wajib ada untuk Chrome & Edge modern
+                event.returnValue = "";
             }
         };
 
@@ -110,13 +93,13 @@ export default function TahunAjaran() {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("tahun_ajaran_id", selectedTA);
-        // Opsional: Reset state progress bar di sini menjadi 0%
+
         setProgress(0);
         setStatusMessage("Memulai import...");
         setOpenModalResponse(true);
         setImporting(true);
+
         try {
-            // Ambil CSRF Token jika Anda menggunakan session Laravel (Blade/Inertia)
             const csrfToken = document
                 .querySelector('meta[name="csrf-token"]')
                 ?.getAttribute("content");
@@ -129,7 +112,6 @@ export default function TahunAjaran() {
                     headers: {
                         Accept: "text/event-stream",
                         "X-CSRF-TOKEN": csrfToken || "",
-                        // Catatan: Jangan set "Content-Type" secara manual saat pakai FormData
                     },
                 },
             );
@@ -146,28 +128,18 @@ export default function TahunAjaran() {
                 if (done) break;
 
                 const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split("\n\n"); // Memecah berdasarkan enter ganda dari PHP
+                const lines = chunk.split("\n\n");
 
                 lines.forEach((line) => {
                     if (line.startsWith("data: ")) {
                         try {
-                            // Parse JSON dari server
                             const data = JSON.parse(line.replace("data: ", ""));
-
-                            // --- UPDATE UI PROGRESS DI SINI ---
-                            // Contoh jika Anda pakai Vue/React state:
                             setProgress(data.progress);
                             setStatusMessage(data.message);
-                            console.log(
-                                `Progress: ${data.progress}% - ${data.message}`,
-                            );
 
-                            // Cek jika proses dari server sudah menyertakan status done: true
                             if (data.done) {
                                 showAlert("Data berhasil diimport!", "success");
-                                getGuru(); // Refresh tabel/data guru
-
-                                // Reset input file agar bisa digunakan lagi
+                                getTahunAjaran();
                                 event.target.value = null;
                             }
                         } catch (e) {
@@ -183,8 +155,10 @@ export default function TahunAjaran() {
             showAlert("Terjadi kesalahan saat memproses file.", "error");
             event.target.value = null;
             setOpenModalResponse(false);
+            setImporting(false);
         }
     };
+
     const cekSiswa = async () => {
         const response = await axios.get(route("getData.cek-siswa"));
         if (response.data.success == false) {
@@ -193,25 +167,31 @@ export default function TahunAjaran() {
             handleTambah();
         }
     };
+
     const getTahunAjaran = async () => {
         setLoading(true);
         await axios
             .get(route("master.tahun-ajaran.getTahunAjaran"))
             .then((res) => {
                 if (res.data.status == false) {
-                    seResult([]);
+                    setResult([]);
                 } else {
                     setResult(res.data.data);
-                    setLoading(false);
                 }
+                setLoading(false);
+            })
+            .catch(() => {
+                setLoading(false);
             });
     };
+
     const handleStatus = () => {
         showAlert(
             "Data Akan Secara Otomatis Di Nonaktifkan Jika Ada Tahun Ajaran Yang Baru Di Tambahkan",
             "warning",
         );
     };
+
     useEffect(() => {
         getTahunAjaran();
     }, []);
@@ -229,14 +209,9 @@ export default function TahunAjaran() {
 
     return (
         <AuthenticatedLayout header="Tahun Ajaran">
-            <div className="bg-white shadow sm:rounded-lg p-6">
-                <div className="flex justify-end">
-                    <PrimaryButton
-                        className="mb-2"
-                        onClick={() => {
-                            cekSiswa();
-                        }}
-                    >
+            <div className="bg-white shadow sm:rounded-lg p-4 sm:p-6">
+                <div className="flex justify-end mb-3">
+                    <PrimaryButton size="sm" onClick={() => cekSiswa()}>
                         + Tambah Tahun Ajaran
                     </PrimaryButton>
                 </div>
@@ -248,6 +223,7 @@ export default function TahunAjaran() {
                     loading={loading}
                 />
             </div>
+
             <Add
                 isEdit={isEdit}
                 open={show}
@@ -256,6 +232,7 @@ export default function TahunAjaran() {
                 TahunAjaran={TA}
                 loading={loading}
             />
+
             <input
                 type="file"
                 ref={fileInputRef}
@@ -263,10 +240,10 @@ export default function TahunAjaran() {
                 accept=".xlsx, .xls, .csv"
                 style={{ display: "none" }}
             />
+
             <Modal
-                maxWidth="2xl"
+                maxWidth="md"
                 show={openModalResponse}
-                // Hanya izinkan tutup modal jika belum mulai (0) atau sudah selesai (100)
                 onClose={() => {
                     if (progress === 100 || progress === 0) {
                         setOpenModalResponse(false);
@@ -274,42 +251,36 @@ export default function TahunAjaran() {
                 }}
                 closeable={false}
             >
-                <div className="p-6">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 text-center">
+                <div className="p-4 sm:p-5">
+                    <h3 className="text-base font-semibold text-gray-800 mb-2 text-center">
                         Proses Import SK
-                    </h2>
-                    <small className="text-red-600 mb-4 block text-center rounded-lg bg-red-100 p-2">
-                        <i className="fas fa-exclamation-triangle mr-2"></i>
-                        Perhatian!!! <br /> Mohon jangan menutup jendela ini
-                        sampai proses selesai. Proses ini mungkin memakan waktu
-                        beberapa saat tergantung ukuran file!
-                    </small>
-                    {/* Container Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-5 mb-3 relative overflow-hidden">
-                        {/* Indikator Bar */}
+                    </h3>
+
+                    <p className="text-xs text-red-600 mb-3 text-center bg-red-50 border border-red-100 p-2 rounded-md">
+                        <span className="font-bold">Perhatian:</span> Mohon
+                        jangan menutup jendela ini sampai proses selesai.
+                    </p>
+
+                    <div className="w-full bg-gray-200 rounded-full h-4 mb-2 relative overflow-hidden">
                         <div
-                            className="bg-green-500 h-5 rounded-full transition-all duration-300 ease-out"
+                            className="bg-green-500 h-4 rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${progress}%` }}
                         ></div>
-
-                        {/* Teks Persentase (Ditengah) */}
-                        <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">
+                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
                             {progress > 0 ? `${progress}%` : "0%"}
                         </div>
                     </div>
 
-                    {/* Pesan Status */}
-                    <p className="text-sm text-gray-600 text-center min-h-[20px]">
+                    <p className="text-xs text-gray-600 text-center min-h-[18px] mb-4">
                         {statusMessage ||
-                            "Harap tunggu, proses sedang berjalan...,Jangan menutup jendela ini."}
+                            "Harap tunggu, proses sedang berjalan..."}
                     </p>
 
-                    {/* Tombol Tutup (Hanya muncul saat progress sudah 100%) */}
                     {progress === 100 && (
-                        <div className="mt-6 flex justify-center">
+                        <div className="flex justify-center">
                             <button
                                 onClick={() => setOpenModalResponse(false)}
-                                className="px-6 py-2 bg-green-500 text-white text-sm font-semibold rounded-md shadow hover:bg-gray-700 transition-colors"
+                                className="px-4 py-1.5 bg-green-600 text-white text-xs font-semibold rounded shadow hover:bg-green-700 transition-colors"
                             >
                                 Tutup & Selesai
                             </button>

@@ -9,12 +9,10 @@ export default function Offcanvas({
     position = "right",
     width = "w-80",
     icon,
-    // NEW
-    staticBackdrop = false, // true = tidak bisa close saat klik backdrop
-    closeOnEsc = true, // false = ESC tidak menutup
+    staticBackdrop = false,
+    closeOnEsc = true,
     showBackdrop = true,
 }) {
-    // ESC
     useEffect(() => {
         if (!closeOnEsc) return;
 
@@ -25,15 +23,11 @@ export default function Offcanvas({
         };
 
         window.addEventListener("keydown", handleEsc);
-
-        return () => {
-            window.removeEventListener("keydown", handleEsc);
-        };
+        return () => window.removeEventListener("keydown", handleEsc);
     }, [closeOnEsc, open, onClose]);
 
     const handleBackdropClick = () => {
         if (staticBackdrop) return;
-
         onClose();
     };
 
@@ -43,7 +37,7 @@ export default function Offcanvas({
             {showBackdrop && (
                 <div
                     onClick={handleBackdropClick}
-                    className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-all duration-300 ${
+                    className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-xs transition-all duration-300 ${
                         open ? "visible opacity-100" : "invisible opacity-0"
                     }`}
                 />
@@ -51,7 +45,7 @@ export default function Offcanvas({
 
             {/* PANEL */}
             <div
-                className={`fixed top-0 z-50 h-screen ${width} bg-white shadow-2xl transition-all duration-300 ${
+                className={`fixed top-0 z-50 h-screen ${width} bg-white shadow-xl transition-all duration-300 ${
                     position === "right" ? "right-0" : "left-0"
                 } ${
                     open
@@ -62,25 +56,22 @@ export default function Offcanvas({
                 }`}
             >
                 {/* HEADER */}
-                <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-                    <div>
-                        <h2 className="text-lg font-semibold text-green-800">
-                            {icon} {title}
-                        </h2>
-                    </div>
+                <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                    <h2 className="text-sm font-semibold text-green-800 flex items-center gap-1.5 truncate">
+                        {icon} <span className="truncate">{title}</span>
+                    </h2>
 
                     {/* CLOSE BUTTON */}
-
                     <DangerButton
                         onClick={onClose}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-500 transition hover:bg-gray-100"
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 p-0"
                     >
-                        <i className="fa fa-times"></i>
+                        <i className="fa fa-times text-xs"></i>
                     </DangerButton>
                 </div>
 
                 {/* BODY */}
-                <div className="h-[calc(100vh-81px)] overflow-y-auto p-5">
+                <div className="h-[calc(100vh-53px)] overflow-y-auto p-4">
                     {children}
                 </div>
             </div>

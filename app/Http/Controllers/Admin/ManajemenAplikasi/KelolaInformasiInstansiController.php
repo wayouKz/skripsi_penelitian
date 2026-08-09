@@ -19,8 +19,6 @@ class KelolaInformasiInstansiController extends Controller
     // 1. Tambahkan validasi agar lebih aman (terutama untuk file)
     $request->validate([
         'nama_instansi'   => 'required|string|max:255',
-        'logo_instansi'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
-        'sampul_instansi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // max 2MB
     ]);
 
     // 2. Cek apakah konfigurasi sudah ada di database

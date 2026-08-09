@@ -2,9 +2,8 @@ import { useAlert } from "@/Components/AlertContext";
 import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
-import TextInput from "@/Components/TextInput";
 import { useForm, usePage } from "@inertiajs/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export default function Add({
     open,
@@ -12,7 +11,6 @@ export default function Add({
     TahunAjaran = null,
     isEdit = false,
     getTahunAjaran,
-    loading,
 }) {
     const { data, post, reset, errors, setData, processing } = useForm({
         tahun_ajaran: "",
@@ -25,70 +23,47 @@ export default function Add({
     const submit = (e) => {
         e.preventDefault();
 
-        const options = {};
+        const url = isEdit
+            ? route("master.tahun-ajaran.update", { id: TahunAjaran.id })
+            : route("master.tahun-ajaran.store");
 
-        if (isEdit) {
-            post(
-                route("master.tahun-ajaran.update", {
-                    id: TahunAjaran.id,
-                }),
-                {
-                    onSuccess: (page) => {
-                        if (flash?.success) {
-                            showAlert(flash?.success, "success");
-                        } else if (flash?.error) {
-                            showAlert(flash?.error, "error");
-                        }
-
-                        setOpen(false);
-                        getTahunAjaran();
-                        reset();
-                    },
-                },
-            );
-        } else {
-            post(route("master.tahun-ajaran.store"), {
-                onSuccess: (page) => {
-                    if (flash?.success) {
-                        showAlert(flash?.success, "success");
-                    } else if (flash?.error) {
-                        showAlert(flash?.error, "error");
-                    }
-
-                    setOpen(false);
-                    getTahunAjaran();
-                    reset();
-                },
-            });
-        }
+        post(url, {
+            onSuccess: () => {
+                if (flash?.success) {
+                    showAlert(flash?.success, "success");
+                } else if (flash?.error) {
+                    showAlert(flash?.error, "error");
+                }
+                setOpen(false);
+                getTahunAjaran();
+                reset();
+            },
+        });
     };
 
     const ambilTahun = () => {
         const tahunSekarang = new Date().getFullYear();
-
-        const data = [];
-
+        const result = [];
         for (let i = 0; i < 3; i++) {
             const awal = tahunSekarang - i;
             const akhir = awal + 1;
-
-            data.push(`${awal}/${akhir}`);
+            result.push(`${awal}/${akhir}`);
         }
-
-        return data;
+        return result;
     };
 
     useEffect(() => {
-        if (isEdit) {
-            setData("tahun_ajaran", TahunAjaran.tahun_ajaran);
-            setData("semester", TahunAjaran.semester);
-            setData("status", TahunAjaran.status);
+        if (isEdit && TahunAjaran) {
+            setData({
+                tahun_ajaran: TahunAjaran.tahun_ajaran || "",
+                semester: TahunAjaran.semester || "",
+                status: TahunAjaran.status || "active",
+            });
         } else {
-            setData("tahun_ajaran", "");
-            setData("semester", "");
-            setData("status", "active");
+            reset();
         }
-    }, [isEdit]);
+    }, [isEdit, TahunAjaran, open]);
+
     return (
         <FormModal
             title={isEdit ? "Edit Tahun Ajaran" : "Tambah Tahun Ajaran"}
@@ -97,44 +72,66 @@ export default function Add({
             setOpen={setOpen}
             onSubmit={submit}
             loading={processing}
+            maxWidth="md"
         >
-            <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-1">
-                    <InputLabel for="tahun_ajaran" value="Tahun Ajaran" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <InputLabel
+                        for="tahun_ajaran"
+                        value="Tahun Ajaran"
+                        className="text-xs"
+                    />
                     <select
                         name="tahun_ajaran"
                         id="tahun_ajaran"
                         value={data.tahun_ajaran}
-                        onChange={(e) => {
-                            setData("tahun_ajaran", e.target.value);
-                        }}
-                        className={`mt-1 block w-full py-2 px-3 border ${errors.tahun_ajaran ? "border-red-500" : ""} border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
+                        onChange={(e) =>
+                            setData("tahun_ajaran", e.target.value)
+                        }
+                        className={`mt-1 block w-full py-1.5 px-2.5 border ${
+                            errors.tahun_ajaran
+                                ? "border-red-500"
+                                : "border-gray-300"
+                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-xs`}
                     >
-                        <option value="">[Pilih Tahun Ajaran]</option>
+                        <option value="">[Pilih Tahun]</option>
                         {ambilTahun().map((tahun, index) => (
                             <option key={index} value={tahun}>
                                 {tahun}
                             </option>
                         ))}
                     </select>
-                    <InputError message={errors.tahun_ajaran} />
+                    <InputError
+                        message={errors.tahun_ajaran}
+                        className="mt-1 text-[10px]"
+                    />
                 </div>
-                <div className="col-span-1">
-                    <InputLabel for="semester" value="Semester" />
+
+                <div>
+                    <InputLabel
+                        for="semester"
+                        value="Semester"
+                        className="text-xs"
+                    />
                     <select
                         name="semester"
                         id="semester"
                         value={data.semester}
-                        onChange={(e) => {
-                            setData("semester", e.target.value);
-                        }}
-                        className={`${errors.semester ? "border-red-500" : ""} mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm`}
+                        onChange={(e) => setData("semester", e.target.value)}
+                        className={`mt-1 block w-full py-1.5 px-2.5 border ${
+                            errors.semester
+                                ? "border-red-500"
+                                : "border-gray-300"
+                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-xs`}
                     >
                         <option value="">[Pilih Semester]</option>
                         <option value="ganjil">Ganjil</option>
                         <option value="genap">Genap</option>
                     </select>
-                    <InputError message={errors.semester} />
+                    <InputError
+                        message={errors.semester}
+                        className="mt-1 text-[10px]"
+                    />
                 </div>
             </div>
         </FormModal>

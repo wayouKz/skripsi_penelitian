@@ -5,22 +5,27 @@ import JadwalMengajarAnda from "./Jadwal/JadwalMengajar";
 import Perwalian from "./Perwalian/Perwalian";
 import { useEffect, useState } from "react";
 import InputLabel from "@/Components/InputLabel";
+
 export default function Akademik() {
-    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState();
+    const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
     const [namaTahunAjaran, setNamaTahunAjaran] = useState("");
     const [tahunAjaran, setTahunAjaran] = useState([]);
+
     const fetchTahunAjaran = async () => {
         try {
             const response = await axios.get(route("getData.get-tahun-ajaran"));
             if (response.data.success === true) {
-                setTahunAjaran(response.data.data);
                 const dataTahun = response.data.data;
+                setTahunAjaran(dataTahun);
+
                 const activeTahun = dataTahun.find(
                     (t) => t.status === "active",
                 );
+
                 if (activeTahun) {
-                    // Pastikan yang diset adalah .value, bukan .status
                     setSelectedTahunAjaran(activeTahun.value);
+                    // Set initial namaTahunAjaran so it isn't blank on load
+                    setNamaTahunAjaran(activeTahun.label);
                 }
             } else {
                 setTahunAjaran([]);
@@ -30,9 +35,11 @@ export default function Akademik() {
             setTahunAjaran([]);
         }
     };
+
     useEffect(() => {
         fetchTahunAjaran();
     }, []);
+
     const menus = [
         {
             value: "kelas-diampu",
@@ -64,6 +71,7 @@ export default function Akademik() {
             icon: "users",
         },
     ];
+
     return (
         <AuthenticatedLayout header="Akademik">
             <div className="flex justify-end mb-2">
@@ -80,13 +88,9 @@ export default function Akademik() {
                         className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block w-full p-2.5"
                     >
                         <option value="">[Pilih Tahun Ajaran]</option>
-                        {tahunAjaran?.map((tahunAjaran) => (
-                            <option
-                                key={tahunAjaran.value}
-                                value={tahunAjaran.value}
-                                selected={tahunAjaran.status === "active"}
-                            >
-                                {tahunAjaran.label}
+                        {tahunAjaran?.map((tahun) => (
+                            <option key={tahun.value} value={tahun.value}>
+                                {tahun.label}
                             </option>
                         ))}
                     </select>

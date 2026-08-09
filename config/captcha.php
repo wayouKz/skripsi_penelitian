@@ -2,14 +2,11 @@
 
 return [
     'disable' => env('CAPTCHA_DISABLE', false),
-    'characters' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-        'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
-        'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
-        't', 'u', 'v', 'w', 'x', 'y', 'z', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    'characters' => [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     // 'fontsDirectory' => dirname(__DIR__) . '/assets/fonts',
     // 'bgsDirectory' => dirname(__DIR__) . '/assets/backgrounds',
     'default' => [
-        'length' => 6,
+        'length' => 5,
         'width' => 345,
         'height' => 65,
         'quality' => 90,
@@ -18,7 +15,7 @@ return [
         'encrypt' => true,
     ],
     'flat' => [
-        'length' => 6,
+        'length' => 5,
         'fontColors' => ['#2c3e50', '#c0392b', '#16a085', '#c0392b', '#8e44ad', '#303f9f', '#f57c00', '#795548'],
         'width' => 345,
         'height' => 65,

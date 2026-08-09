@@ -19,10 +19,8 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
     const flash = usePage().props.flash;
     const { showAlert } = useAlert();
 
-    // Mengecek apakah komponen berjalan dalam mode Edit atau Tambah Baru
     const isEdit = !!selectedData;
 
-    // 1. Isi form saat edit, reset form saat tambah baru
     useEffect(() => {
         if (open) {
             if (isEdit) {
@@ -32,18 +30,17 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                     role_id: selectedData.role_id || "",
                 });
             } else {
-                reset(); // Bersihkan form jika mode tambah data
+                reset();
             }
         }
     }, [selectedData, open]);
 
-    // 2. Handler submit untuk mengarahkan ke rute store atau update
     const onSubmit = (e) => {
         e.preventDefault();
 
         const submitRoute = isEdit
             ? route("manajemen.kelola-user.update", { id: selectedData.id })
-            : route("manajemen.kelola-user.store"); // Rute simpan data baru
+            : route("manajemen.kelola-user.store");
 
         post(submitRoute, {
             onSuccess: () => {
@@ -58,7 +55,6 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
         });
     };
 
-    // 3. Mengambil daftar peran (roles) untuk pilihan dropdown
     const getRole = async () => {
         try {
             const response = await axios.get(
@@ -82,6 +78,36 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
         }
     }, [open]);
 
+    // Kustomisasi ukuran styling react-select agar kompak (small)
+    const customSelectStyles = {
+        control: (base) => ({
+            ...base,
+            minHeight: "32px",
+            fontSize: "12px",
+            borderRadius: "0.75rem",
+            borderColor: "#e5e7eb",
+            boxShadow: "none",
+            "&:hover": { borderColor: "#10b981" },
+        }),
+        valueContainer: (base) => ({
+            ...base,
+            padding: "0px 8px",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            padding: "4px",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+        option: (base) => ({
+            ...base,
+            fontSize: "12px",
+            padding: "6px 10px",
+        }),
+    };
+
     return (
         <FormModal
             onSubmit={onSubmit}
@@ -94,27 +120,38 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                     : "Tambah Akun Pengguna Baru"
             }
         >
-            <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                     <div className="col-span-1">
-                        <InputLabel htmlFor="name" value="Nama User" />
+                        <InputLabel
+                            htmlFor="name"
+                            value="Nama User"
+                            className="text-xs font-semibold text-gray-700"
+                        />
                         <TextInput
                             id="name"
                             type="text"
-                            className="mt-1 block w-full"
+                            className="mt-1 block w-full text-xs py-1.5 px-3 rounded-xl"
                             value={data.name}
                             onChange={(e) => setData("name", e.target.value)}
                         />
-                        <InputError message={errors.name} className="mt-2" />
+                        <InputError
+                            message={errors.name}
+                            className="mt-1 text-[10px]"
+                        />
                     </div>
 
                     <div className="col-span-1">
-                        <InputLabel htmlFor="username" value="Username" />
+                        <InputLabel
+                            htmlFor="username"
+                            value="Username"
+                            className="text-xs font-semibold text-gray-700"
+                        />
                         <TextInput
                             id="username"
                             type="text"
                             icon="tag"
-                            className="mt-1 block w-full"
+                            className="mt-1 block w-full text-xs py-1.5 px-3 rounded-xl"
                             value={data.username}
                             onChange={(e) =>
                                 setData("username", e.target.value)
@@ -122,12 +159,16 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                         />
                         <InputError
                             message={errors.username}
-                            className="mt-2"
+                            className="mt-1 text-[10px]"
                         />
                     </div>
 
                     <div className="col-span-2">
-                        <InputLabel htmlFor="role_id" value="Peran" />
+                        <InputLabel
+                            htmlFor="role_id"
+                            value="Peran"
+                            className="text-xs font-semibold text-gray-700 mb-1"
+                        />
                         <Select
                             options={roleOptions}
                             value={
@@ -138,17 +179,15 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                             menuPortalTarget={document.body}
                             menuPosition="fixed"
                             placeholder="Pilih Peran..."
-                            styles={{
-                                menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 9999,
-                                }),
-                            }}
+                            styles={customSelectStyles}
                             onChange={(selectedOption) =>
                                 setData("role_id", selectedOption?.value || "")
                             }
                         />
-                        <InputError message={errors.role_id} className="mt-2" />
+                        <InputError
+                            message={errors.role_id}
+                            className="mt-1 text-[10px]"
+                        />
                     </div>
                 </div>
             </div>

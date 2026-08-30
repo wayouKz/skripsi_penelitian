@@ -35,11 +35,18 @@ export default function Kelas() {
         {
             header: "Jurusan",
             render(row) {
-                return (
+                if (row.nama_jurusan == null) {
+                    return (
+                        <span className="text-yellow-500">
+                            <i className="fas fa-exclamation-triangle"></i> {""}
+                            Jurusan Belum Dipilih
+                        </span>
+                    );
+                } else {
                     <span className="inline-flex items-center justify-center px-3 py-1 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm whitespace-nowrap">
-                        {row.nama_jurusan || "Tidak Ada Jurusan"}
-                    </span>
-                );
+                        {row.nama_jurusan}
+                    </span>;
+                }
             },
         },
         {

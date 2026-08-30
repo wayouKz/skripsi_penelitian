@@ -81,7 +81,8 @@ class GetDataController extends Controller
         $formattedData = $data->map(function ($item) {
             return [
                 "value" => (string) $item->id,         // Ambil ID sebagai value
-                "label" => $item->nama_kelas . " ".($item->nama_jurusan  ? strtoupper($item->nama_jurusan)  : "") ,       // Sesuaikan 'nama_kelas' dengan nama kolom di database Anda
+                "label" => $item->nama_kelas . " ".($item->nama_jurusan  ? strtoupper($item->nama_jurusan)  : "") ,
+                "tingkat" => $item->tingkat
             ];
         })->toArray();
 
@@ -141,7 +142,8 @@ $data = $this->builder($tableName)
         't_list_guru_mapels.id as unique_id',
         't_list_gurus.kelas_id',
         't_list_gurus.tahun_ajaran_id',
-        'm_kelas.nama_kelas'
+        'm_kelas.nama_kelas',
+        'm_kelas.tingkat'
     )
     ->get()
     ->groupBy('id')
@@ -170,6 +172,7 @@ $data = $this->builder($tableName)
                                         'beban_jam'  => $item->beban_jam ?? 0,
                                         'kelas_id'   => $item->kelas_id ?? '',
                                         'nama_kelas' => $item->nama_kelas,
+                                        'tingkat'    => $item->tingkat
                                     ];
                                 })
                                 ->values()
@@ -231,6 +234,7 @@ $data = $this->builder($tableName)
         'm_kelas.nama_kelas',
         'm_kelas.tingkat',
         'm_siswas.nisn',
+        'm_siswas.id as siswa_id',
         'm_siswas.nama_siswa',
         'm_siswas.jenis_kelamin',
         'm_gurus.nama_guru',
@@ -241,12 +245,12 @@ $data = $this->builder($tableName)
         $join->on('m_kelas.id', '=', 't_list_siswas.kelas_id');
 
         // Jika ada filter tahun ajaran yang dikirim dari React
-        // if ($tahunAjaran) {
-        //     // Sesuaikan 'tahun_ajaran_id' dengan nama kolom asli di tabel t_list_siswas Anda
-        //     $join->where('t_list_siswas.tahun_ajaran_id', '=', $tahunAjaran);
-        // }
+        if ($tahunAjaran) {
+            // Sesuaikan 'tahun_ajaran_id' dengan nama kolom asli di tabel t_list_siswas Anda
+            $join->where('t_list_siswas.tahun_ajaran_id', '=', $tahunAjaran);
+        }
     })
-    ->leftJoin('m_siswas', 't_list_siswas.nisn', '=', 'm_siswas.nisn')
+    ->leftJoin('m_siswas', 't_list_siswas.siswa_id', '=', 'm_siswas.id')
     ->leftJoin('m_gurus', 'm_kelas.id_wali_kelas', '=', 'm_gurus.id')
     ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
     // ->where('m_kelas.tahun_ajaran_id', $tahunAjaran)
@@ -261,7 +265,7 @@ $data = $this->builder($tableName)
             'nama_wali_kelas' => $first->nama_guru,
             'tingkat' => $first->tingkat,
             'siswa' => $items->filter(function ($item) {
-                return !is_null($item->nisn);
+                return !is_null($item->siswa_id);
             })->map(function ($item) {
                 return [
                     'value' => $item->nisn,
@@ -294,7 +298,7 @@ $data = $this->builder($tableName)
             'nama_siswa',
             'jenis_kelamin'
         )
-        ->whereNotIn('nisn', $siswaSudahMapping)
+        ->whereNotIn('id', $siswaSudahMapping)
         // ->where('status', 'Aktif') // (Opsional) Uncomment ini jika Anda punya kolom status untuk mengecualikan siswa yang sudah lulus/pindah
         ->get();
 
@@ -410,7 +414,7 @@ public function getKelasTujuan(Request $request)
     ]);
 }
 public function getSiswaInKelas(Request $request){
-        $data = MSiswa::select(
+        $query = MSiswa::select(
             'm_siswas.nisn as value',
             'm_siswas.nama_siswa as label',
             'm_siswas.jenis_kelamin',
@@ -419,19 +423,21 @@ public function getSiswaInKelas(Request $request){
             'm_kelas.nama_kelas',
             'm_tahun_ajarans.tahun_ajaran',
             'm_tahun_ajarans.semester')
-        ->leftJoin('t_list_siswas', 'm_siswas.nisn', '=', 't_list_siswas.nisn')
+        ->leftJoin('t_list_siswas', 'm_siswas.id', '=', 't_list_siswas.siswa_id')
         ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id')
         ->leftJoin('m_tahun_ajarans', 't_list_siswas.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
-        ->where('t_list_siswas.kelas_id', $request->kelas_id)
-        ->where('t_list_siswas.tahun_ajaran_id', $request->Ta)
-        ->get();
+        ->where('t_list_siswas.tahun_ajaran_id', $request->Ta);
+        if ($request->kelas_id !="all") {
+            $query->where('t_list_siswas.kelas_id', $request->kelas_id);
+        }
+        $data = $query->get();
         return $response = response()->json(["data" => $data, "success" => true]);
     }
 
     public function cekKelasTujuan(Request $request)
     {
         // 1. Ambil Total Siswa (Gunakan pemanggilan statis baru agar independen)
-        $dataTotal = MSiswa::join('t_list_siswas', 'm_siswas.nisn', '=', 't_list_siswas.nisn');
+        $dataTotal = MSiswa::join('t_list_siswas', 'm_siswas.id', '=', 't_list_siswas.siswa_id');
             // Pastikan parameter request yang digunakan seragam.
             // Di sini saya asumsikan menggunakan kelas_id dan Ta.
 
@@ -449,7 +455,7 @@ public function getSiswaInKelas(Request $request){
                 'm_siswas.jenis_kelamin',
                 't_list_siswas.kelas_id'
             )
-            ->leftJoin('t_list_siswas', 'm_siswas.nisn', '=', 't_list_siswas.nisn')
+            ->leftJoin('t_list_siswas', 'm_siswas.id', '=', 't_list_siswas.siswa_id')
             ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id');
 
             if($request->kelas_asal_id == "Lulus"){
@@ -484,21 +490,7 @@ public function getSiswaInKelas(Request $request){
 
     public function getHistoryJadwal(Request $request){
         $tahunAjaran = $request->tahun_ajaran_id;
-       $data = TJadwal::select([
-        't_jadwals.*',
-        'm_gurus.nama_guru',
-        'm_mapels.nama_mapel',
-        'm_kelas.nama_kelas'
-    ])
-    ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-    ->leftJoin('m_gurus', 't_list_guru_mapels.nip', '=', 'm_gurus.nip') // Tambahan relasi ke tabel guru
-    ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
-    ->leftJoin('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
-    ->where('t_jadwals.tahun_ajaran_id', $tahunAjaran)
-    ->orderBy('m_kelas.nama_kelas', 'asc')
-    ->orderByRaw("FIELD(t_jadwals.hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat')") // Wajib pakai orderByRaw untuk sintaks SQL native
-    ->orderBy('t_jadwals.jam_mulai', 'asc')
-    ->get();
+        $data = TJadwal::getJadwalByTahunAjaran($tahunAjaran);
         return response()->json([
             "data" => $data,
             "success" => true
@@ -507,59 +499,7 @@ public function getSiswaInKelas(Request $request){
 
     public function getGuruPengampuKelas(Request $request){
         $tahunAjaranId = $request->tahun_ajaran;
-    $data = TListGuru::select(
-        'm_gurus.nama_guru',
-        'm_kelas.nama_kelas',
-        'perwalian.nama_guru as nama_perwalian',
-        'perwalian.nip as nip_perwalian',
-        'm_kelas.id as kelas_id',
-
-        // 1. TETAP gunakan GROUP_CONCAT agar SQL tidak error & kelas tidak duplikat
-        DB::raw('GROUP_CONCAT(DISTINCT m_mapels.nama_mapel SEPARATOR "||") as raw_mapel'),
-
-        DB::raw('COUNT(DISTINCT t_list_siswas.nisn) as jumlah_siswa')
-    )
-    ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
-    ->leftJoin('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
-    ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-    ->leftJoin('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
-    ->leftJoin('m_gurus as perwalian', 'perwalian.id', '=', 'm_kelas.id_wali_kelas')
-    ->leftJoin('t_list_siswas', 't_list_gurus.kelas_id', '=', 't_list_siswas.kelas_id')
-    ->where('m_gurus.nip', Auth::user()->nip)
-    ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaranId)
-    ->groupBy(
-        'm_gurus.nama_guru',
-        'm_kelas.nama_kelas',
-        'm_kelas.id',
-        'perwalian.nama_guru',
-        'perwalian.nip',
-
-    )
-    ->get()
-    ->map(function ($item) {
-        // Enkripsi ID
-        $item->kelas_id = Crypt::encryptString($item->kelas_id);
-
-        // 2. Proses pembentukan Array Mapel
-        $mapelList = [];
-        if ($item->raw_mapel) {
-            $pecahMapel = explode('||', $item->raw_mapel);
-            foreach ($pecahMapel as $mapel) {
-                // Masukkan ke dalam format array of object yang Anda inginkan
-                $mapelList[] = [
-                    'nama_mapel' => $mapel
-                ];
-            }
-        }
-
-        // Assign ke properti mapel
-        $item->mapel = $mapelList;
-
-        // Bersihkan properti mentah agar response JSON rapi
-        unset($item->raw_mapel);
-
-        return $item;
-    });
+        $data = TListGuru::getGuruPengampu($tahunAjaranId);
         if(!empty($data) && count($data) > 0){
             $json = [
                 'data' => $data,
@@ -588,35 +528,18 @@ public function getSiswaInKelas(Request $request){
     $jamSekarang = $sekarang->format('H:i:00');
     if($request->type != 'informasi'){
 
-        $isJadwalAktif = TJadwal::where('kelas_id', $kelasId)
-        ->where('tahun_ajaran_id', $tahunAjaran)
-        ->where('kode_jadwal', $jadwal)
-        ->where('hari', $hariIni)
-        ->where('jam_mulai', '<=', $jamSekarang)
-        ->where('jam_selesai', '>=', $jamSekarang)
-        ->exists();
-         // keluarkan ! jika ingin development
-        if ($isJadwalAktif) {
-            return response()->json([
-                "success" => false,
-                "msg"     => "Tidak ada jadwal pelajaran yang aktif untuk kelas ini pada hari dan jam sekarang."
-                ], 200);
+        $isJadwalAktif = TJadwal::cekJadwal($kelasId, $tahunAjaran, $jadwal, $hariIni, $jamSekarang);
+         /* comment ini jika ingin development
+         if ($isJadwalAktif) {
+             return response()->json([
+                 "success" => false,
+                 "msg"     => "Tidak ada jadwal pelajaran yang aktif untuk kelas ini pada hari dan jam sekarang."
+                 ], 200);
         }
+        sampe sini*/
     }
 
-    $data = TListSiswa::leftJoin('m_siswas', 't_list_siswas.nisn', '=', 'm_siswas.nisn')
-        ->where('t_list_siswas.kelas_id', $kelasId)
-        ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran)
-        ->select(
-            't_list_siswas.nisn',
-            'm_siswas.nama_siswa',
-            'm_siswas.jenis_kelamin',
-            'm_siswas.tempat_lahir',
-            'm_siswas.tanggal_lahir',
-            't_list_siswas.kelas_id'
-        )
-        ->get();
-
+    $data = TListSiswa::getSiswaByTahunAjaran($tahunAjaran, $kelasId);
     // 5. Evaluasi data siswa
     if ($data->isEmpty()) {
         return response()->json([
@@ -647,19 +570,7 @@ public function getSiswaInKelas(Request $request){
         $kelasID = $request->kelas_id;
         $tahunAjaran = $request->tahun_ajaran_id;
 
-        $data = TListGuruMapel::select(
-            'm_mapels.nama_mapel',
-                'm_mapels.kode_mapel',
-                't_jadwals.kode_jadwal',
-        )
-        ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-        ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-        ->leftJoin('t_jadwals', 't_list_guru_mapels.id', '=', 't_jadwals.t_list_guru_mapel_id')
-        ->where('t_list_gurus.kelas_id', $kelasID)
-        ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaran)
-        ->where('t_list_gurus.nip', Auth::user()->nip)
-        ->groupBy('t_jadwals.kode_jadwal' ,'m_mapels.nama_mapel', 'm_mapels.kode_mapel')
-        ->get();
+        $data = TListGuruMapel::MapelGuruKelas($kelasID, $tahunAjaran);
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -674,14 +585,7 @@ public function getSiswaInKelas(Request $request){
         $kelasID = $request->kelas_id;
         $tahunAjaran = $request->tahun_ajaran_id;
 
-        $data = TJadwal::leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-        ->leftJoin('m_gurus', 't_list_guru_mapels.nip', '=', 'm_gurus.nip')
-        ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
-        ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-        ->where('t_list_gurus.kelas_id', $kelasID)
-        ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaran)
-        ->where('t_list_guru_mapels.nip', Auth::user()->nip)
-        ->get();
+        $data = TJadwal::jadwalKelas($kelasID, $tahunAjaran);
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -694,48 +598,7 @@ public function getSiswaInKelas(Request $request){
 
     public function getHistoryAbsensi(Request $request)
     {
-        $data = TAbsenGuru::where('t_absen_gurus.kode_jadwal', $request->kode_jadwal)
-    ->leftJoin('t_absen_siswas', 't_absen_gurus.kode_absen', '=', 't_absen_siswas.kode_absen')
-    // Asumsi: Anda juga melakukan join ke tabel siswas master untuk mengambil nama
-    ->leftJoin('m_siswas', 't_absen_siswas.nisn', '=', 'm_siswas.nisn')
-    ->select(
-        't_absen_gurus.kode_absen',
-        't_absen_gurus.waktu_absen',
-        't_absen_gurus.waktu',
-        't_absen_siswas.nisn',
-        'm_siswas.nama_siswa', // Mengambil nama siswa
-        't_absen_siswas.status'
-    )
-    ->orderBy('t_absen_gurus.waktu', 'desc')
-    ->get()
-
-    // 1. Kelompokkan data yang datar berdasarkan kode_absen
-    ->groupBy('kode_absen')
-    // 2. Map setiap kelompok menjadi format yang Anda inginkan
-    ->map(function ($group) {
-
-        // Ambil baris pertama dari kelompok ini sebagai data Induk (Guru/Jadwal)
-        $parent = $group->first();
-
-        return [
-            'kode_absen'    => $parent->kode_absen,
-            'waktu_absen' => $parent->waktu_absen, // Atau kolom tanggal_absen Anda
-            'waktu'   => $parent->waktu,
-
-            // 3. Map lagi isi kelompok ini khusus untuk array list_siswa
-            'list_siswa'    => $group->map(function ($siswa) {
-                return [
-                    'nama_siswa' => $siswa->nama_siswa ?? 'Tidak diketahui',
-                    'nisn'       => $siswa->nisn,
-                    'status'     => $siswa->status
-                ];
-            })->values()->toArray() // Gunakan values() agar index list_siswa selalu mulai dari 0
-        ];
-    })
-
-    // 4. Reset index array utama agar menjadi murni [0, 1, 2, ...] bukan index asosiatif
-    ->values();
-
+        $data = TAbsenGuru::historyAbsen();
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -803,20 +666,7 @@ public function getSiswaInKelas(Request $request){
 
     public function getJadwalPerGuru(Request $request){
     $tahunAjaran = $request->tahun_ajaran_id;
-        $data = TJadwal::select(
-            't_jadwals.kode_jadwal',
-            'm_kelas.nama_kelas',
-            'm_mapels.nama_mapel',
-            't_jadwals.hari',
-            't_jadwals.jam_mulai',
-            't_jadwals.jam_selesai'
-        )
-        ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-        ->leftJoin('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
-        ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
-        ->where('t_list_guru_mapels.nip', Auth::user()->nip)
-        ->where('t_jadwals.tahun_ajaran_id', $tahunAjaran)
-        ->get();
+        $data = TJadwal::getJadwalByTahunAjaran($tahunAjaran);
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data jadwal"];
@@ -829,22 +679,11 @@ public function getSiswaInKelas(Request $request){
 
     public function getSiswaPerwalian(Request $request){
         $tahunAjaran = $request->tahun_ajaran_id;
-    $data = TListSiswa::select(
-        'm_siswas.nisn',
-        'm_siswas.nama_siswa',
-        'm_siswas.jenis_kelamin',
-        't_list_siswas.kelas_id',
-        'm_kelas.nama_kelas'
-    )
-    ->leftJoin('m_siswas', 't_list_siswas.nisn', '=', 'm_siswas.nisn')
-    ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id')
-    ->where('m_kelas.id_wali_kelas', Auth::user()->guru->id)
-    ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran)
-    ->get();
-    return response()->json([
-        "data" => $data,
-        "success" => true
-    ]);
+        $data = TListSiswa::getWaliKelas($tahunAjaran);
+        return response()->json([
+            "data" => $data,
+            "success" => true
+        ]);
     }
 
     public function cekDataMapel(){
@@ -889,5 +728,25 @@ public function getSiswaInKelas(Request $request){
     ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
     ->where('t_jadwals.tahun_ajaran_id', 3)->get();
         return view('cek-data-mapel', compact('dataJam', 'dataJamGuru', 'jadwal'));
+    }
+
+    public function getTotalJam(Request $request){
+        $tingkat = $request->tingkat;
+        $tahunAjaran = $request->tahun_ajaran_id;
+    $data = [];
+        foreach($tingkat as $t){
+            $totalJam = DB::table('m_kelas')
+            ->join('t_list_gurus', 'm_kelas.id', '=', 't_list_gurus.kelas_id')
+            ->join('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
+            ->where('m_kelas.tingkat', $t)
+            ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaran)
+            ->sum('t_list_guru_mapels.beban_jam');
+            $data["tingkat".$t] = [
+                'total_jam' => $totalJam];
+        }
+        return response()->json([
+            "data" => $data,
+            "success" => true
+        ]);
     }
 }

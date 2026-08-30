@@ -94,7 +94,7 @@ class Pdf extends Controller
   $daftarAbsenSiswa = DB::table('t_list_siswas')
     ->where('t_list_siswas.kelas_id', $kelas_id)
     ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran_id)
-    ->leftJoin('t_absen_siswas', 't_list_siswas.nisn', '=', 't_absen_siswas.nisn')
+    ->leftJoin('t_absen_siswas', 't_list_siswas.siswa_id', '=', 't_absen_siswas.siswa_id')
     ->leftJoin('t_jadwals', function ($join) use ($tahunAjaran_id) {
         $join->on('t_absen_siswas.kode_jadwal', '=', 't_jadwals.kode_jadwal')
              ->where('t_jadwals.tahun_ajaran_id', '=', $tahunAjaran_id);
@@ -183,7 +183,7 @@ class Pdf extends Controller
         $tanggalCetak = now()->format('d-m-Y H:i:s');
         $footer = '<table width="100%" style="font-size: 9px; font-family: sans-serif; color: #555; border-top: 1px solid #ddd; padding-top: 5px;">
                     <tr>
-                        <td align="left">Dicetak oleh: ' . $namaUser . ' pada ' . $tanggalCetak . '</td>
+                        <td align="left">Dicetak oleh: ' . strtoupper($namaUser) . ' pada ' . $tanggalCetak . '</td>
                         <td align="right">Halaman {PAGENO} dari {nbpg}</td>
                     </tr>
                 </table>';

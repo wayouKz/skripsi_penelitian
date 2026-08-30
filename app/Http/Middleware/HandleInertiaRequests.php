@@ -49,6 +49,7 @@ public function share(Request $request): array
             'guru' => $user?->guru,
         ],
         'settings_application' => $config,
+        'highlight' => !empty($config->card_img) ? (object) json_decode($config->card_img ) : (object) [],
         'flash' => [
             'success' => $request->session()->get('success'),
             'error' => $request->session()->get('error'),

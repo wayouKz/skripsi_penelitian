@@ -59,12 +59,11 @@ export default function Login({ status, canResetPassword, config }) {
                     {/* BAGIAN KIRI: Teks Instansi */}
                     <div className="w-full lg:w-1/2 text-white text-center lg:text-left mt-10 lg:mt-0">
                         <h1 className="text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg tracking-tight">
-                            SIM Akademik
-                        </h1>
-                        <p className="text-xl lg:text-2xl font-semibold mb-2 drop-shadow-md">
                             {config?.nama_instansi || "SISTEM INFORMASI"}{" "}
-                            {/* Sesuaikan variabel config */}
-                        </p>
+                        </h1>
+                        {/* <p className="text-xl lg:text-2xl font-semibold mb-2 drop-shadow-md">
+
+                        </p> */}
                         <p className="text-sm lg:text-base text-green-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
                             {config?.alamat_instansi ||
                                 "CONTOH JALAN, CONTOH KOTA"}
@@ -92,11 +91,9 @@ export default function Login({ status, canResetPassword, config }) {
                         {/* 2. Judul Form */}
                         <div className="text-center mb-8">
                             <h2 className="text-3xl font-extrabold text-green-600 tracking-tight">
-                                SIM akademik
+                                {config?.nama_instansi ||
+                                    "SISTEM INFORMASI NAMA SEKOLAH"}
                             </h2>
-                            <p className="text-[11px] font-semibold text-gray-500 mt-1 uppercase tracking-wider">
-                                Sistem Informasi & Manajemen Akademik
-                            </p>
                         </div>
 
                         {/* 3. Notifikasi Error / Status */}
@@ -162,7 +159,7 @@ export default function Login({ status, canResetPassword, config }) {
                             {/* Input Captcha Inline dengan Gambar */}
                             <div>
                                 {/* Set tinggi container menjadi 44px */}
-                                <div className="flex gap-3 h-[44px]">
+                                <div className="lg:flex gap-3 h-[44px] sm:w-full">
                                     <input
                                         id="captcha"
                                         type="text"
@@ -176,7 +173,7 @@ export default function Login({ status, canResetPassword, config }) {
 
                                     {/* Gambar Captcha dengan ukuran fix 118x44 px */}
                                     <div
-                                        className="w-[198px] h-[45px] flex-shrink-0 bg-white rounded-xl overflow-hidden cursor-pointer relative border border-gray-200 group"
+                                        className="lg:w-[198px] h-[45px] lg:flex-shrink-0 sm:w-full bg-white rounded-xl overflow-hidden cursor-pointer relative border border-gray-200 group"
                                         onClick={refreshCaptcha}
                                         title="Klik untuk menyegarkan kode"
                                     >
@@ -184,7 +181,7 @@ export default function Login({ status, canResetPassword, config }) {
                                             src={`/captcha/flat?${captchaKey}`}
                                             alt="Captcha"
                                             /* Memaksa gambar mengikuti ukuran 118x44 px */
-                                            className={`w-[200px] h-[44px] object-fill transition-opacity duration-300 ${isCaptchaLoading ? "opacity-0" : "opacity-100 group-hover:opacity-80"}`}
+                                            className={`lg:w-[200px] sm:w-full h-[44px] object-fill transition-opacity duration-300 ${isCaptchaLoading ? "opacity-0" : "opacity-100 group-hover:opacity-80"}`}
                                             onLoad={() =>
                                                 setIsCaptchaLoading(false)
                                             }
@@ -222,8 +219,7 @@ export default function Login({ status, canResetPassword, config }) {
 
                 {/* BAGIAN BAWAH: Footer Copyright */}
                 <div className="relative z-10 py-6 text-center text-green-100/80 text-xs font-medium tracking-wide">
-                    &copy; {currentYear} Aplikasi SIM Akademik by INFORMATIKA
-                    UNG
+                    &copy; {currentYear} Aplikasi by INFORMATIKA UNG
                 </div>
             </div>
         </>

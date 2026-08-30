@@ -362,6 +362,7 @@ export default function Guru() {
                 borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
             },
         }),
+
         valueContainer: (base) => ({
             ...base,
             padding: "0px 6px",
@@ -416,27 +417,23 @@ export default function Guru() {
                     {/* Wali Kelas */}
                     {activeMenu === "wali_kelas" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
-                            <div className="flex items-center gap-3 mb-6 bg-white p-4 border border-gray-100 rounded-lg">
-                                <label className="text-xs font-semibold text-gray-700">
-                                    Filter Kelas:
-                                </label>
-                                <div className="w-72">
-                                    <Select
-                                        options={opsiKelas}
-                                        value={
-                                            opsiKelas.find(
-                                                (o) => o.value === filter.kelas,
-                                            ) || null
-                                        }
-                                        onChange={(opt) =>
-                                            setFilter({
-                                                kelas: opt ? opt.value : null,
-                                            })
-                                        }
-                                        isClearable={true}
-                                        styles={customSelectStyles}
-                                    />
-                                </div>
+                            <div className="w-72 m-2">
+                                <Select
+                                    options={opsiKelas}
+                                    value={
+                                        opsiKelas.find(
+                                            (o) => o.value === filter.kelas,
+                                        ) || null
+                                    }
+                                    onChange={(opt) =>
+                                        setFilter({
+                                            kelas: opt ? opt.value : null,
+                                        })
+                                    }
+                                    isClearable={true}
+                                    styles={customSelectStyles}
+                                    placeholder="Pilih Kelas..."
+                                />
                             </div>
                             <DataTable
                                 columns={columnsWali}
@@ -505,8 +502,10 @@ export default function Guru() {
                                             openModalPdf("guru_mapel")
                                         }
                                         className="h-10 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-800"
+                                        disabled={!selectedTahunAjaran}
                                     >
-                                        <i className="fa fa-file-pdf mr-2"></i>
+                                        Cetak SK{" "}
+                                        <i className="fa fa-file-pdf ms-2"></i>
                                     </PrimaryButton>
                                     <PrimaryButton
                                         onClick={() =>

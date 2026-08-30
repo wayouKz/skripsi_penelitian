@@ -27,14 +27,17 @@ use App\Http\Controllers\Master\JadwalController;
 use App\Http\Controllers\Master\KelasController;
 use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\TahunAjaranController;
+use App\Models\Config;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
+    // return Inertia::render('Welcome', [
+    //     'canLogin' => Route::has('login'),
+    //     'config' => Config::first(),
+    //     'canRegister' => Route::has('register'),
+    //     'laravelVersion' => Application::VERSION,
+    //     'phpVersion' => PHP_VERSION,
+    // ]);
 });
 
 Route::prefix('install')->group(function () {
@@ -73,7 +76,7 @@ Route::middleware('auth')->group(function () {
         Route::get('get-kelas-aktif',  'getKelasAktif')->name('get-kelas-aktif');
         Route::get('get-jadwal-perguru',  'getJadwalPerGuru')->name('get-jadwal-perguru');
         Route::get('get-siswa-perwalian',  'getSiswaPerwalian')->name('get-siswa-perwalian');
-
+        Route::get('get-total-jam',  'getTotalJam')->name('get-total-jam');
         Route::get('/cek-data-mapel',  'cekDataMapel')->name('cek-data-mapel');
     });
 
@@ -133,6 +136,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/getSiswa',  'getSiswa')->name('getSiswa');
             Route::post('mapping-kelas-siswa',  'mappingKelasSiswa')->name('mapping-kelas');
             Route::post('/proses-kenaikan',  'prosesKenaikan')->name('proses-kenaikan');
+            Route::post('/import-siswa', 'importSiswa')->name('import-siswa');
         });
 
         Route::controller(TahunAjaranController::class)->prefix('/tahun-ajaran')->name('tahun-ajaran.')->group(function () {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Master;
 
 use App\Http\Controllers\Controller;
 use App\Models\TAlumni;
+use App\Models\WAHYU\MKelas;
 use App\Models\WAHYU\MSiswa;
 use App\Models\WAHYU\TListSiswa;
 use Exception;
@@ -270,4 +271,157 @@ class SiswaController extends Controller
         ], 500);
     }
 }
+    public function importSiswa(Request $request)
+    {
+        $file = $request->file('fileExcel');
+        $tahun_ajaran_id = $request->tahun_ajaran_id;
+
+        $xlsxPath = $file->getRealPath();
+        $tempDir = storage_path('app/temp/' . uniqid());
+        if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
+
+      $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($xlsxPath);
+        $reader->setReadDataOnly(true);
+        $spreadsheet = $reader->load($xlsxPath);
+        $sheetNames = $spreadsheet->getSheetNames();
+        $dataSiswa = [];
+        $dataKelas = []; // Pastikan inisialisasi array ini
+
+        // 1. Looping semua sheet yang ada di file Excel
+        foreach ($sheetNames as $sheetName) {
+            // Jika kamu hanya ingin mengekstrak sheet absensi (X1 - X15) dan mengabaikan sheet 'Nilai' atau 'Kelas'
+            if (strpos($sheetName, 'Nilai') !== false || $sheetName === 'Kelas') {
+                continue;
+            }
+
+            // Panggil sheet menggunakan NAMA ASLI DARI EXCEL (misal: "X1")
+            $sheet = $spreadsheet->getSheetByName($sheetName);
+
+            // Format nama sheet HANYA untuk kebutuhan database (misal: jadi "X-1")
+            $sheetNameFormatted = preg_replace('/([a-zA-Z]+)(\d+)/', '$1-$2', $sheetName);
+
+            // 2. Ubah seluruh data di sheet tersebut menjadi Array (dengan key abjad kolom A, B, C...)
+            $sheetData = $sheet->toArray(null, true, true, true);
+
+            // 3. Looping data per baris (Data siswa dimulai dari baris ke-3)
+            foreach ($sheetData as $rowIndex => $row) {
+                // Lewati baris 1 dan 2 karena itu adalah header (Tanggal / Pertemuan)
+                if ($rowIndex < 3) continue;
+
+                $no = $row['A'];
+                $namaSiswa = $row['B'];
+
+                // Jika kolom nama kosong, berarti data di sheet tersebut sudah habis
+                if (empty($namaSiswa)) {
+                    continue;
+                }
+
+                // 4. Masukkan data yang relevan ke dalam array utama
+                $dataSiswa[] = [
+                    'no'              => $no,
+                    'nama'            => $namaSiswa,
+                    'kelas'           => $sheetNameFormatted, // Gunakan nama yang ada stripnya untuk DB
+                    'tahun_ajaran_id' => $tahun_ajaran_id,
+                ];
+
+                $dataKelas[] = [
+                    'tahun_ajaran_id' => $tahun_ajaran_id,
+                    'kelas'           => $sheetNameFormatted // Sebaiknya gunakan yang sudah diformat juga
+                ];
+            }
+        }
+
+        unlink($xlsxPath);
+
+        $data = [
+            "dataSiswa" => $dataSiswa,
+        ];
+      return response()->stream(function () use ($data, $request) {
+    set_time_limit(0);
+
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    try {
+        $mapKelas = MKelas::pluck('id', 'nama_kelas')->toArray();
+        $tahunAjaranId = $data['tahun_ajaran_id'] ?? $request->tahun_ajaran_id;
+
+            $totalSiswa = count($data['dataSiswa']);
+
+        foreach ($data['dataSiswa'] as $ind => $val) {
+            try {
+                // 1. Dapatkan ID Siswa secara langsung
+                $siswa = MSiswa::updateOrCreate(
+                    ['nama_siswa' => $val['nama']],
+                    ['jenis_kelamin' => 'Laki-laki']
+                );
+                $siswa_id = $siswa->id;
+
+                $namaKelasExcel = $val['kelas'];
+
+                if (!isset($mapKelas[$namaKelasExcel])) {
+                    // Jika kelas tidak ditemukan, lempar error agar masuk ke catch
+                    throw new \Exception("Kelas '{$namaKelasExcel}' tidak ditemukan.");
+                }
+
+                // 2. Dapatkan ID Kelas
+                $kelas_id = $mapKelas[$namaKelasExcel];
+
+                // 3. Simpan ke TListSiswa
+                TListSiswa::updateOrCreate(
+                    [
+                        'tahun_ajaran_id' => $tahunAjaranId,
+                        'siswa_id'        => $siswa_id,
+                    ],
+                    [
+                        'kelas_id'        => $kelas_id,
+                        'nama_siswa'      => $val['nama'],
+                    ]
+                );
+
+                // 4. Hitung progres saat ini
+                $progress = round((($ind + 1) / $totalSiswa) * 100);
+
+                // Kirim response JSON sukses dengan format yang diminta JS
+                echo json_encode([
+                    'message'  => "Berhasil menyimpan: {$val['nama']}",
+                    'progress' => $progress
+                ]) . "\n";
+
+            } catch (\Exception $e) {
+                // Hitung progres meskipun terjadi error agar bar progres tidak berhenti
+                $progress = round((($ind + 1) / $totalSiswa) * 100);
+
+                // Kirim response JSON error ke frontend
+                echo json_encode([
+                    'message'  => "Error pada {$val['nama']}: " . $e->getMessage(),
+                    'progress' => $progress
+                ]) . "\n";
+            }
+
+            // Dorong data ke browser secara realtime
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+            flush();
+        }
+    } catch (\Exception $e) {
+        // Tangkap error fatal di luar loop (misal gagal ambil data kelas)
+        echo json_encode([
+            'status'  => 'fatal_error',
+            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+        ]) . "\n";
+
+        if (ob_get_level() > 0) {
+            ob_flush();
+        }
+        flush();
+    }
+}, 200, [
+    'Cache-Control' => 'no-cache',
+    'Content-Type'  => 'application/x-ndjson',
+    'Connection'    => 'keep-alive',
+]);
+    }
 }

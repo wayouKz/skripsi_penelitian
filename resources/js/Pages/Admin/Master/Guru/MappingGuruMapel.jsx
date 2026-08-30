@@ -16,7 +16,8 @@ import DroppableMapelRow from "./partials/DroppableMapelRow";
 import DraggableGuru from "./partials/DraggableGuru";
 import DragGhost from "./partials/DragGhost";
 import Select from "react-select";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+
 export default function MappingGuruMapel({
     open,
     setOpen,
@@ -31,6 +32,13 @@ export default function MappingGuruMapel({
     const [search, setSearch] = useState("");
     const [tahunAjaranList, setTahunAjaranList] = useState([]);
     const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
+
+    // State untuk total jam dari Database (Server)
+    const [totalJamServer, setTotalJamServer] = useState({
+        10: 0,
+        11: 0,
+        12: 0,
+    });
 
     // --- STYLING CUSTOM UNTUK REACT-SELECT ---
     const customSelectStyles = {
@@ -141,8 +149,6 @@ export default function MappingGuruMapel({
                 ...item,
                 guru: (item.guru || []).map((g) => ({
                     ...g,
-                    // 🌟 PERBAIKAN 1: Tambahkan String random agar unique_id benar-benar unik
-                    // meskipun data dari DB ada yang kembar/duplikat.
                     unique_id: `existing-${g.nip}-${g.kelas_id}-${Math.random().toString(36).substring(2, 9)}`,
                     value: g.nip,
                     label: g.nama,
@@ -233,6 +239,7 @@ export default function MappingGuruMapel({
         },
         [],
     );
+
     const removeGuru = useCallback((mapelId, uniqueId) => {
         setMapelList((prev) =>
             prev.map((m) =>
@@ -245,6 +252,67 @@ export default function MappingGuruMapel({
             ),
         );
     }, []);
+
+    // ==========================================
+    // VARIAN 1: Hitung dari Database via Fetch
+    // ==========================================
+    const fetchTotalJam = useCallback(async () => {
+        if (!selectedTahunAjaran) return;
+
+        try {
+            const res = await axios.get(route("getData.get-total-jam"), {
+                params: {
+                    tahun_ajaran_id: selectedTahunAjaran,
+                },
+            });
+
+            if (res.data.success) {
+                setTotalJamServer({
+                    10: res.data.data.tingkat10.total_jam,
+                    11: res.data.data.tingkat11.total_jam,
+                    12: res.data.data.tingkat12.total_jam,
+                });
+            }
+        } catch (error) {
+            console.error("Gagal mengambil total jam server:", error);
+        }
+    }, [selectedTahunAjaran]);
+
+    useEffect(() => {
+        if (open && selectedTahunAjaran) {
+            fetchTotalJam();
+        }
+    }, [open, selectedTahunAjaran]);
+
+    // ==========================================
+    // VARIAN 2: Hitung Real-time saat Input (Frontend)
+    // ==========================================
+    const totalJamRealtime = useMemo(() => {
+        const hasil = { 10: 0, 11: 0, 12: 0 };
+
+        mapelList.forEach((mapel) => {
+            (mapel.guru || []).forEach((g) => {
+                if (!g.kelas_id || !g.beban_jam) return;
+
+                const kelasObj = kelasList.find(
+                    (k) =>
+                        Number(k.id || k.kelas_id || k.value) ===
+                        Number(g.kelas_id),
+                );
+
+                if (kelasObj) {
+                    const tingkat = Number(kelasObj.tingkat);
+                    const jam = Number(g.beban_jam) || 0;
+
+                    if (hasil[tingkat] !== undefined) {
+                        hasil[tingkat] += jam;
+                    }
+                }
+            });
+        });
+
+        return hasil;
+    }, [mapelList, kelasList]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -288,6 +356,7 @@ export default function MappingGuruMapel({
                 if (res.data.success) {
                     showAlert(res.data.msg, "success", 2000);
                     getGuruMapel();
+                    fetchTotalJam(); // Refresh data server setelah simpan
                 } else {
                     showCenterAlert(res.data.msg, "error", 2000);
                 }
@@ -298,7 +367,6 @@ export default function MappingGuruMapel({
         g.label.toLowerCase().includes(search.toLowerCase()),
     );
 
-    // Opsi untuk React Select Tahun Ajaran
     const tahunAjaranOptions = (tahunAjaranList || []).map((ta) => ({
         value: ta.value,
         label: ta.label,
@@ -458,6 +526,38 @@ export default function MappingGuruMapel({
                     {activeGuru ? <DragGhost guru={activeGuru} /> : null}
                 </DragOverlay>
             </DndContext>
+
+            {/* Footer Gabungan Database & Real-time */}
+            {/* Sisi Kiri: Total Jam Server (Database) */}
+            {/* Footer Gabungan Satu UI */}
+            <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 px-5 py-3 border border-gray-200 text-xs text-gray-600 rounded-xl mt-4 gap-3 shadow-sm">
+                <div className="flex items-center gap-2 justify-end">
+                    <small className="font-bold text-gray-800">
+                        Total Jam :
+                    </small>
+                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
+                        X:{" "}
+                        <strong className="font-bold text-emerald-600">
+                            {totalJamRealtime[10]}
+                        </strong>{" "}
+                        Jam
+                    </span>
+                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
+                        XI:{" "}
+                        <strong className="font-bold text-emerald-600">
+                            {totalJamRealtime[11]}
+                        </strong>{" "}
+                        Jam
+                    </span>
+                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
+                        XII:{" "}
+                        <strong className="font-bold text-emerald-600">
+                            {totalJamRealtime[12]}
+                        </strong>{" "}
+                        Jam
+                    </span>
+                </div>
+            </div>
         </FormModal>
     );
 }

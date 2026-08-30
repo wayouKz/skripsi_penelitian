@@ -9,8 +9,46 @@ import { useState } from "react";
 export default function KelolaInformasiInstansi() {
     const [logoPreview, setLogoPreview] = useState(null);
     const [sampulPreview, setSampulPreview] = useState(null);
+    const [highlightPreviews, setHighlightPreviews] = useState([
+        null,
+        null,
+        null,
+    ]);
+
     const dataInstansi = usePage().props.settings_application;
     const { showAlert } = useAlert();
+
+    // 1. Parsing data JSON card_img dari database menjadi Array
+    let parsedCardImg = {}; // Kita gunakan object sebagai default agar lebih fleksibel
+
+    if (dataInstansi?.card_img) {
+        try {
+            let rawData = dataInstansi.card_img;
+
+            // Terkadang data JSON dari Laravel menjadi string 2x (double-encoded).
+            // Loop ini memastikan kita mengekstrak string tersebut sampai menjadi bentuk aslinya (Object/Array).
+            while (
+                typeof rawData === "string" &&
+                (rawData.trim().startsWith("[") ||
+                    rawData.trim().startsWith("{"))
+            ) {
+                rawData = JSON.parse(rawData);
+            }
+
+            parsedCardImg = rawData || {};
+
+            // Console log sementara untuk nge-cek apakah datanya sukses ditangkap
+            console.log("Sukses Parse card_img:", parsedCardImg);
+        } catch (error) {
+            console.error(
+                "Gagal memparsing card_img:",
+                error,
+                "Data mentah:",
+                dataInstansi.card_img,
+            );
+        }
+    }
+
     const { data, setData, post, processing, errors } = useForm({
         nama_instansi: dataInstansi?.nama_instansi || "",
         logo_instansi: dataInstansi?.logo_instansi || null,
@@ -19,7 +57,14 @@ export default function KelolaInformasiInstansi() {
         email_instansi: dataInstansi?.email_instansi || "",
         website_instansi: dataInstansi?.website_instansi || "",
         sampul_instansi: dataInstansi?.sampul_instansi || null,
+
+        // Cek fallback index angka integer maupun string agar tidak lolos
+        foto_highlight_1: parsedCardImg[0] || parsedCardImg["0"] || null,
+        foto_highlight_2: parsedCardImg[1] || parsedCardImg["1"] || null,
+        foto_highlight_3: parsedCardImg[2] || parsedCardImg["2"] || null,
     });
+
+    console.log("Data form saat ini:", data);
 
     const handleSampulChange = (e) => {
         const file = e.target.files[0];
@@ -37,6 +82,30 @@ export default function KelolaInformasiInstansi() {
         setLogoPreview(URL.createObjectURL(file));
     };
 
+    // Handler untuk perubahan gambar highlight
+    const handleHighlightChange = (index, e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Update URL preview
+        const newPreviews = [...highlightPreviews];
+        newPreviews[index] = URL.createObjectURL(file);
+        setHighlightPreviews(newPreviews);
+
+        setData(`foto_highlight_${index + 1}`, file);
+    };
+
+    // Handler untuk menghapus gambar highlight
+    const removeHighlight = (index) => {
+        // Hapus dari preview
+        const newPreviews = [...highlightPreviews];
+        newPreviews[index] = null;
+        setHighlightPreviews(newPreviews);
+
+        // Hapus dari state form jika itu file baru (kembalikan ke null)
+        setData(`foto_highlight_${index + 1}`, null);
+    };
+
     const submit = (e) => {
         e.preventDefault();
 
@@ -44,6 +113,9 @@ export default function KelolaInformasiInstansi() {
             forceFormData: true,
             onSuccess: () => {
                 showAlert("Informasi instansi berhasil diperbarui", "success");
+            },
+            onError: () => {
+                showAlert("Informasi instansi gagal diperbarui", "error");
             },
         });
     };
@@ -98,7 +170,7 @@ export default function KelolaInformasiInstansi() {
                             </div>
 
                             {/* Logo */}
-                            <div className="md:col-span-4">
+                            <div className="md:col-span-4 lg:col-span-2">
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                                     Logo Instansi
                                 </label>
@@ -165,16 +237,14 @@ export default function KelolaInformasiInstansi() {
                                     </p>
                                 )}
                             </div>
-
-                            {/* Foto Sampul */}
-                            <div className="md:col-span-4 mt-2">
+                            <div className="md:col-span-4 lg:col-span-2 mt-2">
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                                     Foto Sampul (Header/Banner)
                                 </label>
 
                                 <div className="border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 p-3 hover:border-green-400 transition">
                                     {/* Preview Area */}
-                                    <div className="w-full h-[500px] bg-gray-200 rounded-xl overflow-hidden mb-2.5 shadow-sm">
+                                    <div className="w-full  bg-gray-200 rounded-xl overflow-hidden mb-2.5 shadow-sm">
                                         {sampulPreview ||
                                         data?.sampul_instansi ? (
                                             <img
@@ -184,7 +254,7 @@ export default function KelolaInformasiInstansi() {
                                                         : `/storage/public/sampul_instansi/${data.sampul_instansi}`
                                                 }
                                                 alt="Sampul Instansi"
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-[110px] object-cover"
                                                 loading="lazy"
                                             />
                                         ) : (
@@ -220,8 +290,95 @@ export default function KelolaInformasiInstansi() {
                                 )}
                             </div>
 
+                            {/* Foto Highlight 1, 2, 3 */}
+                            <div className="md:col-span-4 mt-2">
+                                <label className="block text-xs font-semibold text-gray-700 mb-2">
+                                    Foto Highlight Landing Page
+                                </label>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    {[0, 1, 2].map((index) => {
+                                        const fieldName = `foto_highlight_${index + 1}`;
+                                        const existingImage = data[fieldName];
+                                        const previewUrl =
+                                            highlightPreviews[index];
+
+                                        // 3. Cek apakah menampilkan file lokal baru ATAU data string dari server
+                                        // Catatan: Saya ubah path ke /storage/foto_highlight/ sesuai folder storeAs Backend Anda sebelumnya
+                                        const displaySrc = previewUrl
+                                            ? previewUrl
+                                            : typeof existingImage ===
+                                                    "string" && existingImage
+                                              ? `/storage/public/foto_highlight/${existingImage}`
+                                              : null;
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="relative w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:border-green-400 transition overflow-hidden"
+                                            >
+                                                {displaySrc ? (
+                                                    <div className="relative w-full h-full">
+                                                        <img
+                                                            src={displaySrc}
+                                                            alt={`Highlight ${index + 1}`}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                removeHighlight(
+                                                                    index,
+                                                                )
+                                                            }
+                                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hover:bg-red-600 transition-colors shadow-md"
+                                                        >
+                                                            <i className="fa fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer p-3">
+                                                        <div className="flex flex-col items-center justify-center text-center">
+                                                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-1.5">
+                                                                <i className="fa fa-image text-green-600 text-base"></i>
+                                                            </div>
+                                                            <p className="text-xs font-medium text-gray-700">
+                                                                Upload Foto{" "}
+                                                                {index + 1}
+                                                            </p>
+                                                            <p className="text-[9px] text-gray-500 mt-0.5">
+                                                                Disarankan
+                                                                potrait
+                                                            </p>
+                                                        </div>
+                                                        <input
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={(e) =>
+                                                                handleHighlightChange(
+                                                                    index,
+                                                                    e,
+                                                                )
+                                                            }
+                                                        />
+                                                    </label>
+                                                )}
+
+                                                {errors[fieldName] && (
+                                                    <p className="absolute bottom-2 left-2 bg-white/90 px-1.5 py-0.5 rounded text-red-500 text-[10px] shadow-sm">
+                                                        {errors[fieldName]}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Foto Sampul */}
+
                             {/* Alamat */}
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 mt-2">
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                                     Alamat Instansi
                                 </label>
@@ -248,7 +405,7 @@ export default function KelolaInformasiInstansi() {
                             </div>
 
                             {/* Telepon */}
-                            <div className="md:col-span-2">
+                            <div className="md:col-span-2 mt-2">
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                                     Telepon Instansi
                                 </label>

@@ -11,9 +11,15 @@ export default function FormModal({
     maxWidth = "2xl",
     children,
     showForm = true,
+    closeable = true,
 }) {
     return (
-        <Modal show={show} onClose={onClose} maxWidth={maxWidth}>
+        <Modal
+            show={show}
+            onClose={onClose}
+            maxWidth={maxWidth}
+            closeable={closeable}
+        >
             <div className="flex h-full flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b px-4 py-2.5 bg-white shrink-0">
@@ -43,7 +49,7 @@ export default function FormModal({
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-50"
+                                className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-100 disabled:opacity-50"
                             >
                                 Batal
                             </button>

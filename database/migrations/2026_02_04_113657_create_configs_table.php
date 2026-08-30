@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('email_instansi')->nullable();
             $table->string('website_instansi')->nullable();
             $table->string('sampul_instansi')->nullable();
+            $table->json('card_img')->nullable();
             $table->timestamps();
         });
     }

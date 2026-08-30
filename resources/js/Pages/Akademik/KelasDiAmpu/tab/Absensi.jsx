@@ -177,7 +177,6 @@ export default function Absensi({ dataKelas }) {
     // Handle submit form absensi
     const submitAbsensi = async (e) => {
         e.preventDefault();
-
         // Validasi pencegahan error
         if (!selectedMapel) {
             showAlert(
@@ -249,6 +248,7 @@ export default function Absensi({ dataKelas }) {
         ) || null;
 
     const handleSelectMapelChange = (option) => {
+        console.log(option);
         if (option) {
             setSelectedMapel(option.value);
             setNamaMapel(option.label);
@@ -359,6 +359,8 @@ export default function Absensi({ dataKelas }) {
                             type="button"
                             title="Lihat Riwayat Absensi"
                             onClick={() => {
+                                console.log(selectedMapel);
+
                                 if (!selectedMapel) {
                                     showAlert(
                                         "Mohon pilih Mata Pelajaran terlebih dahulu.",

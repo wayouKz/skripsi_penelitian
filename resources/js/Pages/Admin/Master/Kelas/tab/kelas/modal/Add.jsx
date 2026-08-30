@@ -108,6 +108,7 @@ export default function Add({
             show={open}
             onClose={() => setOpen(false)}
             onSubmit={submit}
+            closable={true}
         >
             <div className="space-y-3">
                 {/* Field Wali Kelas */}
@@ -203,14 +204,14 @@ export default function Add({
                 </div>
 
                 {/* Jurusan Checkbox */}
-                <div className="flex items-center pt-1">
+                <div className="flex items-center pt-1 gap-2">
+                    <span className="ml-2 text-xs text-gray-700">
+                        Gunakan Jurusan :
+                    </span>
                     <Checkbox
                         checked={showJurusan}
                         onChange={() => setShowJurusan(!showJurusan)}
                     />
-                    <span className="ml-2 text-xs text-gray-700">
-                        Gunakan Jurusan
-                    </span>
                 </div>
 
                 {showJurusan && (

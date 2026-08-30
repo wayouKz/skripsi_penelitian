@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('kode_absen')->index();
             $table->string('kode_jadwal')->index();
-            $table->string('nisn')->index();
+            $table->string('nisn')->nullable()->index();
+            $table->foreignId('siswa_id')->constrained('m_siswas')->onDelete('cascade');
             $table->integer('pertemuan')->nullable();
             $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals')->onDelete('cascade');
             $table->foreign('nisn')->references('nisn')->on('m_siswas')->onDelete('cascade');

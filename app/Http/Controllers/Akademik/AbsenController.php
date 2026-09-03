@@ -38,6 +38,7 @@ public function store(Request $request)
     }
     foreach($dataAbsensi as $item) {
         $dataToInsert[] = [
+            'siswa_id'       => $item['siswa_id'],
             'kode_absen'    => $kodeSesiAbsensi,
             'kode_jadwal'     => $kode_jadwal,
             'tahun_ajaran_id' => $tahun_ajaran_id,

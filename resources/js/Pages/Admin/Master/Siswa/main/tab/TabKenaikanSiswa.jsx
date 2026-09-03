@@ -9,10 +9,10 @@ import "driver.js/dist/driver.css";
 function SummaryRow({ label, value, muted = false }) {
     return (
         <div
-            className={`flex items-center justify-between px-4 py-2.5 ${muted ? "bg-gray-50/50" : ""}`}
+            className={`flex items-center justify-between px-3 py-1.5 ${muted ? "bg-gray-50/50" : ""}`}
         >
-            <span className="text-xs text-gray-500">{label}</span>
-            <span className="text-xs">{value}</span>
+            <span className="text-[11px] text-gray-500">{label}</span>
+            <span className="text-[11px]">{value}</span>
         </div>
     );
 }
@@ -44,15 +44,15 @@ export default function TabKenaikanKelas() {
     });
     const [autoLogs, setAutoLogs] = useState([]);
 
-    // --- STYLING CUSTOM UNTUK REACT-SELECT ---
+    // --- STYLING CUSTOM UNTUK REACT-SELECT (DIBUAT SMALL) ---
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
             backgroundColor: state.isDisabled ? "#F9FAFB" : "#FFFFFF",
             borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
-            borderRadius: "0.5rem",
-            minHeight: "38px",
-            padding: "0 2px",
+            borderRadius: "0.375rem",
+            minHeight: "30px",
+            height: "30px",
             boxShadow: state.isFocused
                 ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
                 : "none",
@@ -64,17 +64,19 @@ export default function TabKenaikanKelas() {
         valueContainer: (base) => ({
             ...base,
             padding: "0 6px",
+            minHeight: "30px",
+            height: "30px",
         }),
         placeholder: (base) => ({
             ...base,
             color: "#9CA3AF",
-            fontSize: "0.875rem",
+            fontSize: "0.75rem",
             fontWeight: "normal",
         }),
         singleValue: (base) => ({
             ...base,
             color: "#1F2937",
-            fontSize: "0.875rem",
+            fontSize: "0.75rem",
             fontWeight: "600",
         }),
         option: (base, state) => ({
@@ -85,9 +87,14 @@ export default function TabKenaikanKelas() {
                   ? "#ECFDF5"
                   : "white",
             color: state.isSelected ? "white" : "#1F2937",
-            fontSize: "0.875rem",
+            fontSize: "0.75rem",
             fontWeight: "500",
+            padding: "4px 8px",
             cursor: "pointer",
+        }),
+        indicatorsContainer: (base) => ({
+            ...base,
+            height: "30px",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -246,9 +253,13 @@ export default function TabKenaikanKelas() {
                 String(kelasTujuanId).toUpperCase() === "LULUS"
                     ? "LULUS"
                     : Number(kelasTujuanId),
-            siswa_ids: selectedSiswa.map((nisn) => {
-                const s = siswaAsal.find((item) => item.value === nisn);
-                return { nisn, nama_siswa: s ? s.label : "" };
+            siswa_ids: selectedSiswa.map((id) => {
+                const s = siswaAsal.find((item) => item.value === id);
+                return {
+                    id,
+                    nama_siswa: s ? s.label : "",
+                    nisn: s ? s.nisn : "",
+                };
             }),
         };
 
@@ -358,11 +369,16 @@ export default function TabKenaikanKelas() {
                                     ? "LULUS"
                                     : Number(targetId),
                             siswa_ids: siswaArr.map((s) => ({
-                                nisn: s.value,
+                                nisn: s.nisn,
+                                siswa_id: s.value,
                                 nama_siswa: s.label,
                             })),
                         };
-
+                        console.log(
+                            "Payload untuk kelas",
+                            currentKelas.nama_kelas,
+                            payload,
+                        );
                         const resProses = await axios.post(
                             route("master.siswa.proses-kenaikan"),
                             payload,
@@ -560,19 +576,19 @@ export default function TabKenaikanKelas() {
     return (
         <div className="relative">
             {/* ======= HEADER & TOMBOL PANDUAN ======= */}
-            <div className="flex justify-between items-center mb-5 pb-3 border-b border-gray-100">
+            <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
                 <div>
-                    <h2 className="text-lg font-bold text-gray-800">
+                    <h2 className="text-base font-bold text-gray-800">
                         Proses Kenaikan Kelas
                     </h2>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-[10px] text-gray-500 mt-0.5">
                         Pindahkan siswa ke tingkat selanjutnya atau kelulusan.
                     </p>
                 </div>
                 <button
                     type="button"
                     onClick={startTour}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-md text-[11px] font-bold transition-all shadow-sm"
                 >
                     <i className="fa fa-question-circle" />
                     <span className="hidden sm:inline">Panduan Pemakaian</span>
@@ -582,14 +598,14 @@ export default function TabKenaikanKelas() {
             {/* ======= MODAL LOADING SYNC ======= */}
             {isAutoProcessing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
-                    <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg mx-4 flex flex-col gap-4 border border-gray-100">
-                        <div className="flex items-center gap-3 border-b border-gray-100 pb-3">
-                            <i className="fa fa-sync fa-spin text-emerald-600 text-xl" />
+                    <div className="bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm mx-4 flex flex-col gap-3 border border-gray-100">
+                        <div className="flex items-center gap-3 border-b border-gray-100 pb-2">
+                            <i className="fa fa-sync fa-spin text-emerald-600 text-base" />
                             <div>
-                                <h3 className="text-gray-800 font-bold text-base">
+                                <h3 className="text-gray-800 font-bold text-sm">
                                     Memproses Kenaikan Otomatis
                                 </h3>
-                                <p className="text-gray-500 text-xs">
+                                <p className="text-gray-500 text-[10px]">
                                     Mohon tunggu, mengeksekusi kelas satu per
                                     satu...
                                 </p>
@@ -597,7 +613,7 @@ export default function TabKenaikanKelas() {
                         </div>
 
                         <div className="flex flex-col gap-1.5">
-                            <div className="flex justify-between text-xs font-semibold">
+                            <div className="flex justify-between text-[11px] font-semibold">
                                 <span className="text-emerald-600">
                                     Kelas: {autoProgress.kelasName}
                                 </span>
@@ -606,18 +622,18 @@ export default function TabKenaikanKelas() {
                                     {autoProgress.total}
                                 </span>
                             </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200">
+                            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden border border-gray-200">
                                 <div
-                                    className="bg-emerald-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                                    className="bg-emerald-600 h-2 rounded-full transition-all duration-300 ease-out"
                                     style={{ width: `${progressPercentage}%` }}
                                 />
                             </div>
-                            <div className="text-right text-[10px] text-gray-400 font-medium">
+                            <div className="text-right text-[9px] text-gray-400 font-medium">
                                 {progressPercentage}% Selesai
                             </div>
                         </div>
 
-                        <div className="bg-black rounded-xl p-3 h-36 overflow-y-auto font-mono text-[11px] text-green-400 flex flex-col gap-1 shadow-inner border border-slate-700">
+                        <div className="bg-black rounded-lg p-2 h-24 overflow-y-auto font-mono text-[10px] text-green-400 flex flex-col gap-1 shadow-inner border border-slate-700">
                             {autoLogs.length === 0 ? (
                                 <span className="text-slate-500">
                                     Menyiapkan data...
@@ -644,29 +660,29 @@ export default function TabKenaikanKelas() {
                 </div>
             )}
 
-            <form onSubmit={submitKenaikan} className="flex flex-col gap-5">
+            <form onSubmit={submitKenaikan} className="flex flex-col gap-3">
                 {/* --- GRID UTAMA LAYOUT --- */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_50px_1fr] gap-4 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_40px_1fr] gap-3 items-stretch">
                     {/* ======= PANEL 1: KELAS ASAL ======= */}
                     <div
                         id="tour-panel-asal"
-                        className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col transition-all duration-200"
+                        className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col transition-all duration-200"
                     >
-                        <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100 bg-gray-50/50 rounded-t-xl">
-                            <div className="flex items-center gap-3">
-                                <span className="w-5 h-5 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-[11px] font-bold">
+                        <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50/50 rounded-t-lg">
+                            <div className="flex items-center gap-2">
+                                <span className="w-4 h-4 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-[10px] font-bold">
                                     1
                                 </span>
-                                <span className="text-sm font-semibold text-gray-800">
+                                <span className="text-xs font-semibold text-gray-800">
                                     Asal Kelas & Siswa
                                 </span>
                             </div>
                         </div>
 
-                        <div className="p-4 flex flex-col gap-4 flex-1">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                        <div className="p-3 flex flex-col gap-3 flex-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Lama
                                     </label>
                                     <Select
@@ -692,13 +708,13 @@ export default function TabKenaikanKelas() {
                                         placeholder="Pilih Tahun Ajaran"
                                         isSearchable={true}
                                         menuPortalTarget={document.body}
-                                        className="text-sm"
+                                        className="text-xs"
                                         classNamePrefix="react-select"
                                         styles={customSelectStyles}
                                     />
                                 </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Kelas Saat Ini
                                     </label>
                                     <Select
@@ -715,7 +731,7 @@ export default function TabKenaikanKelas() {
                                         isSearchable={true}
                                         isDisabled={!taAsal}
                                         menuPortalTarget={document.body}
-                                        className="text-sm"
+                                        className="text-xs"
                                         classNamePrefix="react-select"
                                         styles={customSelectStyles}
                                     />
@@ -723,15 +739,15 @@ export default function TabKenaikanKelas() {
                             </div>
 
                             {/* Box List Siswa */}
-                            <div className="flex flex-col border border-gray-200 rounded-xl overflow-hidden flex-1 min-h-[300px] bg-white shadow-inner">
-                                <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-b border-gray-200">
+                            <div className="flex flex-col border border-gray-200 rounded-lg overflow-hidden flex-1 min-h-[200px] bg-white shadow-inner">
+                                <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 border-b border-gray-200">
                                     <label
                                         id="tour-pilih-siswa"
-                                        className="flex items-center gap-2.5 cursor-pointer select-none"
+                                        className="flex items-center gap-2 cursor-pointer select-none"
                                     >
                                         <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500/30 accent-emerald-600 cursor-pointer"
+                                            className="w-3.5 h-3.5 rounded text-emerald-600 focus:ring-emerald-500/30 accent-emerald-600 cursor-pointer"
                                             checked={isCheckAllChecked}
                                             ref={(el) => {
                                                 if (el)
@@ -744,28 +760,28 @@ export default function TabKenaikanKelas() {
                                                 loadingSiswa
                                             }
                                         />
-                                        <span className="text-xs font-semibold text-gray-700">
+                                        <span className="text-[11px] font-semibold text-gray-700">
                                             Pilih Semua
                                         </span>
                                     </label>
-                                    <span className="text-[11px] font-bold text-gray-500 bg-gray-200/60 border border-gray-300 px-2.5 py-0.5 rounded-full">
+                                    <span className="text-[10px] font-bold text-gray-500 bg-gray-200/60 border border-gray-300 px-2 py-0.5 rounded-full">
                                         {selectedSiswa.length} /{" "}
                                         {siswaAsal.length}
                                     </span>
                                 </div>
 
-                                <div className="overflow-y-auto max-h-64 flex-1 p-2 scrollbar-thin scrollbar-thumb-gray-200">
+                                <div className="overflow-y-auto max-h-52 flex-1 p-1.5 scrollbar-thin scrollbar-thumb-gray-200">
                                     {loadingSiswa ? (
-                                        <div className="flex flex-col items-center justify-center h-full py-16 gap-2 text-emerald-500">
-                                            <i className="fa fa-spinner animate-spin text-2xl" />
-                                            <span className="text-xs font-medium text-gray-400">
+                                        <div className="flex flex-col items-center justify-center h-full py-10 gap-2 text-emerald-500">
+                                            <i className="fa fa-spinner animate-spin text-xl" />
+                                            <span className="text-[11px] font-medium text-gray-400">
                                                 Memuat daftar siswa...
                                             </span>
                                         </div>
                                     ) : siswaAsal.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center h-full py-16 gap-2 text-gray-300">
-                                            <i className="fa fa-users text-3xl text-gray-200" />
-                                            <span className="text-xs font-medium text-gray-400">
+                                        <div className="flex flex-col items-center justify-center h-full py-10 gap-2 text-gray-300">
+                                            <i className="fa fa-users text-2xl text-gray-200" />
+                                            <span className="text-[11px] font-medium text-gray-400">
                                                 Belum ada data siswa
                                             </span>
                                         </div>
@@ -779,11 +795,11 @@ export default function TabKenaikanKelas() {
                                                 return (
                                                     <li key={siswa.value}>
                                                         <label
-                                                            className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all border ${isChecked ? "bg-emerald-50/70 border-emerald-200" : "border-transparent hover:bg-gray-50"}`}
+                                                            className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer transition-all border ${isChecked ? "bg-emerald-50/70 border-emerald-200" : "border-transparent hover:bg-gray-50"}`}
                                                         >
                                                             <input
                                                                 type="checkbox"
-                                                                className="w-4 h-4 rounded text-emerald-600 accent-emerald-600 flex-shrink-0"
+                                                                className="w-3.5 h-3.5 rounded text-emerald-600 accent-emerald-600 flex-shrink-0"
                                                                 checked={
                                                                     isChecked
                                                                 }
@@ -794,12 +810,12 @@ export default function TabKenaikanKelas() {
                                                                 }
                                                             />
                                                             <div className="flex flex-col min-w-0">
-                                                                <span className="text-sm font-semibold text-gray-800 truncate">
+                                                                <span className="text-xs font-semibold text-gray-800 truncate">
                                                                     {
                                                                         siswa.label
                                                                     }
                                                                 </span>
-                                                                <span className="text-[11px] font-medium text-gray-400">
+                                                                <span className="text-[10px] font-medium text-gray-400">
                                                                     NISN:{" "}
                                                                     {
                                                                         siswa.value
@@ -820,10 +836,10 @@ export default function TabKenaikanKelas() {
                     {/* ======= DIVIDER ARROW UTAMA ======= */}
                     <div className="hidden lg:flex items-center justify-center self-center flex-shrink-0">
                         <div className="flex flex-col items-center gap-1">
-                            <div className="w-px h-4 bg-gray-200" />
-                            <div className="w-8 h-8 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center">
+                            <div className="w-px h-3 bg-gray-200" />
+                            <div className="w-6 h-6 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center">
                                 <svg
-                                    className="w-3.5 h-3.5 text-emerald-500"
+                                    className="w-3 h-3 text-emerald-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -836,33 +852,30 @@ export default function TabKenaikanKelas() {
                                     />
                                 </svg>
                             </div>
-                            <div className="w-px h-4 bg-gray-200" />
+                            <div className="w-px h-3 bg-gray-200" />
                         </div>
                     </div>
 
                     {/* ======= PANEL 2: KELAS TUJUAN ======= */}
                     <div
                         id="tour-panel-tujuan"
-                        className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden transition-all duration-200"
+                        className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden transition-all duration-200"
                     >
-                        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
-                            <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                        <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">
+                            <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
                                 2
                             </span>
                             <div className="min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 leading-none">
+                                <p className="text-xs font-semibold text-gray-800 leading-none">
                                     Target Pemindahan
-                                </p>
-                                <p className="text-[11px] text-gray-400 mt-0.5">
-                                    Tentukan kelas dan tahun ajaran tujuan
                                 </p>
                             </div>
                         </div>
 
-                        <div className="p-5 flex flex-col gap-4 flex-1">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                        <div className="p-3 flex flex-col gap-3 flex-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Baru
                                     </label>
                                     <Select
@@ -876,13 +889,13 @@ export default function TabKenaikanKelas() {
                                         placeholder="Pilih tahun ajaran..."
                                         isSearchable={true}
                                         menuPortalTarget={document.body}
-                                        className="text-sm"
+                                        className="text-xs"
                                         classNamePrefix="react-select"
                                         styles={customSelectStyles}
                                     />
                                 </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Kelas Selanjutnya
                                     </label>
                                     <Select
@@ -897,7 +910,7 @@ export default function TabKenaikanKelas() {
                                         isSearchable={true}
                                         isDisabled={!kelasAsalId}
                                         menuPortalTarget={document.body}
-                                        className="text-sm"
+                                        className="text-xs"
                                         classNamePrefix="react-select"
                                         styles={customSelectStyles}
                                     />
@@ -907,9 +920,9 @@ export default function TabKenaikanKelas() {
                             {/* Summary card */}
                             <div
                                 id="tour-ringkasan"
-                                className="flex-1 border border-gray-200 rounded-xl overflow-hidden"
+                                className="flex-1 border border-gray-200 rounded-lg overflow-hidden"
                             >
-                                <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50 border-b border-gray-100">
+                                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border-b border-gray-100">
                                     <svg
                                         className="w-3.5 h-3.5 text-gray-400"
                                         fill="none"
@@ -923,7 +936,7 @@ export default function TabKenaikanKelas() {
                                             d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 0 2-2h2a2 2 0 0 0 2 2"
                                         />
                                     </svg>
-                                    <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Ringkasan Pemindahan
                                     </p>
                                 </div>
@@ -933,7 +946,7 @@ export default function TabKenaikanKelas() {
                                         label="Siswa dipilih"
                                         value={
                                             <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                                                <span className="w-1 h-1 rounded-full bg-emerald-500 inline-block" />
                                                 {selectedSiswa.length} siswa
                                             </span>
                                         }
@@ -957,7 +970,7 @@ export default function TabKenaikanKelas() {
                                                         {kelasNamaTujuan}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-amber-500 font-medium text-xs">
+                                                    <span className="text-amber-500 font-medium text-[10px]">
                                                         Belum dipilih
                                                     </span>
                                                 )
@@ -983,9 +996,9 @@ export default function TabKenaikanKelas() {
 
                             {/* Warning banner */}
                             {siswaNotMoved > 0 && siswaAsal.length > 0 ? (
-                                <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                                <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                                     <svg
-                                        className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"
+                                        className="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -997,7 +1010,7 @@ export default function TabKenaikanKelas() {
                                             d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
                                         />
                                     </svg>
-                                    <p className="text-xs text-amber-800 leading-relaxed">
+                                    <p className="text-[11px] text-amber-800 leading-tight">
                                         <span className="font-semibold">
                                             {siswaNotMoved} siswa
                                         </span>{" "}
@@ -1006,22 +1019,22 @@ export default function TabKenaikanKelas() {
                                     </p>
                                 </div>
                             ) : (
-                                <div className="hidden lg:block h-[46px]" />
+                                <div className="hidden lg:block h-[34px]" />
                             )}
                         </div>
                     </div>
                 </div>
 
                 {/* ======= BUTTON SUBMIT & AUTO / FOOTER ======= */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2 border-t border-gray-100 mt-2">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-2 pt-2 border-t border-gray-100 mt-1">
                     <button
                         id="tour-btn-auto"
                         type="button"
                         onClick={handleAutoProcessAll}
                         disabled={!taAsal || !taTujuan || isAutoProcessing}
-                        className="w-full sm:w-auto flex justify-center items-center gap-2 px-5 py-2.5 bg-white border-2 border-green-500 text-green-600 hover:bg-green-50 disabled:border-gray-200 disabled:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm font-bold rounded-xl shadow-sm transition-all duration-200"
+                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-white border-2 border-green-500 text-green-600 hover:bg-green-50 disabled:border-gray-200 disabled:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed text-xs font-bold rounded-lg shadow-sm transition-all duration-200"
                     >
-                        <i className="fa fa-magic text-xs" />
+                        <i className="fa fa-magic text-[10px]" />
                         <span>Kenaikan Otomatis Semua Kelas</span>
                     </button>
 
@@ -1034,16 +1047,16 @@ export default function TabKenaikanKelas() {
                             !kelasTujuanId ||
                             loading
                         }
-                        className="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
+                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
                     >
                         {loading ? (
                             <>
-                                <i className="fa fa-spinner animate-spin text-sm" />
+                                <i className="fa fa-spinner animate-spin text-xs" />
                                 <span>Memproses...</span>
                             </>
                         ) : (
                             <>
-                                <i className="fa fa-paper-plane text-xs" />
+                                <i className="fa fa-paper-plane text-[10px]" />
                                 <span>Proses Kenaikan Kelas</span>
                             </>
                         )}

@@ -3,7 +3,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 
-export default function UploadExcel({ openImport, setOpenImport }) {
+export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
     const { showCenterAlert } = useAlert();
     const [dataTahunAjaran, setDataTahunAjaran] = useState([]);
     const [tahunAjaran, setTahunAjaran] = useState(null);
@@ -129,9 +129,11 @@ export default function UploadExcel({ openImport, setOpenImport }) {
                             try {
                                 // Mencoba mem-parsing data stream sebagai JSON
                                 const data = JSON.parse(line);
-
-                                if (data.message)
+                                if (data.status === "error") {
+                                    showCenterAlert(data.message, "error");
+                                } else if (data.status === "success") {
                                     setStreamMessage(data.message);
+                                }
                                 if (data.progress !== undefined)
                                     setProgress(data.progress);
                             } catch (e) {
@@ -142,7 +144,8 @@ export default function UploadExcel({ openImport, setOpenImport }) {
                     });
                 }
             }
-
+            getSiswa();
+            setOpenImport(false);
             setFile(null);
             setFileName("");
         } catch (error) {
@@ -277,10 +280,6 @@ export default function UploadExcel({ openImport, setOpenImport }) {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                     </svg>
-
-                    <span className="text-gray-600 font-medium text-center">
-                        {streamMessage}
-                    </span>
 
                     {/* Komponen Progress Bar */}
                     <div className="w-full max-w-xs mt-4">

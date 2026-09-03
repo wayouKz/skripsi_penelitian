@@ -30,14 +30,14 @@ use App\Http\Controllers\Master\TahunAjaranController;
 use App\Models\Config;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-    // return Inertia::render('Welcome', [
-    //     'canLogin' => Route::has('login'),
-    //     'config' => Config::first(),
-    //     'canRegister' => Route::has('register'),
-    //     'laravelVersion' => Application::VERSION,
-    //     'phpVersion' => PHP_VERSION,
-    // ]);
+    // return redirect()->route('login');
+    return Inertia::render('LandingPage/Welcome', [
+        'canLogin' => Route::has('login'),
+        'config' => Config::first(),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
 
 Route::prefix('install')->group(function () {

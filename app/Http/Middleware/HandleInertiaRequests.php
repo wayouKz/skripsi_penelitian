@@ -34,7 +34,7 @@ public function share(Request $request): array
 {
     try {
     $user = $request->user();
-    $config = Config::first();
+    $config = Config::with('kepalaSekolah')->first();
     // Lanjutkan logika jika user ditemukan
 } catch (\Illuminate\Database\QueryException $e) {
     $user = null;

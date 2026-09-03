@@ -10,8 +10,7 @@ class TahunAjaranSeeder extends Seeder
     public static function run()
     {
         $dataTA = [
-            ['tahun_ajaran' => '2025/2026', 'status' => 'nonactive', 'semester' => 'Ganjil'],
-            ['tahun_ajaran' => '2025/2026', 'status' => 'active', 'semester' => 'Genap'],
+            ['tahun_ajaran' => '2026/2027', 'status' => 'active', 'semester' => 'Ganjil'],
         ];
 
         foreach ($dataTA as $ta) {

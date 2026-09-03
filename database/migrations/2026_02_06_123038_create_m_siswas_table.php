@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('nisn')->nullable()->index();
             $table->string('nama_siswa');
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
-            $table->string('tempat_lahir');
-            $table->date('tanggal_lahir');
+            $table->enum('jenis_kelamin', ['Belum Ditentukan','Laki-laki', 'Perempuan']);
+            $table->string('tempat_lahir')->nullable();
+            $table->date('tanggal_lahir')->nullable();
             $table->string('agama')->nullable();
-            $table->string('alamat');
+            $table->string('alamat')->nullable();
             $table->string('no_telp')->nullable();
             $table->string('no_telp_orang_tua')->nullable();
             $table->string('foto')->nullable();

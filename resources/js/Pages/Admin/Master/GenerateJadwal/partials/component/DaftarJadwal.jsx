@@ -6,19 +6,80 @@ export default function DaftarJadwal({
     historyJadwal,
     selectedTahunAjaran,
     selectedNamaTahunAjaran,
+    dataMapel,
+    listMapelGuru,
 }) {
-    // State untuk menyimpan kelas yang difilter. null atau "" = tampilkan semua
+    // State untuk menyimpan kelas, mapel, dan guru yang difilter
     const [selectedKelas, setSelectedKelas] = useState(null);
+    const [selectedMapel, setSelectedMapel] = useState(null);
+    const [selectedGuru, setSelectedGuru] = useState(null);
     const [openPdfModal, setOpenPdfModal] = useState(false);
     const daftarHari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
     if (!historyJadwal || historyJadwal.length === 0) return null;
-    console.log(historyJadwal);
+
     const groupedByKelas = historyJadwal.reduce((acc, curr) => {
         if (!acc[curr.nama_kelas]) acc[curr.nama_kelas] = [];
         acc[curr.nama_kelas].push(curr);
         return acc;
     }, {});
+
+    // 1. Generate Opsi Guru secara Dinamis Berdasarkan listMapelGuru
+    const uniqueGuruMap = new Map();
+
+    listMapelGuru.forEach((mapel) => {
+        if (mapel.guru && Array.isArray(mapel.guru)) {
+            mapel.guru.forEach((guru) => {
+                const id = guru.guru_id || guru.id;
+                const nama = guru.nama || guru.nama_guru;
+                if (id && nama && !uniqueGuruMap.has(String(id))) {
+                    uniqueGuruMap.set(String(id), {
+                        value: id,
+                        label: nama,
+                    });
+                }
+            });
+        }
+    });
+
+    const allGeneratedGuru = [
+        { value: "all", label: "Semua Guru" },
+        ...Array.from(uniqueGuruMap.values()),
+    ];
+
+    // 2. Filter Opsi Guru jika user memilih Mapel tertentu (Juga dibuat unik)
+    const uniqueGuruByMapelMap = new Map();
+
+    if (selectedMapel && selectedMapel !== "all") {
+        listMapelGuru
+            .filter((m) => String(m.id) === String(selectedMapel))
+            .forEach((m) => {
+                if (m.guru && Array.isArray(m.guru)) {
+                    m.guru.forEach((guru) => {
+                        const id = guru.guru_id || guru.id;
+                        const nama = guru.nama || guru.nama_guru;
+                        if (
+                            id &&
+                            nama &&
+                            !uniqueGuruByMapelMap.has(String(id))
+                        ) {
+                            uniqueGuruByMapelMap.set(String(id), {
+                                value: id,
+                                label: nama,
+                            });
+                        }
+                    });
+                }
+            });
+    }
+
+    const dataGuruOptions =
+        selectedMapel && selectedMapel !== "all"
+            ? [
+                  { value: "all", label: "Semua Guru" },
+                  ...Array.from(uniqueGuruByMapelMap.values()),
+              ]
+            : allGeneratedGuru;
 
     // Array opsi untuk Select dengan tambahan "Semua Kelas" di urutan teratas
     const kelasList = [
@@ -34,16 +95,19 @@ export default function DaftarJadwal({
     // Filter daftar kelas berdasarkan pilihan user
     const filteredKelasList = selectedKelas
         ? kelasList.filter((item) => item.value === selectedKelas)
-        : kelasList.filter((item) => item.value !== ""); // Jika null/kosong, tampilkan SEMUA kelas asli
+        : kelasList.filter((item) => item.value !== "");
 
     const params = {
         tahun_ajaran_id: historyJadwal[0]?.tahun_ajaran_id || null,
         kelas_id: selectedKelas || "all",
+        mapel_id: selectedMapel || "all",
+        guru_id: selectedGuru || "all",
     };
 
     const pdfUrl = route("pdf.jadwal", params);
 
     const titlePdf = `Jadwal Pelajaran - ${selectedNamaTahunAjaran}  ${selectedKelas && selectedKelas !== "" ? ` - Kelas ${selectedKelas}` : " - Semua Kelas"}`;
+
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
@@ -93,41 +157,107 @@ export default function DaftarJadwal({
             zIndex: 9999,
         }),
     };
+    console.log(filteredKelasList, "filteredKelasList");
 
     return (
         <>
             <div className="">
-                {/* BAGIAN FILTER KELAS */}
+                {/* BAGIAN FILTER KELAS, MAPEL & GURU */}
                 <div className="max-w-full pb-3">
                     <div className="flex justify-between items-center gap-2 cursor-pointer">
                         {/* Dropdown React-Select */}
-                        <div className="min-w-[220px]">
-                            <Select
-                                options={kelasList || []}
-                                value={
-                                    kelasList?.find(
-                                        (opt) =>
-                                            opt.value === (selectedKelas || ""),
-                                    ) || null
-                                }
-                                onChange={(option) =>
-                                    setSelectedKelas(
-                                        option && option.value !== ""
-                                            ? option.value
-                                            : null,
-                                    )
-                                }
-                                styles={customSelectStyles}
-                                isSearchable={true}
-                                isClearable={true}
-                                placeholder="Pilih Kelas..."
-                            />
+                        <div className="flex gap-2 flex-wrap">
+                            {/* Filter Kelas */}
+                            <div className="min-w-[200px]">
+                                <Select
+                                    options={kelasList || []}
+                                    value={
+                                        kelasList?.find(
+                                            (opt) =>
+                                                opt.value ===
+                                                (selectedKelas || ""),
+                                        ) || null
+                                    }
+                                    onChange={(option) =>
+                                        setSelectedKelas(
+                                            option && option.value !== ""
+                                                ? option.value
+                                                : null,
+                                        )
+                                    }
+                                    styles={customSelectStyles}
+                                    isSearchable={true}
+                                    isClearable={true}
+                                    placeholder="Pilih Kelas..."
+                                />
+                            </div>
+
+                            {/* Filter Mapel */}
+                            <div className="min-w-[200px]">
+                                <Select
+                                    options={dataMapel || []}
+                                    value={
+                                        dataMapel?.find(
+                                            (opt) =>
+                                                opt.value ===
+                                                (selectedMapel || ""),
+                                        ) || null
+                                    }
+                                    onChange={(option) => {
+                                        const newMapel =
+                                            option &&
+                                            option.value !== "" &&
+                                            option.value !== "all"
+                                                ? option.value
+                                                : null;
+                                        setSelectedMapel(newMapel);
+                                        // Reset pilihan guru jika mapel diubah agar tidak mismatch
+                                        setSelectedGuru(null);
+                                    }}
+                                    styles={customSelectStyles}
+                                    isSearchable={true}
+                                    isClearable={true}
+                                    placeholder="Pilih Mapel..."
+                                />
+                            </div>
+
+                            {/* Filter Guru */}
+                            <div className="min-w-[200px]">
+                                <Select
+                                    options={dataGuruOptions || []}
+                                    value={
+                                        dataGuruOptions?.find(
+                                            (opt) =>
+                                                opt.value ===
+                                                (selectedGuru.value || ""),
+                                        ) || null
+                                    }
+                                    onChange={(option) =>
+                                        setSelectedGuru({
+                                            value:
+                                                option && option.value !== ""
+                                                    ? option.value
+                                                    : null,
+                                            label:
+                                                option && option.label !== ""
+                                                    ? option.label
+                                                    : null,
+                                        })
+                                    }
+                                    styles={customSelectStyles}
+                                    isSearchable={true}
+                                    isClearable={true}
+                                    placeholder="Pilih Guru..."
+                                />
+                            </div>
                         </div>
+
                         <button
                             type="button"
                             className="mt-2 px-3 py-2 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors"
                             onClick={() => setOpenPdfModal(true)}
                         >
+                            <span className="mr-1 text-xs">Cetak PDF</span>
                             <i className="fa fa-print"></i>
                         </button>
                     </div>
@@ -155,21 +285,49 @@ export default function DaftarJadwal({
                                     {/* Konten Grid Hari (List ke bawah per kolom) */}
                                     <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-gray-200 bg-gray-50/30">
                                         {daftarHari.map((hari) => {
-                                            // Ambil dan urutkan jadwal untuk hari ini berdasarkan jam mulai
+                                            // Ambil dan filter jadwal berdasarkan hari, mapel, dan guru
                                             const jadwalHariIni = dataKelas
-                                                .filter(
-                                                    (j) =>
+                                                .filter((j) => {
+                                                    const matchHari =
                                                         (j.hari
                                                             ? j.hari.toLowerCase()
                                                             : "") ===
-                                                        hari.toLowerCase(),
-                                                )
+                                                        hari.toLowerCase();
+
+                                                    const matchMapel =
+                                                        selectedMapel &&
+                                                        selectedMapel !== "all"
+                                                            ? String(
+                                                                  j.mapel_id,
+                                                              ) ===
+                                                              String(
+                                                                  selectedMapel,
+                                                              )
+                                                            : true;
+
+                                                    const matchGuru =
+                                                        selectedGuru &&
+                                                        selectedGuru !== "all"
+                                                            ? String(
+                                                                  j.nama_guru,
+                                                              ) ===
+                                                              String(
+                                                                  selectedGuru.label,
+                                                              )
+                                                            : true;
+
+                                                    return (
+                                                        matchHari &&
+                                                        matchMapel &&
+                                                        matchGuru
+                                                    );
+                                                })
                                                 .sort((a, b) =>
                                                     a.jam_mulai.localeCompare(
                                                         b.jam_mulai,
                                                     ),
                                                 );
-
+                                            console.log(jadwalHariIni);
                                             return (
                                                 <div
                                                     key={hari}

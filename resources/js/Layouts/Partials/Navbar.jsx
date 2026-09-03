@@ -103,7 +103,7 @@ export default function Navbar({ user, onToggle, startTour }) {
                                 </div>
 
                                 {/* Status Dot */}
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></span>
+                                {/* <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></span> */}
                             </button>
 
                             {/* DROPDOWN */}

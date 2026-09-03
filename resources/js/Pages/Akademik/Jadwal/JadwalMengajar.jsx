@@ -1,6 +1,7 @@
 import { useAlert } from "@/Components/AlertContext";
 import RenderTabelJadwal from "./renderTabelJadwal";
 import { useEffect, useState } from "react";
+import { usePage } from "@inertiajs/react";
 
 export default function JadwalMengajarAnda({
     selectedNamaTahunAjaran,
@@ -9,12 +10,14 @@ export default function JadwalMengajarAnda({
     const [jadwal, setJadwal] = useState([]);
     const [loading, setLoading] = useState(false);
     const { showAlert } = useAlert();
+    const auth = usePage().props.auth;
     const getJadwalPerGuru = async () => {
         setLoading(true);
         try {
             const res = await axios.get(
                 route("getData.get-jadwal-perguru", {
                     tahun_ajaran_id: selectedTahunAjaran,
+                    guru_id: auth.user.guru_id,
                 }),
             );
             if (res.data.success === false) {

@@ -81,10 +81,9 @@ export default function Configurasi({
         })
         .map((mapel) => {
             const mapGuru = new Map();
-
             mapel.guru.forEach((g) => {
-                if (!mapGuru.has(g.nip)) {
-                    mapGuru.set(g.nip, {
+                if (!mapGuru.has(g.guru_id)) {
+                    mapGuru.set(g.guru_id, {
                         ...g,
                         detail_kelas: g.kelas_id
                             ? [
@@ -98,7 +97,7 @@ export default function Configurasi({
                         total_jam: Number(g.beban_jam) || 0,
                     });
                 } else {
-                    const existing = mapGuru.get(g.nip);
+                    const existing = mapGuru.get(g.guru_id);
                     if (
                         g.kelas_id &&
                         !existing.detail_kelas.find(
@@ -265,13 +264,18 @@ export default function Configurasi({
         }
     };
 
-    const filteredTahunAjaranOptions = tahunAjaranList
-        .filter((ta) => String(ta.value).toLowerCase() !== "all")
-        .map((ta) => ({
-            value: ta.value,
-            label: ta.label,
-        }));
-
+    const filteredTahunAjaranOptions = [
+        // 1. Tambahkan opsi default di indeks pertama (paling atas)
+        {
+            value: "",
+            label: "[Pilih Tahun Ajaran]",
+        },
+        // 2. Masukkan sisa data yang sudah di-filter
+        ...tahunAjaranList.filter(
+            (ta) => String(ta.value).toLowerCase() !== "all",
+        ),
+    ];
+    console.log("filteredTahunAjaranOptions", filteredTahunAjaranOptions);
     const selectedTahunAjaranOption =
         filteredTahunAjaranOptions.find(
             (opt) => String(opt.value) === String(selectedTahunAjaran),

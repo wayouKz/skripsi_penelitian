@@ -218,7 +218,17 @@ export default function Guru() {
     const columnsGuru = useMemo(
         () => [
             { header: "No", render: (_, i) => i + 1 },
-            { header: "NIP", accessor: "nip" },
+            {
+                header: "NIP",
+                render: (row) =>
+                    row.nip ? (
+                        <span className="font-mono text-gray-700">
+                            {row.nip}
+                        </span>
+                    ) : (
+                        <span className="text-gray-400">Tidak tersedia</span>
+                    ),
+            },
             { header: "Nama Guru", accessor: "nama_guru" },
             {
                 header: "Status",

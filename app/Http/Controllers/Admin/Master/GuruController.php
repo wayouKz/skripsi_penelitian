@@ -328,7 +328,7 @@ public function DataGuruMapel(Request $request)
         $q->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
         ->where('t_list_gurus.tahun_ajaran_id', $tahun_ajaran_id);
     })
-    ->leftJoin('m_gurus as guru', 'guru.nip', '=', 't_list_gurus.nip')
+    ->leftJoin('m_gurus as guru', 'guru.id', '=', 't_list_gurus.guru_id')
     ->leftJoin('m_kelas', 't_list_gurus.kelas_id', '=', 'm_kelas.id')
     ->select(
         'm_mapels.id',

@@ -15,8 +15,8 @@ return new class extends Migration
     $table->id();
 
     $table->string('nip')->nullable()->unique();
-    $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade')->onUpdate('cascade');
-
+    // $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade')->onUpdate('cascade');
+    $table->foreignId('guru_id')->nullable()->constrained('m_gurus')->onDelete('cascade')->onUpdate('cascade');
     $table->string('username')->unique();
     $table->string('name');
     $table->string('email')->unique()->nullable();

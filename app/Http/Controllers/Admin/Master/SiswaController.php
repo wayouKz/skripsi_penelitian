@@ -243,7 +243,8 @@ class SiswaController extends Controller
                 TListSiswa::updateOrCreate(
                     [
                         'tahun_ajaran_id' => $taTujuan,
-                        'nisn'            => $siswa['nisn']
+                        'nisn'            => $siswa['nisn'] ?? null,
+                        'siswa_id'              => $siswa['siswa_id'] ?? null, // Optional: jika ada ID dari frontend
                     ],
                     [
                         'kelas_id'   => $kelasTujuan,
@@ -271,7 +272,7 @@ class SiswaController extends Controller
         ], 500);
     }
 }
-    public function importSiswa(Request $request)
+public function importSiswa(Request $request)
     {
         $file = $request->file('fileExcel');
         $tahun_ajaran_id = $request->tahun_ajaran_id;
@@ -280,148 +281,162 @@ class SiswaController extends Controller
         $tempDir = storage_path('app/temp/' . uniqid());
         if (!file_exists($tempDir)) mkdir($tempDir, 0777, true);
 
-      $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($xlsxPath);
+        $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReaderForFile($xlsxPath);
         $reader->setReadDataOnly(true);
         $spreadsheet = $reader->load($xlsxPath);
         $sheetNames = $spreadsheet->getSheetNames();
+
         $dataSiswa = [];
-        $dataKelas = []; // Pastikan inisialisasi array ini
+        $genderMap = [];
 
-        // 1. Looping semua sheet yang ada di file Excel
+        // ==============================================================================
+        // LANGKAH 1: PENCERDASAN SCANNER JENIS KELAMIN DI SEMUA SHEET
+        // ==============================================================================
         foreach ($sheetNames as $sheetName) {
-            // Jika kamu hanya ingin mengekstrak sheet absensi (X1 - X15) dan mengabaikan sheet 'Nilai' atau 'Kelas'
-            if (strpos($sheetName, 'Nilai') !== false || $sheetName === 'Kelas') {
-                continue;
-            }
+            if (in_array($sheetName, ['X', 'XI & XII', 'Tanpa NIM', 'data-export'])) continue;
 
-            // Panggil sheet menggunakan NAMA ASLI DARI EXCEL (misal: "X1")
             $sheet = $spreadsheet->getSheetByName($sheetName);
+            if (!$sheet) continue;
 
-            // Format nama sheet HANYA untuk kebutuhan database (misal: jadi "X-1")
-            $sheetNameFormatted = preg_replace('/([a-zA-Z]+)(\d+)/', '$1-$2', $sheetName);
-
-            // 2. Ubah seluruh data di sheet tersebut menjadi Array (dengan key abjad kolom A, B, C...)
             $sheetData = $sheet->toArray(null, true, true, true);
 
-            // 3. Looping data per baris (Data siswa dimulai dari baris ke-3)
-            foreach ($sheetData as $rowIndex => $row) {
-                // Lewati baris 1 dan 2 karena itu adalah header (Tanggal / Pertemuan)
-                if ($rowIndex < 3) continue;
+            foreach ($sheetData as $row) {
+                // Ubah baris menjadi array nilai murni untuk disapu bersih isinya
+                $rowValues = array_values(array_filter($row, function($val) {
+                    return !is_null($val) && trim($val) !== '';
+                }));
 
-                $no = $row['A'];
-                $namaSiswa = $row['B'];
+                $detectedName = null;
+                $detectedGender = null;
 
-                // Jika kolom nama kosong, berarti data di sheet tersebut sudah habis
-                if (empty($namaSiswa)) {
-                    continue;
+                // Cari string nama (panjang karakter > 3) dan kode gender ('L' / 'P') dalam satu baris yang sama
+                foreach ($rowValues as $val) {
+                    $cleanVal = trim($val);
+                    $upperVal = strtoupper($cleanVal);
+
+                    // Jika ketemu kode gender tunggal L atau P
+                    if (in_array($upperVal, ['L', 'P']) && !$detectedGender) {
+                        $detectedGender = ($upperVal === 'L') ? 'Laki-Laki' : 'Perempuan';
+                    }
+                    // Jika teks cukup panjang dan bukan angka/simbol, asumsikan itu Nama Siswa
+                    elseif (strlen($cleanVal) > 3 && !is_numeric($cleanVal) && !$detectedName) {
+                        // Pastikan bukan judul header
+                        if (strpos($upperVal, 'DAFTAR') === false && strpos($upperVal, 'TP.') === false) {
+                            $detectedName = $cleanVal;
+                        }
+                    }
                 }
 
-                // 4. Masukkan data yang relevan ke dalam array utama
-                $dataSiswa[] = [
-                    'no'              => $no,
-                    'nama'            => $namaSiswa,
-                    'kelas'           => $sheetNameFormatted, // Gunakan nama yang ada stripnya untuk DB
-                    'tahun_ajaran_id' => $tahun_ajaran_id,
-                ];
-
-                $dataKelas[] = [
-                    'tahun_ajaran_id' => $tahun_ajaran_id,
-                    'kelas'           => $sheetNameFormatted // Sebaiknya gunakan yang sudah diformat juga
-                ];
+                // Jika nama dan gender klop dalam satu baris, masukkan ke peta memori
+                if ($detectedName && $detectedGender) {
+                    $genderMap[$detectedName] = $detectedGender;
+                }
             }
         }
 
-        unlink($xlsxPath);
+        // ==============================================================================
+        // LANGKAH 2: AMBIL DATA UTAMA (NAMA, NISN, KELAS) LALU COCOKKAN
+        // ==============================================================================
+        foreach ($sheetNames as $sheetName) {
+            if (!in_array($sheetName, ['X', 'XI & XII', 'Tanpa NIM'])) continue;
+
+            $sheet = $spreadsheet->getSheetByName($sheetName);
+            if (!$sheet) continue;
+
+            $sheetData = $sheet->toArray(null, true, true, true);
+
+            foreach ($sheetData as $rowIndex => $row) {
+                $namaSiswa = isset($row['A']) ? trim($row['A']) : '';
+                $nisn      = isset($row['B']) ? trim($row['B']) : null;
+                $kelasAsli = isset($row['C']) ? trim($row['C']) : '';
+
+                if (empty($namaSiswa) || empty($kelasAsli)) continue;
+
+                $kelasFormatted = str_replace('.', '-', $kelasAsli);
+
+                // Ambil dari memori hasil pemindaian cerdas, fallback ke 'Belum Ditentukan'
+                $jenisKelamin = isset($genderMap[$namaSiswa]) ? $genderMap[$namaSiswa] : 'Belum Ditentukan';
+
+                $dataSiswa[] = [
+                    'nama'            => $namaSiswa,
+                    'nisn'            => $nisn,
+                    'jenis_kelamin'   => $jenisKelamin,
+                    'kelas'           => $kelasFormatted,
+                ];
+            }
+        }
 
         $data = [
             "dataSiswa" => $dataSiswa,
+            "tahun_ajaran_id" => $tahun_ajaran_id
         ];
-      return response()->stream(function () use ($data, $request) {
-    set_time_limit(0);
 
-    if (ob_get_level() > 0) {
-        ob_end_clean();
-    }
+        return response()->stream(function () use ($data) {
+            set_time_limit(0);
+            if (ob_get_level() > 0) ob_end_clean();
 
-    try {
-        $mapKelas = MKelas::pluck('id', 'nama_kelas')->toArray();
-        $tahunAjaranId = $data['tahun_ajaran_id'] ?? $request->tahun_ajaran_id;
-
-            $totalSiswa = count($data['dataSiswa']);
-
-        foreach ($data['dataSiswa'] as $ind => $val) {
             try {
-                // 1. Dapatkan ID Siswa secara langsung
-                $siswa = MSiswa::updateOrCreate(
-                    ['nama_siswa' => $val['nama']],
-                    ['jenis_kelamin' => 'Laki-laki']
-                );
-                $siswa_id = $siswa->id;
+                $mapKelas = MKelas::pluck('id', 'nama_kelas')->toArray();
+                $tahunAjaranId = $data['tahun_ajaran_id'];
+                $totalSiswa = count($data['dataSiswa']);
 
-                $namaKelasExcel = $val['kelas'];
+                foreach ($data['dataSiswa'] as $ind => $val) {
+                    try {
+                        // Simpan / Update ke database MSiswa
+                        $siswa = MSiswa::updateOrCreate(
+                            ['nama_siswa' => $val['nama']],
+                            [
+                                'nisn'          => $val['nisn'],
+                                'jenis_kelamin' => $val['jenis_kelamin']
+                            ]
+                        );
+                        $siswa_id = $siswa->id;
+                        $namaKelasExcel = $val['kelas'];
 
-                if (!isset($mapKelas[$namaKelasExcel])) {
-                    // Jika kelas tidak ditemukan, lempar error agar masuk ke catch
-                    throw new \Exception("Kelas '{$namaKelasExcel}' tidak ditemukan.");
+                        if (!isset($mapKelas[$namaKelasExcel])) {
+                            throw new \Exception("Kelas '{$namaKelasExcel}' tidak ditemukan.");
+                        }
+
+                        // Simpan relasi ke TListSiswa
+                        TListSiswa::updateOrCreate(
+                            [
+                                'tahun_ajaran_id' => $tahunAjaranId,
+                                'siswa_id'        => $siswa_id,
+                            ],
+                            [
+                                'kelas_id'        => $mapKelas[$namaKelasExcel],
+                                'nama_siswa'      => $val['nama'],
+                            ]
+                        );
+
+                        $progress = round((($ind + 1) / $totalSiswa) * 100);
+                        echo json_encode([
+                            'status'   => 'success',
+                            'message'  => "Disimpan: {$val['nama']} ({$val['jenis_kelamin']})",
+                            'progress' => $progress
+                        ]) . "\n";
+
+                    } catch (\Exception $e) {
+                        $progress = round((($ind + 1) / $totalSiswa) * 100);
+                        echo json_encode([
+                            'status'   => 'error',
+                            'message'  => "Error {$val['nama']}: " . $e->getMessage(),
+                            'progress' => $progress
+                        ]) . "\n";
+                    }
+
+                    if (ob_get_level() > 0) ob_flush();
+                    flush();
                 }
-
-                // 2. Dapatkan ID Kelas
-                $kelas_id = $mapKelas[$namaKelasExcel];
-
-                // 3. Simpan ke TListSiswa
-                TListSiswa::updateOrCreate(
-                    [
-                        'tahun_ajaran_id' => $tahunAjaranId,
-                        'siswa_id'        => $siswa_id,
-                    ],
-                    [
-                        'kelas_id'        => $kelas_id,
-                        'nama_siswa'      => $val['nama'],
-                    ]
-                );
-
-                // 4. Hitung progres saat ini
-                $progress = round((($ind + 1) / $totalSiswa) * 100);
-
-                // Kirim response JSON sukses dengan format yang diminta JS
-                echo json_encode([
-                    'message'  => "Berhasil menyimpan: {$val['nama']}",
-                    'progress' => $progress
-                ]) . "\n";
-
             } catch (\Exception $e) {
-                // Hitung progres meskipun terjadi error agar bar progres tidak berhenti
-                $progress = round((($ind + 1) / $totalSiswa) * 100);
-
-                // Kirim response JSON error ke frontend
-                echo json_encode([
-                    'message'  => "Error pada {$val['nama']}: " . $e->getMessage(),
-                    'progress' => $progress
-                ]) . "\n";
+                echo json_encode(['status' => 'fatal_error', 'message' => $e->getMessage()]) . "\n";
+                if (ob_get_level() > 0) ob_flush();
+                flush();
             }
-
-            // Dorong data ke browser secara realtime
-            if (ob_get_level() > 0) {
-                ob_flush();
-            }
-            flush();
-        }
-    } catch (\Exception $e) {
-        // Tangkap error fatal di luar loop (misal gagal ambil data kelas)
-        echo json_encode([
-            'status'  => 'fatal_error',
-            'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
-        ]) . "\n";
-
-        if (ob_get_level() > 0) {
-            ob_flush();
-        }
-        flush();
-    }
-}, 200, [
-    'Cache-Control' => 'no-cache',
-    'Content-Type'  => 'application/x-ndjson',
-    'Connection'    => 'keep-alive',
-]);
+        }, 200, [
+            'Cache-Control' => 'no-cache',
+            'Content-Type'  => 'application/x-ndjson',
+            'Connection'    => 'keep-alive',
+        ]);
     }
 }

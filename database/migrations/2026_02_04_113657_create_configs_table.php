@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('email_instansi')->nullable();
             $table->string('website_instansi')->nullable();
             $table->string('sampul_instansi')->nullable();
+            $table->foreignId('kepala_sekolah_id')->nullable()->constrained('m_gurus')->onDelete('set null');
             $table->json('card_img')->nullable();
             $table->timestamps();
         });

@@ -13,6 +13,7 @@ export default function MasterSiswa({
     setShow,
     isEdit,
     selectedSiswa,
+    getSiswa,
     handleTambah,
 }) {
     const [openImport, setOpenImport] = useState(false);
@@ -70,6 +71,7 @@ export default function MasterSiswa({
                 </div>
 
                 <UploadExcel
+                    getSiswa={getSiswa}
                     openImport={openImport}
                     setOpenImport={setOpenImport}
                 />

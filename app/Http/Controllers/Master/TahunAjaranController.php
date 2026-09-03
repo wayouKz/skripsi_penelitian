@@ -156,310 +156,326 @@ class TahunAjaranController extends Controller
         }
 
 
-        return response()->stream(function () use ($data, $tahun_ajaran_id) {
-            // Matikan batasan waktu eksekusi agar tidak timeout
-            set_time_limit(0);
+       return response()->stream(function () use ($data, $tahun_ajaran_id) {
+    // Matikan batasan waktu eksekusi agar tidak timeout
+    set_time_limit(0);
 
-            if (ob_get_level() > 0) {
-                ob_end_clean();
+    if (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    $dataKelas = [];
+    $dataMapel = []; // Inisialisasi array untuk menampung Mapel beserta relasi gurunya
+    $totalData = count($data);
+
+    // =========================================================================
+    // TAHAP 1: PROSES GURU & USER (Porsi 60%)
+    // =========================================================================
+    foreach ($data as $index => $row) {
+        try {
+            // Tangani duplikasi nama "Guru Baru"
+            $namaRaw = trim($row['nama_guru'] ?? '');
+            $nama = ($namaRaw === 'Guru Baru') ? "Guru Baru " . ($index + 1) : $namaRaw;
+
+            // Logika NIP
+            $rawNip = trim($row['nip'] ?? '');
+            $nip = (in_array($rawNip, ['---', ''])) ? null : $rawNip;
+
+            // UpdateOrCreate MGuru
+            if ($nip) {
+                $guru = MGuru::updateOrCreate(
+                    ['nip' => $nip],
+                    ['nama_guru' => $nama]
+                );
+            } else {
+                $guru = MGuru::updateOrCreate(
+                    ['nama_guru' => $nama],
+                    ['nip' => null,'jenis_kelamin' => $row['jenis_kelamin'] ?? 'Belum Ditentukan']
+                );
             }
 
-            $dataKelas = [];
-            $dataMapel = []; // Inisialisasi array untuk menampung Mapel beserta relasi gurunya
-            $totalData = count($data);
+            $guruId = $guru->id;
 
-            foreach ($data as $index => $row) {
-                try {
-                    // Tangani duplikasi nama "Guru Baru"
-                    $namaRaw = trim($row['nama_guru'] ?? '');
-                    $nama = ($namaRaw === 'Guru Baru') ? "Guru Baru " . ($index + 1) : $namaRaw;
+            // Penulisan strtolower & Update/Create User
+            $username = str_replace([' ', ',', '.', "'", '-','spd','mpd'], '', strtolower($nip ?? $nama));
 
-                    // Sanitasi NIP: Jika kosong atau '---', gunakan Nama
-                    $rawNip = trim($row['nip'] ?? '');
-                    $nip = (in_array($rawNip, ['---', ''])) ? $nama : $rawNip;
-
-                    // Update/Create MGuru
-                    $guru = MGuru::updateOrCreate(
-                        ['nip' => $nip],
-                        ['nama_guru' => $nama]
-                    );
-
-                    // Update/Create User
-                  $username = str_replace([' ', ',', '.', "'", '-','spd'], '', strtolower($nip ?? $nama));
-                    User::updateOrCreate(
-                        ['username' => $username,'nip' => $nip],
-                        [
-                            'name' => $nama,
-                            'nip' => $nip ?? $username,
-                            'password' => \Illuminate\Support\Facades\Hash::make($nip ?? 'default123'),
-                            'role_id' => 2,
-                        ]
-                    );
-
-                    $guruId = $guru->id;
-
-                    // --- DAFTARKAN KELAS & MAPEL DARI MAPEL DI AMPU ---
-                    if (!empty($row['mapel_di_ampu'])) {
-                        foreach ($row['mapel_di_ampu'] as $item) {
-                            // A. Kumpulkan Data Kelas
-                            $kelasKey = trim($item['kelas'] ?? '');
-                            $kelasKey = str_replace(' ', '-', $kelasKey);
-
-                            if ($kelasKey && !isset($dataKelas[$kelasKey])) {
-                                $tingkat = null;
-                                if (stripos($kelasKey, 'XII') !== false) $tingkat = 12;
-                                elseif (stripos($kelasKey, 'XI') !== false) $tingkat = 11;
-                                elseif (stripos($kelasKey, 'X') !== false) $tingkat = 10;
-
-                                $dataKelas[$kelasKey] = [
-                                    'nama_kelas'      => $kelasKey,
-                                    'tingkat'         => $tingkat,
-                                    'id_wali_kelas'   => null,
-                                    // 'tahun_ajaran_id' => $tahun_ajaran_id
-                                ];
-                            }
-
-                            // B. Kumpulkan Data Mapel & Relasi Guru-Mapel
-                            $mapelKey = trim($item['nama_mapel'] ?? '');
-
-                            if ($mapelKey) {
-                                if (!isset($dataMapel[$mapelKey])) {
-                                    $dataMapel[$mapelKey] = [
-                                        'nama_mapel' => $mapelKey,
-                                        'list_guru'  => [] // Wadah untuk relasi mapping
-                                    ];
-                                }
-
-                                // Simpan relasi untuk dieksekusi nanti (setelah Mapel & Kelas tersimpan di DB)
-                                $dataMapel[$mapelKey]['list_guru'][] = [
-                                    'nip'             => $nip,
-                                    'nama_kelas'      => $kelasKey,
-                                    'tahun_ajaran_id' => $tahun_ajaran_id,
-                                    'beban_jam'       => $item['beban_jam']
-                                ];
-                            }
-                        }
-                    }
-
-                    // --- DAFTARKAN KELAS DARI WALI KELAS ---
-                    if (!empty($row['wali_kelas'])) {
-                        $rawWaliKelas = trim(preg_replace('/wali\s*kelas/i', '', $row['wali_kelas']));
-                        $waliKelasKey = str_replace(' ', '-', $rawWaliKelas);
-
-                        if ($waliKelasKey) {
-                            if (!isset($dataKelas[$waliKelasKey])) {
-                                $tingkat = null;
-                                if (stripos($waliKelasKey, 'XII') !== false) $tingkat = 12;
-                                elseif (stripos($waliKelasKey, 'XI') !== false) $tingkat = 11;
-                                elseif (stripos($waliKelasKey, 'X') !== false) $tingkat = 10;
-
-                                $dataKelas[$waliKelasKey] = [
-                                    'nama_kelas'      => $waliKelasKey,
-                                    'tingkat'         => $tingkat,
-                                    'id_wali_kelas'   => $guruId,
-                                    // 'tahun_ajaran_id' => $tahun_ajaran_id
-                                ];
-                            } else {
-                                $dataKelas[$waliKelasKey]['id_wali_kelas'] = $guruId;
-                                $dataKelas[$waliKelasKey]['tahun_ajaran_id'] = $tahun_ajaran_id;
-                            }
-                        }
-                    }
-
-                    // --- HITUNG PROGRESS GURU (0% - 60%) ---
-                    $progress = round((($index + 1) / $totalData) * 60);
-
-                    echo "data: " . json_encode([
-                        'progress' => $progress,
-                        'message' => "Memproses Guru: $nama"
-                    ]) . "\n\n";
-
-                    flush();
-
-                } catch (\Throwable $e) {
-                    echo "data: " . json_encode([
-                        'progress' => round((($index + 1) / $totalData) * 60),
-                        'message' => "ERROR di Baris " . ($index + 1) . ": " . $e->getMessage(),
-                        'error' => true
-                    ]) . "\n\n";
-                    flush();
-                    continue;
-                }
+            $user = User::where('guru_id', $guruId)->first();
+            if (!$user) {
+                User::create([
+                    'guru_id'  => $guruId,
+                    'name'     => $nama,
+                    'username' => $username,
+                    'nip'      => $nip ?? $username,
+                    'password' => Hash::make($nip ?? $username),
+                    'role_id'  => 2,
+                ]);
+            } else {
+                $user->update([
+                    'name'     => $nama,
+                    'username' => $username,
+                    'nip'      => $nip ?? $username,
+                ]);
             }
 
-            // =========================================================================
-            // TAHAP 2: PROSES PENYIMPANAN DATA MAPEL (Porsi 15%) -> Total 75%
-            // =========================================================================
-            $totalMapel = count($dataMapel);
-            $mapelIndex = 0;
+            // --- DAFTARKAN KELAS & MAPEL DARI MAPEL DI AMPU ---
+            if (!empty($row['mapel_di_ampu'])) {
+                foreach ($row['mapel_di_ampu'] as $item) {
+                    // A. Kumpulkan Data Kelas
+                    $kelasKey = trim($item['kelas'] ?? '');
+                    $kelasKey = str_replace(' ', '-', $kelasKey);
 
-            if ($totalMapel > 0) {
-                foreach ($dataMapel as $mapelData) {
-                    try {
-                        $mapelIndex++;
-                        $namaMapel = $mapelData['nama_mapel'];
-                        $namaMapelClean = str_replace(['(', ')'], '', $namaMapel);
-                        $namaMapelClean = trim(preg_replace('/\s+/', ' ', $namaMapelClean));
-                        $awalan = '';
-                        $pecahanKata = explode(' ', $namaMapelClean);
+                    if ($kelasKey && !isset($dataKelas[$kelasKey])) {
+                        $tingkat = null;
+                        if (stripos($kelasKey, 'XII') !== false) $tingkat = 12;
+                        elseif (stripos($kelasKey, 'XI') !== false) $tingkat = 11;
+                        elseif (stripos($kelasKey, 'X') !== false) $tingkat = 10;
 
-                        if (count($pecahanKata) > 1) {
-                            foreach ($pecahanKata as $kata) {
-                                $kataKecil = strtolower($kata);
-                                if ($kataKecil === 'indonesia') {
-                                    $awalan .= 'IND';
-                                } elseif ($kataKecil === 'inggris') {
-                                    $awalan .= 'ING';
-                                } else {
-                                    $awalan .= strtoupper(substr($kata, 0, 1));
-                                }
-                            }
-                        } else {
-                            $awalan = strtoupper(substr($namaMapelClean, 0, 3));
+                        $dataKelas[$kelasKey] = [
+                            'nama_kelas'    => $kelasKey,
+                            'tingkat'       => $tingkat,
+                            'id_wali_kelas' => null,
+                        ];
+                    }
+
+                    // B. Kumpulkan Data Mapel & Relasi Guru-Mapel
+                    $mapelKey = trim($item['nama_mapel'] ?? '');
+
+                    if ($mapelKey) {
+                        if (!isset($dataMapel[$mapelKey])) {
+                            $dataMapel[$mapelKey] = [
+                                'nama_mapel' => $mapelKey,
+                                'list_guru'  => []
+                            ];
                         }
 
-                        // Masukkan ke database
-                        MMapel::updateOrCreate(
-                            ['nama_mapel' => $namaMapel],
-                            ['kode_mapel' => $awalan]
-                        );
-
-                        $progress = 60 + round(($mapelIndex / $totalMapel) * 15);
-                        echo "data: " . json_encode([
-                            'progress' => $progress,
-                            'message' => "Menyimpan Mapel: " . $namaMapel . " (" . $awalan . ")"
-                        ]) . "\n\n";
-
-                        flush();
-                    } catch (\Throwable $e) {
-                        echo "data: " . json_encode([
-                            'progress' => 60 + round(($mapelIndex / $totalMapel) * 15),
-                            'message' => "ERROR Mapel " . $mapelData['nama_mapel'] . ": " . $e->getMessage(),
-                            'error' => true
-                        ]) . "\n\n";
-                        flush();
+                        // PASTIKAN NIP DAN GURU_ID DIBAWA DI SINI UNTUK TAHAP 4
+                        $dataMapel[$mapelKey]['list_guru'][] = [
+                            'guru_id'         => $guruId, // ID utama
+                            'nip'             => $nip,    // NIP untuk disave ke tabel relasi jika butuh
+                            'nama_kelas'      => $kelasKey,
+                            'tahun_ajaran_id' => $tahun_ajaran_id ?? null,
+                            'beban_jam'       => $item['beban_jam']
+                        ];
                     }
                 }
             }
 
-            // =========================================================================
-            // TAHAP 3: PROSES PENYIMPANAN DATA KELAS (Porsi 15%) -> Total 90%
-            // =========================================================================
-            $totalKelas = count($dataKelas);
-            $kelasIndex = 0;
+            // --- DAFTARKAN KELAS DARI WALI KELAS ---
+            if (!empty($row['wali_kelas'])) {
+                $rawWaliKelas = trim(preg_replace('/wali\s*kelas/i', '', $row['wali_kelas']));
+                $waliKelasKey = str_replace(' ', '-', $rawWaliKelas);
 
-            if ($totalKelas > 0) {
-                foreach ($dataKelas as $kelasData) {
-                    try {
-                        $kelasIndex++;
+                if ($waliKelasKey) {
+                    if (!isset($dataKelas[$waliKelasKey])) {
+                        $tingkat = null;
+                        if (stripos($waliKelasKey, 'XII') !== false) $tingkat = 12;
+                        elseif (stripos($waliKelasKey, 'XI') !== false) $tingkat = 11;
+                        elseif (stripos($waliKelasKey, 'X') !== false) $tingkat = 10;
 
-                        MKelas::updateOrCreate(
-                            ['nama_kelas' => $kelasData['nama_kelas']],
-                            [
-                                'tingkat'         => $kelasData['tingkat'],
-                                'id_wali_kelas'   => $kelasData['id_wali_kelas'],
-                                // 'tahun_ajaran_id' => $kelasData['tahun_ajaran_id']
-                            ]
-                        );
-
-                        $progress = 75 + round(($kelasIndex / $totalKelas) * 15);
-                        echo "data: " . json_encode([
-                            'progress' => $progress,
-                            'message' => "Menyimpan Kelas: " . $kelasData['nama_kelas']
-                        ]) . "\n\n";
-
-                        flush();
-                    } catch (\Throwable $e) {
-                        echo "data: " . json_encode([
-                            'progress' => 75 + round(($kelasIndex / $totalKelas) * 15),
-                            'message' => "ERROR Kelas " . $kelasData['nama_kelas'] . ": " . $e->getMessage(),
-                            'error' => true
-                        ]) . "\n\n";
-
-                        flush();
+                        $dataKelas[$waliKelasKey] = [
+                            'nama_kelas'      => $waliKelasKey,
+                            'tingkat'         => $tingkat,
+                            'id_wali_kelas'   => $guruId,
+                            'tahun_ajaran_id' => $tahun_ajaran_id ?? null
+                        ];
+                    } else {
+                        $dataKelas[$waliKelasKey]['id_wali_kelas'] = $guruId;
+                        $dataKelas[$waliKelasKey]['tahun_ajaran_id'] = $tahun_ajaran_id ?? null;
                     }
                 }
             }
 
-            // =========================================================================
-            // TAHAP 4: PROSES MAPPING GURU, KELAS, MAPEL (Porsi Sisa 10%) -> Total 100%
-            // =========================================================================
-            $mappingIndex = 0;
+            // --- HITUNG PROGRESS GURU ---
+            $progress = round((($index + 1) / $totalData) * 60);
 
-            if ($totalMapel > 0) {
-                foreach ($dataMapel as $mapelData) {
-                    try {
-                        $mappingIndex++;
-
-                        if (!empty($mapelData['list_guru'])) {
-                            // (Opsional) Ambil ID Mapel jika tabel mapping Anda membutuhkan kolom mapel_id
-                            $mapel = MMapel::where('nama_mapel', $mapelData['nama_mapel'])->first();
-
-                            foreach ($mapelData['list_guru'] as $mapping) {
-
-                                // Cari ID Kelas yang baru saja dibuat di Tahap 3
-                                $kelas = MKelas::where('nama_kelas', $mapping['nama_kelas'])
-                                            //    ->where('tahun_ajaran_id', $mapping['tahun_ajaran_id'])
-                                            ->first();
-
-                             if ($kelas) {
-                                    // 1. Buat relasi Guru dan Kelas
-                                    $listGuru = TListGuru::updateOrCreate(
-                                        [
-                                            'nip'             => $mapping['nip'],
-                                            'kelas_id'        => $kelas->id,
-                                            'tahun_ajaran_id' => $mapping['tahun_ajaran_id'],
-                                        ]
-                                    );
-
-                                    // 2. Buat relasi Mapel ke List Guru (DIPERBAIKI)
-                                    TListGuruMapel::updateOrCreate(
-                                        [
-                                            // Kunci pencariannya harus spesifik per kelas (t_list_guru_id) dan mapel
-                                            't_list_guru_id' => $listGuru->id,
-                                            'mapel_id'       => $mapel->id
-                                        ],
-                                        [
-                                            'nip'            => $mapping['nip'], // Opsional, simpan nip jika field-nya butuh
-                                            'beban_jam'      => $mapping['beban_jam'],
-                                        ]
-                                    );
-                                }
-                            }
-                        }
-
-                        $progress = 90 + round(($mappingIndex / $totalMapel) * 10);
-                        echo "data: " . json_encode([
-                            'progress' => $progress,
-                            'message' => "Menyimpan Relasi Mapel: " . $mapelData['nama_mapel']
-                        ]) . "\n\n";
-
-                        flush();
-
-                    } catch (\Throwable $e) {
-                        echo "data: " . json_encode([
-                            'progress' => 90 + round(($mappingIndex / $totalMapel) * 10),
-                            'message' => "ERROR Mapping " . $mapelData['nama_mapel'] . ": " . $e->getMessage(),
-                            'error' => true
-                        ]) . "\n\n";
-                        flush();
-                    }
-                }
-            }
-
-            // --- SELESAI ---
             echo "data: " . json_encode([
-                'progress' => 100,
-                'message' => 'Selesai!',
-                'done' => true
+                'progress' => $progress,
+                'message' => "Memproses Guru: $nama"
             ]) . "\n\n";
 
             flush();
 
-        }, 200, [
-            'Cache-Control' => 'no-cache',
-            'Content-Type' => 'text/event-stream',
-            'X-Accel-Buffering' => 'no',
-        ]);
+        } catch (\Throwable $e) {
+            echo "data: " . json_encode([
+                'progress' => round((($index + 1) / $totalData) * 60),
+                'message' => "ERROR di Baris " . ($index + 1) . ": " . $e->getMessage(),
+                'error' => true
+            ]) . "\n\n";
+            flush();
+            continue;
+        }
+    }
+
+    // =========================================================================
+    // TAHAP 2: PROSES PENYIMPANAN DATA MAPEL (Porsi 15%) -> Total 75%
+    // =========================================================================
+    $totalMapel = count($dataMapel);
+    $mapelIndex = 0;
+
+    if ($totalMapel > 0) {
+        foreach ($dataMapel as $mapelData) {
+            try {
+                $mapelIndex++;
+                $namaMapel = $mapelData['nama_mapel'];
+                $namaMapelClean = str_replace(['(', ')'], '', $namaMapel);
+                $namaMapelClean = trim(preg_replace('/\s+/', ' ', $namaMapelClean));
+                $awalan = '';
+                $pecahanKata = explode(' ', $namaMapelClean);
+
+                if (count($pecahanKata) > 1) {
+                    foreach ($pecahanKata as $kata) {
+                        $kataKecil = strtolower($kata);
+                        if ($kataKecil === 'indonesia') {
+                            $awalan .= 'IND';
+                        } elseif ($kataKecil === 'inggris') {
+                            $awalan .= 'ING';
+                        } else {
+                            $awalan .= strtoupper(substr($kata, 0, 1));
+                        }
+                    }
+                } else {
+                    $awalan = strtoupper(substr($namaMapelClean, 0, 3));
+                }
+
+                MMapel::updateOrCreate(
+                    ['nama_mapel' => $namaMapel],
+                    ['kode_mapel' => $awalan]
+                );
+
+                $progress = 60 + round(($mapelIndex / $totalMapel) * 15);
+                echo "data: " . json_encode([
+                    'progress' => $progress,
+                    'message' => "Menyimpan Mapel: " . $namaMapel . " (" . $awalan . ")"
+                ]) . "\n\n";
+
+                flush();
+            } catch (\Throwable $e) {
+                echo "data: " . json_encode([
+                    'progress' => 60 + round(($mapelIndex / $totalMapel) * 15),
+                    'message' => "ERROR Mapel " . $mapelData['nama_mapel'] . ": " . $e->getMessage(),
+                    'error' => true
+                ]) . "\n\n";
+                flush();
+            }
+        }
+    }
+
+    // =========================================================================
+    // TAHAP 3: PROSES PENYIMPANAN DATA KELAS (Porsi 15%) -> Total 90%
+    // =========================================================================
+    $totalKelas = count($dataKelas);
+    $kelasIndex = 0;
+
+    if ($totalKelas > 0) {
+        foreach ($dataKelas as $kelasData) {
+            try {
+                $kelasIndex++;
+
+                MKelas::updateOrCreate(
+                    ['nama_kelas' => $kelasData['nama_kelas']],
+                    [
+                        'tingkat'         => $kelasData['tingkat'],
+                        'id_wali_kelas'   => $kelasData['id_wali_kelas'], // Menampung guru_id
+                    ]
+                );
+
+                $progress = 75 + round(($kelasIndex / $totalKelas) * 15);
+                echo "data: " . json_encode([
+                    'progress' => $progress,
+                    'message' => "Menyimpan Kelas: " . $kelasData['nama_kelas']
+                ]) . "\n\n";
+
+                flush();
+            } catch (\Throwable $e) {
+                echo "data: " . json_encode([
+                    'progress' => 75 + round(($kelasIndex / $totalKelas) * 15),
+                    'message' => "ERROR Kelas " . $kelasData['nama_kelas'] . ": " . $e->getMessage(),
+                    'error' => true
+                ]) . "\n\n";
+
+                flush();
+            }
+        }
+    }
+
+    // =========================================================================
+    // TAHAP 4: PROSES MAPPING GURU, KELAS, MAPEL (Porsi Sisa 10%) -> Total 100%
+    // =========================================================================
+    $mappingIndex = 0;
+
+    if ($totalMapel > 0) {
+        foreach ($dataMapel as $mapelData) {
+            try {
+                $mappingIndex++;
+
+                if (!empty($mapelData['list_guru'])) {
+                    $mapel = MMapel::where('nama_mapel', $mapelData['nama_mapel'])->first();
+
+                    foreach ($mapelData['list_guru'] as $mapping) {
+
+                        $kelas = MKelas::where('nama_kelas', $mapping['nama_kelas'])->first();
+
+                        if ($kelas) {
+                            // 1. Buat relasi Guru dan Kelas (GUNAKAN guru_id SEBAGAI KUNCI)
+                            $listGuru = TListGuru::updateOrCreate(
+                                [
+                                    'guru_id'         => $mapping['guru_id'], // MASUKKAN GURU ID
+                                    'kelas_id'        => $kelas->id,
+                                    'tahun_ajaran_id' => $mapping['tahun_ajaran_id'],
+                                ],
+                                [
+                                    'nip'             => $mapping['nip'] // Opsional jika field nip tetap diisi
+                                ]
+                            );
+
+                            // 2. Buat relasi Mapel ke List Guru (MASUKKAN GURU ID KE SINI JUGA)
+                            TListGuruMapel::updateOrCreate(
+                                [
+                                    't_list_guru_id' => $listGuru->id,
+                                    'mapel_id'       => $mapel->id
+                                ],
+                                [
+                                    'guru_id'        => $mapping['guru_id'], // MASUKKAN GURU ID
+                                    'nip'            => $mapping['nip'],
+                                    'beban_jam'      => $mapping['beban_jam'],
+                                ]
+                            );
+                        }
+                    }
+                }
+
+                $progress = 90 + round(($mappingIndex / $totalMapel) * 10);
+                echo "data: " . json_encode([
+                    'progress' => $progress,
+                    'message' => "Menyimpan Relasi Mapel: " . $mapelData['nama_mapel']
+                ]) . "\n\n";
+
+                flush();
+
+            } catch (\Throwable $e) {
+                echo "data: " . json_encode([
+                    'progress' => 90 + round(($mappingIndex / $totalMapel) * 10),
+                    'message' => "ERROR Mapping " . $mapelData['nama_mapel'] . ": " . $e->getMessage(),
+                    'error' => true
+                ]) . "\n\n";
+                flush();
+            }
+        }
+    }
+
+    // --- SELESAI ---
+    echo "data: " . json_encode([
+        'progress' => 100,
+        'message' => 'Selesai!',
+        'done' => true
+    ]) . "\n\n";
+
+    flush();
+
+}, 200, [
+    'Cache-Control' => 'no-cache',
+    'Content-Type' => 'text/event-stream',
+    'X-Accel-Buffering' => 'no',
+]);
     }
 }

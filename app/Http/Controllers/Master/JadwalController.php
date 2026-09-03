@@ -157,10 +157,5 @@ class JadwalController extends Controller
     ]);
     }
 
-    public function pdf(Request $request){
-        return response()->view('pdf.jadwal.jadwal', [
-            'tahun_ajaran_id' => $request->input('tahun_ajaran_id'),
-            'kelas' => $request->input('kelas'),
-        ])->header('Content-Type', 'application/pdf');
-    }
+
 }

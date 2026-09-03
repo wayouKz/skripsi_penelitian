@@ -120,6 +120,18 @@ export default function TahunAjaran() {
                 throw new Error("Browser Anda tidak mendukung ReadableStream.");
             }
 
+            const status = response.status;
+            if (status !== 200) {
+                setOpenModalResponse(false);
+                setImporting(false);
+                showAlert(
+                    response.message ||
+                        "Terjadi kesalahan saat memproses file.",
+                    "error",
+                );
+                event.target.value = null;
+                return;
+            }
             const reader = response.body.getReader();
             const decoder = new TextDecoder("utf-8");
 

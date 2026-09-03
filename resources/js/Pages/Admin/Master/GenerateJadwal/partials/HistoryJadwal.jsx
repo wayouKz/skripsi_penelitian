@@ -5,7 +5,23 @@ export default function HistoryJadwal({
     selectedTahunAjaran,
     historyJadwal,
     selectedNamaTahunAjaran,
+    listMapelGuru,
 }) {
+    const mapelList = listMapelGuru.filter(
+        (mapel) => mapel.guru && mapel.guru.length > 0,
+    );
+
+    const dataMapel = [
+        // 1. Tambahkan opsi default "Semua Mapel" di indeks paling atas
+        { value: "all", label: "Semua Mapel" },
+
+        // 2. Map data listMapelGuru dan gabungkan (spread) ke dalam array ini
+        ...listMapelGuru.map((mapel) => ({
+            value: mapel.id,
+            label: mapel.mapel,
+        })),
+    ];
+
     return (
         <div className="space-y-4 animate-in fade-in duration-500">
             <div className="border-b border-gray-100 pb-3">
@@ -36,6 +52,8 @@ export default function HistoryJadwal({
                     historyJadwal={historyJadwal}
                     selectedTahunAjaran={selectedTahunAjaran}
                     selectedNamaTahunAjaran={selectedNamaTahunAjaran}
+                    dataMapel={dataMapel}
+                    listMapelGuru={listMapelGuru}
                 />
             )}
         </div>

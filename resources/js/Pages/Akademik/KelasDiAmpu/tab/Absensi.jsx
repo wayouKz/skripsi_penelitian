@@ -147,7 +147,7 @@ export default function Absensi({ dataKelas }) {
         setSiswa(
             siswa.map((s) =>
                 // Membandingkan berdasarkan id (jika ada) ATAU nisn
-                (s.id || s.nisn) === identifier
+                (s.siswa_id || s.nisn) === identifier
                     ? { ...s, status_kehadiran: statusBaru }
                     : s,
             ),
@@ -195,7 +195,7 @@ export default function Absensi({ dataKelas }) {
             tanggal: tanggal,
             kode_jadwal: selectedMapel,
             data_absensi: siswa.map((s) => ({
-                id_siswa: s.id,
+                siswa_id: s.siswa_id,
                 nisn: s.nisn,
                 status_kehadiran: s.status_kehadiran,
                 pertemuan: pertemuan,
@@ -572,7 +572,7 @@ export default function Absensi({ dataKelas }) {
                                                                             }
                                                                             onChange={() =>
                                                                                 handleStatusChange(
-                                                                                    item.id ||
+                                                                                    item.siswa_id ||
                                                                                         item.nisn,
                                                                                     opt.value,
                                                                                 )

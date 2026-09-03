@@ -23,7 +23,7 @@ class DevController extends Controller
                 JOIN t_list_gurus lg ON gm.t_list_guru_id = lg.id
                 JOIN m_kelas k1 ON j1.kelas_id = k1.id
                 JOIN m_kelas k2 ON j2.kelas_id = k2.id
-                JOIN m_gurus g ON g.nip = lg.nip
+                JOIN m_gurus g ON g.id = lg.guru_id
                 WHERE j1.tahun_ajaran_id = ?;";
 
         $data = DB::select($sql, [$tahunAjaranId]);

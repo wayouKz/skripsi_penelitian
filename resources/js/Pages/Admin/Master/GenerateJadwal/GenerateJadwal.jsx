@@ -80,7 +80,7 @@ export default function GenerateJadwal() {
             const guruList = dataGuru.data.data;
 
             guruList.forEach((data) => {
-                if (data.guru.length == 0) {
+                if (data.guru.length < 0) {
                     showCenterAlert(
                         "Tidak ada data guru pada tahun ajaran ini! Silahkan Kelola guru mata pelajaran terlebih dahulu.",
                         "warning",
@@ -89,7 +89,11 @@ export default function GenerateJadwal() {
                 }
             });
         } catch (error) {
-            console.error("Gagal mengambil data inisial:", error);
+            showCenterAlert(
+                "Gagal mengambil data inisial. Silakan coba lagi.",
+                "error",
+                2000,
+            );
         }
     };
 
@@ -240,6 +244,7 @@ export default function GenerateJadwal() {
                                 selectedNamaTahunAjaran={
                                     selectedNamaTahunAjaran
                                 }
+                                listMapelGuru={listMapelGuru}
                             />
                         )}
                     </div>

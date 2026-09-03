@@ -158,7 +158,12 @@ export default function MappingGuruMapel({
             }));
             setMapelList(data);
         } catch (error) {
-            console.error("Gagal mengambil data mapel:", error);
+            // console.error("Gagal mengambil data mapel:", error);
+            showCenterAlert(
+                "Gagal mengambil data mapel. Silakan coba lagi.",
+                "error",
+                2000,
+            );
         }
     };
 
@@ -177,7 +182,11 @@ export default function MappingGuruMapel({
                 setGuruList(data);
             }
         } catch (error) {
-            console.error("Gagal mengambil data guru:", error);
+            showCenterAlert(
+                "Gagal mengambil data guru. Silakan coba lagi.",
+                "error",
+                2000,
+            );
         }
     };
 
@@ -262,6 +271,7 @@ export default function MappingGuruMapel({
         try {
             const res = await axios.get(route("getData.get-total-jam"), {
                 params: {
+                    tingkat: [10, 11, 12],
                     tahun_ajaran_id: selectedTahunAjaran,
                 },
             });

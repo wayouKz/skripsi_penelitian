@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Helper;
 
 use App\Http\Controllers\Controller;
+use App\Models\Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class Pdf extends Controller
         ->join('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
         ->join('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
         ->join('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-        ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+        ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
         ->where('t_jadwals.tahun_ajaran_id', $tahun_ajaran_id)
         ->when($kelas && $kelas !== 'all', function ($query) use ($kelas) {
             return $query->where('t_jadwals.kelas_id', $kelas);
@@ -58,7 +59,7 @@ class Pdf extends Controller
         't_list_guru_mapels.beban_jam as beban_jam',
 
         )
-        ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+        ->leftJoin('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
         ->leftJoin('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
         // ->leftJoin('t_jadwals', 't_list_guru_mapels.id', '=', 't_jadwals.t_list_guru_mapel_id')
         ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
@@ -119,13 +120,15 @@ class Pdf extends Controller
         'm_gurus.nama_guru', // Mengambil nama guru pengampu
         'm_kelas.nama_kelas',
         'm_tahun_ajarans.tahun_ajaran',
-        'm_tahun_ajarans.semester'
+        'm_tahun_ajarans.semester',
+        'm_gurus.nip'
     )
     ->get()
     ->groupBy('nama_mapel')
     ->map(function ($siswasPerMapel) {
         // Ambil nama guru dari baris pertama mapel tersebut
         $namaGuru = $siswasPerMapel->first()->nama_guru ?? '-';
+        $nip = $siswasPerMapel->first()->nip ?? '-';
         $kelas = $siswasPerMapel->first()->nama_kelas ?? '-';
         $tahunAjaran = $siswasPerMapel->first()->tahun_ajaran ?? '-';
         $semester = $siswasPerMapel->first()->semester ?? '-';
@@ -155,9 +158,11 @@ class Pdf extends Controller
         return [
             'nama_guru' => $namaGuru,
             'kelas' => $kelas,
+            'nip' => $nip,
             'tahun_ajaran' => $tahunAjaran,
             'semester' => $semester,
-            'siswa' => $mappedSiswa
+            'siswa' => $mappedSiswa,
+            'kepala_sekolah' => $this->infoInstansi()->kepalaSekolah ? $this->infoInstansi()->kepalaSekolah->nama_guru : '-',
         ];
     });
 
@@ -191,7 +196,7 @@ class Pdf extends Controller
     }
 
     private function infoInstansi(){
-        $raw = DB::table('configs')->first();
+        $raw = Config::with('kepalaSekolah')->first();
         return $raw;
     }
 }

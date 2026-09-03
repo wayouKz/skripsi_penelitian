@@ -118,21 +118,21 @@ $data = $this->builder($tableName)
     ->leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
     ->leftJoin('t_list_gurus', function ($join) use ($tahunAjaranId) {
         // PERBAIKAN 1: Join berdasarkan NIP DAN KELAS ID agar tidak cross-join (ganda)
-        $join->on('t_list_guru_mapels.nip', '=', 't_list_gurus.nip');
+        $join->on('t_list_guru_mapels.guru_id', '=', 't_list_gurus.guru_id');
 
         if (!empty($tahunAjaranId) && $tahunAjaranId != null) {
-            $join->where('t_list_gurus.tahun_ajaran_id', '=', $tahunAjaranId);
+            $join->where('t_list_gurus.tahun_ajaran_id', $tahunAjaranId);
         } else {
             $join->whereRaw('1 = 0');
         }
     })
     ->leftJoin('m_gurus as guru', function ($join) {
-        $join->on('t_list_gurus.nip', '=', 'guru.nip');
+        $join->on('t_list_gurus.guru_id', '=', 'guru.id');
         $join->where('guru.status', 'active');
     })
     ->leftJoin('m_kelas','m_kelas.id' , '=', 't_list_gurus.kelas_id')
     ->select(
-        'm_mapels.id',
+        'm_mapels.id as id',
         'm_mapels.nama_mapel',
         'm_mapels.kode_mapel',
         'guru.id as guru_id',
@@ -158,7 +158,7 @@ $data = $this->builder($tableName)
                                 })
                                 // PERBAIKAN 2: Pastikan tidak ada duplikasi NIP di kelas yang sama
                                 ->unique(function ($item) {
-                                    return $item->nip . '-' . $item->kelas_id;
+                                    return $item->guru_id . '-' . $item->kelas_id;
                                 })
                                 // 🌟 PERBAIKAN 3: Order by Nama Guru kemudian Nama Kelas
                               ->sortBy(function ($item) {
@@ -168,6 +168,7 @@ $data = $this->builder($tableName)
                                     return [
                                         'id'         => $item->unique_id,
                                         'nama'       => $item->nama_guru,
+                                        'guru_id'    => $item->guru_id,
                                         'nip'        => $item->nip,
                                         'beban_jam'  => $item->beban_jam ?? 0,
                                         'kelas_id'   => $item->kelas_id ?? '',
@@ -196,7 +197,7 @@ $data = $this->builder($tableName)
         'm_mapels.kode_mapel'
     )
     ->where('m_gurus.status', 'active')
-    ->leftJoin('t_list_guru_mapels', 'm_gurus.nip', '=', 't_list_guru_mapels.nip')
+    ->leftJoin('t_list_guru_mapels', 'm_gurus.id', '=', 't_list_guru_mapels.guru_id')
     ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
 
     ->get()
@@ -415,7 +416,8 @@ public function getKelasTujuan(Request $request)
 }
 public function getSiswaInKelas(Request $request){
         $query = MSiswa::select(
-            'm_siswas.nisn as value',
+            'm_siswas.nisn',
+            'm_siswas.id as value',
             'm_siswas.nama_siswa as label',
             'm_siswas.jenis_kelamin',
             't_list_siswas.kelas_id',
@@ -638,7 +640,7 @@ public function getSiswaInKelas(Request $request){
     ->leftJoin('t_absen_gurus', 't_jadwals.kode_jadwal', '=', 't_absen_gurus.kode_jadwal')
     ->leftJoin('m_tahun_ajarans', 't_jadwals.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
     ->where('m_tahun_ajarans.status', '=', 'active')
-    ->leftJoin('m_gurus', 't_list_guru_mapels.nip', '=', 'm_gurus.nip')
+    ->leftJoin('m_gurus', 't_list_guru_mapels.guru_id', '=', 'm_gurus.id')
     ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
 
     ->orderBy('t_jadwals.jam_mulai', 'asc')
@@ -666,7 +668,9 @@ public function getSiswaInKelas(Request $request){
 
     public function getJadwalPerGuru(Request $request){
     $tahunAjaran = $request->tahun_ajaran_id;
-        $data = TJadwal::getJadwalByTahunAjaran($tahunAjaran);
+    $guruId = $request->guru_id;
+        $data = TJadwal::getJadwalByGuru($guruId, $tahunAjaran);
+
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data jadwal"];
@@ -705,9 +709,9 @@ public function getSiswaInKelas(Request $request){
     )
     ->join('t_list_gurus', 'm_kelas.id', '=', 't_list_gurus.kelas_id')
     ->join('t_list_guru_mapels', 't_list_gurus.id', '=', 't_list_guru_mapels.t_list_guru_id')
-    ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+    ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
     ->join('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-    ->where('t_list_gurus.tahun_ajaran_id',3)
+    ->where('t_list_gurus.tahun_ajaran_id',1)
     ->groupBy(
         'm_kelas.id',
         'm_kelas.nama_kelas',
@@ -725,8 +729,8 @@ public function getSiswaInKelas(Request $request){
     ->join('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
     ->join('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
     ->join('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-    ->join('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
-    ->where('t_jadwals.tahun_ajaran_id', 3)->get();
+    ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
+    ->where('t_jadwals.tahun_ajaran_id', 1)->get();
         return view('cek-data-mapel', compact('dataJam', 'dataJamGuru', 'jadwal'));
     }
 

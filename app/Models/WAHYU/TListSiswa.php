@@ -16,6 +16,7 @@ class TListSiswa extends Model
         ->select(
             't_list_siswas.nisn',
             'm_siswas.nama_siswa',
+            'm_siswas.id as siswa_id',
             'm_siswas.jenis_kelamin',
             'm_siswas.tempat_lahir',
             'm_siswas.tanggal_lahir',

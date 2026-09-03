@@ -31,6 +31,7 @@ class KelolaInformasiInstansiController extends Controller
         'telepon_instansi' => $request->telepon_instansi,
         'email_instansi'   => $request->email_instansi,
         'website_instansi' => $request->website_instansi,
+        'kepala_sekolah_id' => $request->kepala_sekolah['value'] ?? null, // Ambil value dari object Select
     ];
 
     // 4. Proses Logo secara Dinamis

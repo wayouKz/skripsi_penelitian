@@ -56,11 +56,69 @@ export default function Siswa() {
                 </div>
             ),
         },
-        { header: "Nisn", accessor: "nisn" },
-        { header: "Nama Siswa", accessor: "nama_siswa" },
-        { header: "Jenis Kelamin", accessor: "jenis_kelamin" },
-        { header: "Tempat Lahir", accessor: "tempat_lahir" },
-        { header: "Tanggal Lahir", accessor: "tanggal_lahir" },
+        {
+            header: "Nisn",
+            render: (row) => (
+                <p
+                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "text-gray-700" : "text-gray-200"} font-mono rounded-full text-xs `}
+                >
+                    {row.nisn || "Kosong"}
+                </p>
+            ),
+        },
+        {
+            header: "Nama Siswa",
+            accessor: "nama_siswa",
+        },
+        {
+            header: "Jenis Kelamin",
+            render: (row) =>
+                row.jenis_kelamin && row.jenis_kelamin === "Laki-laki" ? (
+                    <span className="inline-flex items-center p-1 justify-center bg-gradient-to-br from-green-400 to-green-600 rounded-full text-xs font-semibold text-white shadow-sm">
+                        {row.jenis_kelamin}
+                    </span>
+                ) : (
+                    <span
+                        className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.jenis_kelamin === "Perempuan" ? "from-pink-400 to-pink-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
+                    >
+                        {row.jenis_kelamin}
+                    </span>
+                ),
+        },
+        {
+            header: "Tempat Lahir",
+            render: (row) =>
+                row.tempat_lahir ? (
+                    <span className="inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
+                        {row.tempat_lahir}
+                    </span>
+                ) : (
+                    <span className="inline-flex items-center justify-center p-1 bg-gradient-to-br  rounded-full text-xs font-semibold text-gray-200 shadow-sm ">
+                        --Kosong--
+                    </span>
+                ),
+        },
+        {
+            header: "Tanggal Lahir",
+            render: (row) => (
+                <span className="">
+                    {row.tanggal_lahir ? (
+                        new Date(row.tanggal_lahir).toLocaleDateString(
+                            "id-ID",
+                            {
+                                day: "2-digit",
+                                month: "long",
+                                year: "numeric",
+                            },
+                        )
+                    ) : (
+                        <span className="inline-flex items-center justify-center p-1 bg-gradient-to-br  rounded-full text-xs font-semibold text-gray-200 shadow-sm text-truncate">
+                            --Kosong--
+                        </span>
+                    )}
+                </span>
+            ),
+        },
         {
             header: "#",
             accessor: "id",
@@ -94,11 +152,27 @@ export default function Siswa() {
                 </span>
             ),
         },
-        { header: "Nisn", accessor: "value" },
+        {
+            header: "Nisn",
+            render: (row) => (
+                <p
+                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-green-400 to-green-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
+                >
+                    {row.nisn || "Kosong"}
+                </p>
+            ),
+        },
         { header: "Nama Siswa", accessor: "label" },
         { header: "Kelas", accessor: "nama_kelas" },
         { header: "Tahun Ajaran", accessor: "tahun_ajaran" },
-        { header: "Semester", accessor: "semester" },
+        {
+            header: "Semester",
+            render: (row) => (
+                <span className="text-xs text-gray-700 uppercase tracking-wider">
+                    {row.semester || "Belum Ada"}
+                </span>
+            ),
+        },
     ];
 
     const menus = [
@@ -216,7 +290,13 @@ export default function Siswa() {
         },
         {
             header: "Nisn",
-            accessor: "nisn",
+            render: (row) => (
+                <p
+                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-green-400 to-green-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
+                >
+                    {row.nisn || "Belum Ada"}
+                </p>
+            ),
         },
         {
             header: "Nama",
@@ -230,7 +310,7 @@ export default function Siswa() {
 
     // Format Opsi untuk React Select pada Filter Alumni
     const alumniOptions = [
-        { value: "all", label: "Semua Tahun Ajaran" },
+        { value: "all", label: "[Semua Tahun Ajaran]" },
         ...(dataTahunAjaran || []).map((ta) => ({
             value: ta.id || ta.value,
             label: ta.tahun_ajaran || ta.label,
@@ -259,6 +339,7 @@ export default function Siswa() {
                             setShow={setShow}
                             isEdit={isEdit}
                             selectedSiswa={selectedSiswa}
+                            getSiswa={getSiswa}
                             handleTambah={handleTambah}
                         />
                     )}

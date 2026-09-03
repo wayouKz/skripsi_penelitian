@@ -50,11 +50,11 @@ export default function Sidebar({ collapsed, menuItems }) {
                             className="w-8 h-8 object-contain"
                         />
                     ) : (
-                        <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">
-                                {appName?.charAt(0)?.toUpperCase() || "A"}
-                            </span>
-                        </div>
+                        <img
+                            src={`/img/logo-default.png`}
+                            alt="Logo"
+                            className="w-12 h-12 object-contain"
+                        />
                     )}
                 </div>
             </div>
@@ -77,7 +77,7 @@ export default function Sidebar({ collapsed, menuItems }) {
                                         } py-1.5 px-2.5 rounded-xl transition ${
                                             parentActive
                                                 ? "bg-green-600 text-white shadow-sm"
-                                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                                : "text-gray-500 hover:bg-green-500 hover:text-white"
                                         }`}
                                     >
                                         {/* ICON */}
@@ -124,7 +124,7 @@ export default function Sidebar({ collapsed, menuItems }) {
                         className={`flex items-center py-2 rounded-xl transition ${
                             route().current("profile.edit")
                                 ? "bg-green-600 text-white shadow-sm"
-                                : "text-gray-600 hover:bg-gray-50"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-green-600"
                         } ${collapsed ? "justify-center" : "px-3 space-x-2.5"}`}
                     >
                         {/* ICON */}

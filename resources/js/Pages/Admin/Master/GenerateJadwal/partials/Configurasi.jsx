@@ -52,8 +52,8 @@ export default function Configurasi({
         return initialState;
     });
 
-    const togglePrioritasKelas = (mapel_id, nip, kelas_id) => {
-        const key = `${mapel_id}_${nip}_${kelas_id}`;
+    const togglePrioritasKelas = (mapel_id, nip, guru_id, kelas_id) => {
+        const key = `${mapel_id}_${nip}_${guru_id}_${kelas_id}`;
 
         if (selectedPrioritas.includes(key)) {
             setSelectedPrioritas(
@@ -149,12 +149,13 @@ export default function Configurasi({
             return;
         }
         const formatPrioritas = selectedPrioritas.map((item) => {
-            const [mapel, nip, kelas_id] = item.split("_");
+            const [mapel, nip, guru_id, kelas_id] = item.split("_");
 
             return {
                 nip: nip,
                 kelas_id: Number(kelas_id),
                 mapel_id: Number(mapel),
+                guru_id: Number(guru_id),
             };
         });
         const payloadData = {
@@ -528,7 +529,7 @@ export default function Configurasi({
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto bg-gray-50/50 p-2 space-y-3 rounded-xl border border-gray-100 custom-scrollbar max-h-[320px]">
+                    <div className="flex-1 overflow-y-auto bg-gray-50/50 p-2 space-y-3 rounded-xl border border-gray-100 custom-scrollbar max-h-[500px]">
                         {displayData.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-center p-4">
                                 <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mb-2">
@@ -582,7 +583,12 @@ export default function Configurasi({
                                                             const mapelIdentifier =
                                                                 mapelObj.mapel_id ||
                                                                 mapelObj.mapel;
-                                                            const keyPrioritas = `${mapelIdentifier}_${guru.nip}_${kelas.kelas_id}`;
+                                                            const keyPrioritas = `${mapelIdentifier}_${guru.nip}_${guru.guru_id}_${kelas.kelas_id}`;
+                                                            console.log(
+                                                                mapelIdentifier +
+                                                                    "mapelIdentifier",
+                                                                keyPrioritas,
+                                                            );
 
                                                             const isChecked =
                                                                 selectedPrioritas?.includes(
@@ -612,6 +618,7 @@ export default function Configurasi({
                                                                                 mapelObj.mapel_id ||
                                                                                     mapelObj.mapel,
                                                                                 guru.nip,
+                                                                                guru.guru_id,
                                                                                 kelas.kelas_id,
                                                                             )
                                                                         }

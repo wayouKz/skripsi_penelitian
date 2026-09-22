@@ -143,7 +143,7 @@ export default function Panel({ url, user }) {
                     );
                     data.forEach((item, idx) => {
                         addLog(
-                            `   [#${idx + 1}] ${item.nama_guru} (${item.hari}): ${item.kelas_1} (${item.jam_mulai_1}-${item.jam_selesai_1}) berbenturan dengan ${item.kelas_2} (${item.jam_mulai_2}-${item.jam_selesai_2})`,
+                            `[#${idx + 1}] Kelas ${item.nama_kelas} (${item.hari}): Mapel ${item.mapel_pertama} (${item.guru_pertama}) jam ${item.mulai_1.substring(0, 5)}-${item.selesai_1.substring(0, 5)} bentrok dengan ${item.mapel_kedua} (${item.guru_kedua})`,
                             "error",
                         );
                     });

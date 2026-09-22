@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
+use App\Models\SlotWaktu;
 use App\Services\GeneticAlgorithmService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,21 +18,33 @@ class JadwalController extends Controller
 
     public function generate(Request $request)
 {
-    set_time_limit(300);
-    ini_set('memory_limit', '512M');
+   ini_set('max_execution_time', 0);
+    set_time_limit(0);
+
+    ini_set('memory_limit', '1024M');
     $params = $request->all();
+
+    $slotWaktu = $request->input('slot_waktu', []);
+    // $simpanSlot = SlotWaktu::createOrUpdate([],[
+    //     'slot_waktu' => $jsonSlot
+    // ]);
     $prioritasPagi = $request->input('prioritas_pagi', []); // Diharapkan array of object
 
     $guruMapels = DB::table('t_list_guru_mapels')
         ->join('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+        ->join('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+        ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
         ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id'])
         ->select(
+            't_list_gurus.guru_id',
             't_list_guru_mapels.id',
             't_list_guru_mapels.nip',
             't_list_guru_mapels.mapel_id',
             't_list_guru_mapels.beban_jam',
             't_list_gurus.id as t_list_guru_id',
-            't_list_gurus.kelas_id'
+            't_list_gurus.kelas_id',
+            'm_mapels.nama_mapel',
+            'm_gurus.nama_guru'
         )
         ->get();
 
@@ -47,21 +60,28 @@ class JadwalController extends Controller
     });
     $kelas = DB::table('m_kelas')->get();
 
-    return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
+   return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
 
-        // 1. Matikan kompresi Zlib (karena kompresi akan menahan data sampai proses selesai)
-        ini_set('zlib.output_compression', 'Off');
-        if (function_exists('apache_setenv')) {
-            apache_setenv('no-gzip', '1');
-        }
+    // 1. Matikan kompresi Zlib
+    ini_set('zlib.output_compression', 'Off');
+    if (function_exists('apache_setenv')) {
+        apache_setenv('no-gzip', '1');
+    }
 
-        // 2. Hancurkan SEMUA lapisan output buffer PHP bawaan secara paksa
-        while (ob_get_level() > 0) {
-            ob_end_flush();
-        }
+    // 2. Hancurkan SEMUA lapisan output buffer PHP bawaan secara paksa
+    while (ob_get_level() > 0) {
+        ob_end_flush();
+    }
 
-        echo str_repeat(" ", 4096) . "\n\n";
-        flush();
+    echo str_repeat(" ", 4096) . "\n\n";
+    flush();
+
+    // 3. WRAP KESELURUHAN PROSES DENGAN TRY-CATCH
+    try {
+        // Catat ke log file Laravel (storage/logs/laravel.log) untuk histori backend
+        \Illuminate\Support\Facades\Log::info('Mulai proses Generate Jadwal (GA).', [
+            'tahun_ajaran_id' => $params['tahun_ajaran_id'] ?? null
+        ]);
 
         echo "data: " . json_encode([
             'type' => 'progress',
@@ -71,43 +91,54 @@ class JadwalController extends Controller
         ]) . "\n\n";
         flush();
 
+        $waktuMulai = microtime(true); // Pelacak durasi eksekusi
         $gaEngine = new GeneticAlgorithmService($params, $guruMapels, $kelas, $prioritasPagi);
+
         $gaEngine->onGenerationComplete = function($generasi, $fitness) {
-                echo "data: " . json_encode([
-                    'type' => 'progress',
-                    'generation' => $generasi,
-                    'fitness' => $fitness
-                ]) . "\n\n";
-                flush();
+            echo "data: " . json_encode([
+                'type' => 'progress',
+                'generation' => $generasi,
+                'fitness' => $fitness
+            ]) . "\n\n";
+            flush();
+
+            // Opsional: Log per 50 generasi agar log tidak terlalu penuh
+            if ($generasi % 50 === 0) {
+                \Illuminate\Support\Facades\Log::debug("GA Progress - Gen: $generasi, Fitness: $fitness");
+            }
         };
 
+        // Mulai Generate Algoritma
         $hasil = $gaEngine->generate();
+        $durasi = round(microtime(true) - $waktuMulai, 2);
 
-       if (!empty($hasil['jadwal'])) {
-        try {
-            // 1. WAJIB ADA: Mulai transaksi database
+        \Illuminate\Support\Facades\Log::info("GA Selesai dalam $durasi detik.", ['status' => $hasil['status'] ?? 'unknown']);
+        \Illuminate\Support\Facades\Log::info("Jadwal: " . json_encode($hasil['jadwal']) . "totalData" . count($hasil['jadwal']));
+
+        // 4. CEK APAKAH JADWAL BENAR-BENAR TERBENTUK
+        if (!empty($hasil['jadwal'])) {
+            echo "data: " . json_encode([
+                'type' => 'progress',
+                'message' => 'Proses algoritma selesai, menyimpan jadwal ke database...'
+            ]) . "\n\n";
+            flush();
+
             DB::beginTransaction();
-
-            // 2. Hapus jadwal lama berdasarkan tahun ajaran
             DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
 
             $insert = [];
-
-            // Buat satu kode batch yang sama untuk sesi generate ini (bukan random 100 karakter per baris)
-
             $now = now();
             $kodeJadwalPerBlock = [];
 
             foreach ($hasil['jadwal'] as $jadwal) {
                 $blockKey = $jadwal['t_list_guru_mapel_id'] . '-' . $jadwal['kelas_id'] . '-' . $jadwal['mapel_id'];
 
-                // Jika kode jadwal untuk kelas/blok ini belum dibuat, buat baru
                 if (!isset($kodeJadwalPerBlock[$blockKey])) {
                     $kodeJadwalPerBlock[$blockKey] = 'JDWL-' . strtoupper(Str::random(10));
                 }
 
                 $insert[] = [
-                    'kode_jadwal'          => $kodeJadwalPerBlock[$blockKey], // Sama untuk blok/kelas yang sama
+                    'kode_jadwal'          => $kodeJadwalPerBlock[$blockKey],
                     'tahun_ajaran_id'      => $params['tahun_ajaran_id'],
                     'hari'                 => $jadwal['hari'],
                     'jam_mulai'            => $jadwal['jam_mulai'],
@@ -118,43 +149,58 @@ class JadwalController extends Controller
                     'created_at'           => $now,
                     'updated_at'           => $now,
                 ];
-
-                echo "data: " . json_encode([
-                    'type' => 'progress',
-                    'message' => 'Menyimpan jadwal ke database...'
-                ]) . "\n\n";
-                flush();
             }
-            // 3. Gunakan array_chunk (pecah per 500 baris) agar tidak jebol di MySQL
+
             $chunks = array_chunk($insert, 500);
             foreach ($chunks as $chunk) {
                 DB::table('t_jadwals')->insert($chunk);
             }
 
-            // 4. Commit transaksi jika semua chunk berhasil
             DB::commit();
+            \Illuminate\Support\Facades\Log::info('Jadwal berhasil disimpan ke database.');
 
-            echo "data: " . json_encode(['type' => 'done', 'message' => 'Berhasil!']) . "\n\n";
+            echo "data: " . json_encode([
+                'type' => 'done',
+                'message' => "Berhasil! Waktu eksekusi: $durasi detik."
+            ]) . "\n\n";
             flush();
 
-        } catch (\Exception $e) {
-            // Rollback jika ada error
-            DB::rollBack();
-
-            $detailError = $e->getMessage() . ' di baris ' . $e->getLine();
-
-            echo "data: " . json_encode(['type' => 'error', 'message' => $detailError]) . "\n\n";
+        } else {
+            // 5. JIKA JADWAL KOSONG (Algoritma Gagal Mendapatkan Solusi)
+            \Illuminate\Support\Facades\Log::warning('Jadwal gagal dibuat (array jadwal kosong).');
+            echo "data: " . json_encode([
+                'type' => 'error',
+                'message' => 'Algoritma selesai tetapi gagal menghasilkan jadwal. Kemungkinan parameter jam berbenturan.'
+            ]) . "\n\n";
             flush();
         }
-}
 
-    // 6. Pastikan header anti-buffering ini tetap ada
-    }, 200, [
-        'Content-Type' => 'text/event-stream',
-        'Cache-Control' => 'no-cache, must-revalidate',
-        'Connection' => 'keep-alive',
-        'X-Accel-Buffering' => 'no',
-    ]);
+    } catch (\Exception $e) {
+        // 6. TANGKAP SEMUA ERROR (Algoritma maupun Database)
+        if (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+
+        // Tampilkan error detail ke frontend
+        $detailError = $e->getMessage() . ' di baris ' . $e->getLine() . ' pada ' . basename($e->getFile());
+
+        // Tulis error super detail ke laravel.log
+        \Illuminate\Support\Facades\Log::error('Critical Error Generate Jadwal: ' . $e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        echo "data: " . json_encode(['type' => 'error', 'message' => "Terjadi Kesalahan: $detailError"]) . "\n\n";
+        flush();
+    }
+
+}, 200, [
+    'Content-Type' => 'text/event-stream',
+    'Cache-Control' => 'no-cache, must-revalidate',
+    'Connection' => 'keep-alive',
+    'X-Accel-Buffering' => 'no',
+]);
     }
 
 

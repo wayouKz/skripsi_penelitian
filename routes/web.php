@@ -213,6 +213,9 @@ Route::middleware('auth')->group(function () {
        Route::get('/cek-bentrok-jadwal',  'cekBentrokJadwal')->name('cek-bentrok-jadwal');
        Route::get('/cek-target-jam-mengajar',  'cekTargetJamMengajar')->name('cek-target-jam-mengajar');
        Route::get('/cek-beban-jam-mengajar-per-kelas',  'cekBebanJamMengajarPerKelas')->name('cek-beban-jam-mengajar-per-kelas');
+       Route::get('/cek-jadwal-permapel/{id}','cekJadwalPerMapel');
+       Route::get('/ambil-jadwal','ambilJadwal');
+       Route::get('/cek-guru-mengajar','cekGuruMengajar');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

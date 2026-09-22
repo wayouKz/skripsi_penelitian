@@ -106,13 +106,7 @@ export default function GenerateJadwal() {
             fetchDataAwal();
         }
     }, [selectedTahunAjaran]);
-    // Data Mapping & Grouping (Berdasarkan NIP, lalu mengumpulkan Kelas)
 
-    // FUNGSI MANIPULASI JAM PELAJARAN
-
-    // 6. Fungsi Handle Start GA
-
-    // Fungsi Render Matriks Jadwal History
     useEffect(() => {
         if (selectedTahunAjaran && tahunAjaranList) {
             const found = tahunAjaranList.find(

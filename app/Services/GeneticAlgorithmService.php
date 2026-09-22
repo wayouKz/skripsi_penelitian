@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class GeneticAlgorithmService
 {
@@ -21,7 +20,7 @@ class GeneticAlgorithmService
     private $slotWaktuPerHari = [];
     private $maxJamPerHari = [];
 
-    private $prioritasPagiNip;
+    private $prioritasPagiGuruId;
     private $prioritasPagi;
 
     private $targetBebanJam = [];
@@ -31,8 +30,9 @@ class GeneticAlgorithmService
         $this->populasi = $params['populasi'] ?? 100;
         $this->maxGenerasi = $params['generasi'] ?? 500;
         $this->crossoverRate = $params['crossover_rate'] ?? 0.8;
-        $this->mutationRate = $params['mutation_rate'] ?? 0.1;
-        $this->prioritasPagiNip = $params['prioritas_pagi_nip'] ?? [];
+        $this->mutationRate = $params['mutation_rate'] ?? 0.25;
+
+        $this->prioritasPagiGuruId = $params['prioritas_pagi_guru_id'] ?? [];
         $this->prioritasPagi = $prioritasPagi;
 
         foreach ($this->hari as $h) {
@@ -85,19 +85,28 @@ class GeneticAlgorithmService
         return $this->slotWaktuPerHari[$hari][$jam] ?? ['mulai' => '07:00:00', 'selesai' => '07:35:00'];
     }
 
-    public function generate()
+   public function generate()
     {
         $populasiSaatIni = $this->inisialisasiPopulasi();
+
+        foreach ($populasiSaatIni as $index => $kromosom) {
+            $populasiSaatIni[$index] = $this->repairKromosom($kromosom);
+        }
+
         $generasi = 0;
-        $bestFitness = 0;
+        $bestFitness = -999999.0;
         $bestKromosom = [];
         $stagnantGenerations = 0;
-        $lastBestFitness = 0;
+        $lastBestFitness = -999999.0;
+
+        // --- ADAPTIVE MUTATION SETUP ---
+        $currentMutationRate = $this->mutationRate ?? 0.1; // Ambil nilai awal dari properti kelas (default 0.1 / 10%)
+        $baseMutationRate = $currentMutationRate;
 
         while ($generasi < $this->maxGenerasi) {
             $fitnessPopulasi = [];
             foreach ($populasiSaatIni as $kromosom) {
-                $fitness = $this->hitungFitness($kromosom);
+                $fitness = $this->hitungFitness($kromosom,true);
                 $fitnessPopulasi[] = ['kromosom' => $kromosom, 'fitness' => $fitness];
 
                 if ($fitness > $bestFitness) {
@@ -108,43 +117,94 @@ class GeneticAlgorithmService
 
             if ($bestFitness > $lastBestFitness) {
                 $lastBestFitness = $bestFitness;
-                $stagnantGenerations = 0;
+                $stagnantGenerations = 0; // Reset hitungan macet
             } else {
                 $stagnantGenerations++;
+            }
+
+            // --- LOGIKA ADAPTIVE MUTATION RATE ---
+            // Jika dalam 15 generasi berturut-turut fitness tidak meningkat (mandek)
+            if ($stagnantGenerations >= 15) {
+                // Naikkan tingkat mutasi secara agresif agar keluar dari titik jenuh (maksimal 40%)
+                $currentMutationRate = min(0.4, $baseMutationRate * 3);
+                Log::info("Algoritme macet di gen {$generasi}. Adaptive Mutation diaktifkan: rate naik menjadi {$currentMutationRate}");
+                $stagnantGenerations = 0; // Reset counter agar ada jeda sebelum naik lagi jika masih mandek
+            } else {
+                // Turunkan perlahan kembali mendekati nilai dasar jika sudah mulai stabil
+                $currentMutationRate = max($baseMutationRate, $currentMutationRate * 0.95);
             }
 
             if (is_callable($this->onGenerationComplete)) {
                 ($this->onGenerationComplete)($generasi, $bestFitness);
             }
 
-            if ($bestFitness >= 0.999 || $stagnantGenerations >= $this->maxGenerasi) break;
 
             $populasiBaru = [];
             if (!empty($bestKromosom)) {
-                $populasiBaru[] = $bestKromosom; // Elitism
+                // Elitism wajib di-repair juga agar steril
+                $populasiBaru[] = $this->repairKromosom($bestKromosom);
             }
 
             $sisaPopulasi = $this->populasi - count($populasiBaru);
             for ($i = 0; $i < $sisaPopulasi; $i++) {
                 $parent1 = $this->seleksi($fitnessPopulasi);
                 $parent2 = $this->seleksi($fitnessPopulasi);
+
                 $child = $this->crossover($parent1, $parent2);
+
+                // Gunakan $currentMutationRate yang dinamis di sini
+                // (Pastikan fungsi mutasi di kelas Anda menerima parameter rate, atau set sementara ke properti)
+                $this->mutationRate = $currentMutationRate;
                 $child = $this->mutasi($child);
+
+                // REPAIR WAJIB SETELAH CROSSOVER & MUTASI
+                $child = $this->repairKromosom($child);
+
                 $populasiBaru[] = $child;
             }
+            if ($bestFitness >= 0.999 || $stagnantGenerations >= $this->maxGenerasi) break;
 
             $populasiSaatIni = $populasiBaru;
             $generasi++;
         }
 
+
+        // [Bagian bawah untuk mapping $flatJadwal tetap seperti semula]
         $flatJadwal = [];
         if (!empty($bestKromosom)) {
             foreach ($bestKromosom as $kelasId => $gens) {
-                foreach ($gens as $gen) {
-                    $flatJadwal[] = $gen;
+                foreach ($gens as $chunkId => $gen) {
+                    $durasi = $gen['durasi'];
+                    for ($d = 0; $d < $durasi; $d++) {
+                        $jamKe = $gen['jam_mulai'] + $d;
+                        $waktu = $this->getSlotWaktu($gen['hari'], $jamKe);
+
+                        $flatJadwal[] = [
+                            'guru_id'              => $gen['guru_id'],
+                            't_list_guru_mapel_id' => $gen['t_list_guru_mapel_id'],
+                            'blok_id'              => $chunkId . '_' . $d,
+                            'mapel_id'             => $gen['mapel_id'],
+                            'kelas_id'             => $gen['kelas_id'],
+                            'hari'                 => $gen['hari'],
+                            'jam'                  => $jamKe,
+                            'jam_mulai'            => $waktu['mulai'],
+                            'jam_selesai'          => $waktu['selesai'],
+                            'is_penjaskes'         => $gen['is_penjaskes']
+                        ];
+                    }
                 }
             }
         }
+
+        usort($flatJadwal, function($a, $b) {
+            $hariOrder = ['Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4, 'Jumat' => 5];
+            $kelasCompare = strcmp($a['kelas_id'], $b['kelas_id']);
+            if ($kelasCompare !== 0) return $kelasCompare;
+            $hariA = $hariOrder[$a['hari']] ?? 99;
+            $hariB = $hariOrder[$b['hari']] ?? 99;
+            if ($hariA !== $hariB) return $hariA <=> $hariB;
+            return $a['jam'] <=> $b['jam'];
+        });
 
         return [
             'status' => 'success',
@@ -153,544 +213,768 @@ class GeneticAlgorithmService
             'jadwal' => $flatJadwal
         ];
     }
+    private function inisialisasiPopulasi()
+{
+    $populasi = [];
 
-//   private function inisialisasiPopulasi()
-//     {
-//         $populasi = [];
-//         $guruMapelsArray = $this->guruMapels instanceof \Illuminate\Support\Collection
-//             ? $this->guruMapels->all()
-//             : (array) $this->guruMapels;
+    $guruMapelsArray = $this->guruMapels instanceof \Illuminate\Support\Collection
+        ? $this->guruMapels->all()
+        : (array) $this->guruMapels;
 
-//         $guruMapelPerKelas = [];
-//         foreach ($guruMapelsArray as $gm) {
-//             $guruMapelPerKelas[$gm->kelas_id][] = $gm;
-//         }
+    // 1. HITUNG TOTAL BEBAN JAM MENGAJAR TIAP GURU & CEK KAPASITAS KELAS
+    $totalBebanGuru = [];
+    $guruMapelPerKelas = [];
 
-//         $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection
-//             ? $this->kelas->all()
-//             : (array) $this->kelas;
+    // Hitung total slot jam seminggu untuk validasi overkapasitas
+    $totalSlotSeminggu = 0;
+    foreach ($this->hari as $h) {
+        $totalSlotSeminggu += $this->getMaxJam($h);
+    }
 
-//         $totalPopulasi = $this->populasi;
+    foreach ($guruMapelsArray as $gm) {
+        $guruMapelPerKelas[$gm->kelas_id][] = $gm;
 
-//         for ($i = 0; $i < $totalPopulasi; $i++) {
-//             $kromosom = [];
-//             $matrixGuru = [];
-//             $trackerBebanGuruKelas = [];
-//             $trackerMapelHarian = [];
-
-//             foreach ($kelasArray as $kls) {
-//                 $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
-//                 if (!$kelasId) continue;
-
-//                 $mapelKelas = $guruMapelPerKelas[$kelasId] ?? [];
-//                 if (empty($mapelKelas)) continue;
-
-//                 $kromosom[$kelasId] = [];
-
-//                 $matrixKelasHari = [];
-//                 foreach ($this->hari as $h) {
-//                     $maxH = $this->getMaxJam($h);
-//                     for ($jm = 1; $jm <= $maxH; $jm++) {
-//                         $matrixKelasHari[$h][$jm] = false;
-//                     }
-//                 }
-
-//                 // ===============================================================
-//                 // PERBAIKAN PRIORITAS PAGI: Pisahkan Guru Prioritas & Guru Biasa
-//                 // ===============================================================
-//                 $gmPriority = [];
-//                 $gmRegular = [];
-
-//                 // foreach ($mapelKelas as $gm) {
-//                 //     // Cek apakah NIP guru ini ada di array prioritas_pagi_nip
-//                 //     if (!empty($this->prioritasPagiNip) && in_array($gm->nip, $this->prioritasPagiNip)) {
-//                 //         $gmPriority[] = $gm;
-//                 //     } else {
-//                 //         $gmRegular[] = $gm;
-//                 //     }
-//                 // }
-
-//                 foreach ($mapelKelas as $gm) {
-//                     // Cek langsung properti is_prioritas_pagi bernilai true dari objek gm
-//                     if (!empty($gm->is_prioritas_pagi)) {
-//                         $gmPriority[] = $gm;
-//                     } else {
-//                         $gmRegular[] = $gm;
-//                     }
-//                 }
-//                 // Acak masing-masing kelompok, lalu gabungkan.
-//                 // Guru prioritas ditaruh di awal array agar dieksekusi/dipilih duluan!
-//                 shuffle($gmPriority);
-//                 shuffle($gmRegular);
-//                 $gmShuffled = array_merge($gmPriority, $gmRegular);
-
-//                 // Mulai Memasukkan Jadwal
-//                 foreach ($gmShuffled as $gm) {
-//                     $bebanSeharusnya = (int) $gm->beban_jam;
-
-//                     while (($trackerBebanGuruKelas[$kelasId][$gm->id] ?? 0) < $bebanSeharusnya) {
-//                         $bebanSudahDipasang = $trackerBebanGuruKelas[$kelasId][$gm->id] ?? 0;
-//                         $sisaJam = $bebanSeharusnya - $bebanSudahDipasang;
-
-//                         $ukuranBlokDicoba = [($sisaJam >= 3 ? 3 : $sisaJam)];
-//                         if ($ukuranBlokDicoba[0] > 1) {
-//                             $ukuranBlokDicoba[] = 1;
-//                         }
-
-//                         $slotDipasang = false;
-
-//                         // FASE 1: PEMASANGAN AMAN
-//                         foreach ($ukuranBlokDicoba as $bebanBlok) {
-//                             $hariAcak = $this->hari;
-//                             shuffle($hariAcak);
-
-//                             foreach ($hariAcak as $hari) {
-//                                 $maxJamHariIni = $this->getMaxJam($hari);
-//                                 $bebanMapelHariIni = $trackerMapelHarian[$kelasId][$gm->id][$hari] ?? 0;
-
-//                                 if ($bebanMapelHariIni + $bebanBlok > 3) continue;
-
-//                                 for ($jm = 1; $jm <= ($maxJamHariIni - $bebanBlok + 1); $jm++) {
-//                                     $bisa = true;
-
-//                                     for ($b = 0; $b < $bebanBlok; $b++) {
-//                                         $jamCek = $jm + $b;
-//                                         if ($matrixKelasHari[$hari][$jamCek] === true || isset($matrixGuru[$gm->nip][$hari][$jamCek])) {
-//                                             $bisa = false;
-//                                             break;
-//                                         }
-//                                     }
-
-//                                     if ($bisa) {
-//                                         for ($b = 0; $b < $bebanBlok; $b++) {
-//                                             $jamCek = $jm + $b;
-//                                             $matrixKelasHari[$hari][$jamCek] = true;
-//                                             $matrixGuru[$gm->nip][$hari][$jamCek] = true;
-//                                             $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hari, $jamCek, $bebanSudahDipasang + $b, 1);
-//                                         }
-//                                         $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + $bebanBlok;
-//                                         $trackerMapelHarian[$kelasId][$gm->id][$hari] = $bebanMapelHariIni + $bebanBlok;
-//                                         $slotDipasang = true;
-//                                         break 3;
-//                                     }
-//                                 }
-//                             }
-//                         }
-
-//                         // FASE 2: PEMASANGAN PAKSA (Menjamin 57 Slot Penuh)
-//                         if (!$slotDipasang) {
-//                             foreach ($this->hari as $hariF) {
-//                                 $maxJamHariIniF = $this->getMaxJam($hariF);
-//                                 for ($jmF = 1; $jmF <= $maxJamHariIniF; $jmF++) {
-//                                     if ($matrixKelasHari[$hariF][$jmF] === false) {
-//                                         $matrixKelasHari[$hariF][$jmF] = true;
-//                                         $matrixGuru[$gm->nip][$hariF][$jmF] = true;
-
-//                                         $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hariF, $jmF, 999 + $bebanSudahDipasang, 1);
-
-//                                         $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + 1;
-//                                         $trackerMapelHarian[$kelasId][$gm->id][$hariF] = ($trackerMapelHarian[$kelasId][$gm->id][$hariF] ?? 0) + 1;
-//                                         $slotDipasang = true;
-//                                         break 2;
-//                                     }
-//                                 }
-//                             }
-//                         }
-
-//                         if (!$slotDipasang) break;
-//                     }
-//                 }
-//             }
-//             $populasi[] = $kromosom;
-//         }
-
-//         return $populasi;
-//     }
-private function inisialisasiPopulasi()
-    {
-        $populasi = [];
-        $guruMapelsArray = $this->guruMapels instanceof \Illuminate\Support\Collection
-            ? $this->guruMapels->all()
-            : (array) $this->guruMapels;
-
-        $guruMapelPerKelas = [];
-        foreach ($guruMapelsArray as $gm) {
-            $guruMapelPerKelas[$gm->kelas_id][] = $gm;
+        $gId = $gm->guru_id ?? $gm->nip ?? 'none';
+        if ($gId !== 'none') {
+            $totalBebanGuru[$gId] = ($totalBebanGuru[$gId] ?? 0) + (int) $gm->beban_jam;
         }
+    }
 
-        $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection
-            ? $this->kelas->all()
-            : (array) $this->kelas;
+    // CEK DAN LOG JIKA ADA KELAS YANG OVERKAPASITAS (Beban Jam > Slot Waktu Seminggu)
+    foreach ($guruMapelPerKelas as $kId => $mapels) {
+        $totalBebanKelas = 0;
+        foreach ($mapels as $m) {
+            $totalBebanKelas += (int) $m->beban_jam;
+        }
+        if ($totalBebanKelas > $totalSlotSeminggu) {
+            \Illuminate\Support\Facades\Log::critical("KAPASITAS KELAS {$kId} BERLEBIH: Total Beban = {$totalBebanKelas} jam, Slot Tersedia = {$totalSlotSeminggu} jam. Jadwal PASTI akan ditumpuk (Pass 4) dan jam terlihat hilang di tampilan!");
+        }
+    }
 
-        $totalPopulasi = $this->populasi;
+    $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection
+        ? $this->kelas->all()
+        : (array) $this->kelas;
 
-        for ($i = 0; $i < $totalPopulasi; $i++) {
-            $kromosom = [];
-            $matrixGuru = [];
-            $trackerBebanGuruKelas = [];
-            $trackerMapelHarian = [];
+    $totalPopulasi = $this->populasi;
 
-            foreach ($kelasArray as $kls) {
-                $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
-                if (!$kelasId) continue;
+    for ($i = 0; $i < $totalPopulasi; $i++) {
+        $kromosom = [];
+        $matrixGuru = [];      // Global per kromosom
+        $matrixKelasHari = []; // Melacak ketersediaan slot waktu setiap kelas
 
-                $mapelKelas = $guruMapelPerKelas[$kelasId] ?? [];
-                if (empty($mapelKelas)) continue;
+        foreach ($kelasArray as $kls) {
+            $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
+            if (!$kelasId) continue;
 
-                $kromosom[$kelasId] = [];
-
-                $matrixKelasHari = [];
-                foreach ($this->hari as $h) {
-                    $maxH = $this->getMaxJam($h);
-                    for ($jm = 1; $jm <= $maxH; $jm++) {
-                        $matrixKelasHari[$h][$jm] = false;
-                    }
-                }
-
-                $gmPriority = [];
-                $gmRegular = [];
-
-                foreach ($mapelKelas as $gm) {
-                    $namaMapelLower = strtolower($gm->nama_mapel ?? '');
-                    $isPenjaskes = str_contains($namaMapelLower, 'penjaskes') || str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
-
-                    if (!empty($gm->is_prioritas_pagi) || $isPenjaskes) {
-                        $gmPriority[] = $gm;
-                    } else {
-                        $gmRegular[] = $gm;
-                    }
-                }
-
-                shuffle($gmPriority);
-                shuffle($gmRegular);
-                $gmShuffled = array_merge($gmPriority, $gmRegular);
-
-                foreach ($gmShuffled as $gm) {
-                    $bebanSeharusnya = (int) $gm->beban_jam;
-                    $namaMapelLower = strtolower($gm->nama_mapel ?? '');
-                    $isPenjaskes = str_contains($namaMapelLower, 'penjaskes') || str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
-
-                    while (($trackerBebanGuruKelas[$kelasId][$gm->id] ?? 0) < $bebanSeharusnya) {
-                        $bebanSudahDipasang = $trackerBebanGuruKelas[$kelasId][$gm->id] ?? 0;
-                        $sisaJam = $bebanSeharusnya - $bebanSudahDipasang;
-
-                        $ukuranBlokDicoba = [];
-
-                        // PERUBAHAN 1: Paksa ukuran blok utuh untuk Penjaskes
-                        if ($isPenjaskes) {
-                            // Penjaskes WAJIB dihabiskan sisa jamnya secara berurutan sekaligus
-                            $ukuranBlokDicoba = [$sisaJam];
-                        } else {
-                            $ukuranBlokDicoba = [($sisaJam >= 3 ? 3 : $sisaJam)];
-                            if ($ukuranBlokDicoba[0] > 1) {
-                                $ukuranBlokDicoba[] = 1;
-                            }
-                        }
-
-                        $slotDipasang = false;
-
-                        // FASE 1: PEMASANGAN AMAN
-                        foreach ($ukuranBlokDicoba as $bebanBlok) {
-                            $hariAcak = $this->hari;
-                            shuffle($hariAcak);
-
-                            foreach ($hariAcak as $hari) {
-                                $maxJamHariIni = $this->getMaxJam($hari);
-                                $bebanMapelHariIni = $trackerMapelHarian[$kelasId][$gm->id][$hari] ?? 0;
-
-                                // PERUBAHAN 2: Abaikan batas max 3 jam/hari jika itu adalah mapel Penjaskes
-                                if (!$isPenjaskes && ($bebanMapelHariIni + $bebanBlok > 3)) continue;
-
-                                $batasMaxJamPagi = $isPenjaskes ? min($maxJamHariIni - $bebanBlok + 1, 6) : ($maxJamHariIni - $bebanBlok + 1);
-
-                                for ($jm = 1; $jm <= $batasMaxJamPagi; $jm++) {
-                                    $bisa = true;
-
-                                    for ($b = 0; $b < $bebanBlok; $b++) {
-                                        $jamCek = $jm + $b;
-                                        if ($matrixKelasHari[$hari][$jamCek] === true || isset($matrixGuru[$gm->nip][$hari][$jamCek])) {
-                                            $bisa = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ($bisa) {
-                                        for ($b = 0; $b < $bebanBlok; $b++) {
-                                            $jamCek = $jm + $b;
-                                            $matrixKelasHari[$hari][$jamCek] = true;
-                                            $matrixGuru[$gm->nip][$hari][$jamCek] = true;
-                                            $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hari, $jamCek, $bebanSudahDipasang + $b, 1);
-                                        }
-                                        $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + $bebanBlok;
-                                        $trackerMapelHarian[$kelasId][$gm->id][$hari] = $bebanMapelHariIni + $bebanBlok;
-                                        $slotDipasang = true;
-                                        break 3;
-                                    }
-                                }
-                            }
-                        }
-
-                        // FASE 1 ULANG: (Penjaskes diizinkan dipasang di atas jam 6 jika slot pagi penuh)
-                        if (!$slotDipasang && $isPenjaskes) {
-                            foreach ($ukuranBlokDicoba as $bebanBlok) {
-                                $hariAcak = $this->hari;
-                                shuffle($hariAcak);
-                                foreach ($hariAcak as $hari) {
-                                    $maxJamHariIni = $this->getMaxJam($hari);
-                                    for ($jm = 1; $jm <= ($maxJamHariIni - $bebanBlok + 1); $jm++) {
-                                        $bisa = true;
-                                        for ($b = 0; $b < $bebanBlok; $b++) {
-                                            $jamCek = $jm + $b;
-                                            if ($matrixKelasHari[$hari][$jamCek] === true || isset($matrixGuru[$gm->nip][$hari][$jamCek])) {
-                                                $bisa = false;
-                                                break;
-                                            }
-                                        }
-                                        if ($bisa) {
-                                            for ($b = 0; $b < $bebanBlok; $b++) {
-                                                $jamCek = $jm + $b;
-                                                $matrixKelasHari[$hari][$jamCek] = true;
-                                                $matrixGuru[$gm->nip][$hari][$jamCek] = true;
-                                                $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hari, $jamCek, $bebanSudahDipasang + $b, 1);
-                                            }
-                                            $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + $bebanBlok;
-                                            $trackerMapelHarian[$kelasId][$gm->id][$hari] = ($trackerMapelHarian[$kelasId][$gm->id][$hari] ?? 0) + $bebanBlok;
-                                            $slotDipasang = true;
-                                            break 3;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // PERUBAHAN 3: FASE 2 (PEMASANGAN PAKSA BERURUTAN)
-                        if (!$slotDipasang) {
-                            $bebanBlokPaksa = $ukuranBlokDicoba[0]; // Paksa seluruh blok agar tetap berurutan
-                            $dipasangPaksa = false;
-
-                            // Langkah A: Cari slot kelas kosong berurutan (walaupun gurunya terpaksa bentrok)
-                            foreach ($this->hari as $hariF) {
-                                $maxJamHariIniF = $this->getMaxJam($hariF);
-                                if ($maxJamHariIniF < $bebanBlokPaksa) continue;
-
-                                for ($jmF = 1; $jmF <= $maxJamHariIniF - $bebanBlokPaksa + 1; $jmF++) {
-                                    $kelasKosongBerurutan = true;
-                                    for ($b = 0; $b < $bebanBlokPaksa; $b++) {
-                                        if ($matrixKelasHari[$hariF][$jmF + $b] === true) {
-                                            $kelasKosongBerurutan = false;
-                                            break;
-                                        }
-                                    }
-
-                                    if ($kelasKosongBerurutan) {
-                                        for ($b = 0; $b < $bebanBlokPaksa; $b++) {
-                                            $jamCek = $jmF + $b;
-                                            $matrixKelasHari[$hariF][$jamCek] = true;
-                                            $matrixGuru[$gm->nip][$hariF][$jamCek] = true;
-                                            $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hariF, $jamCek, 999 + $bebanSudahDipasang + $b, 1);
-                                        }
-                                        $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + $bebanBlokPaksa;
-                                        $trackerMapelHarian[$kelasId][$gm->id][$hariF] = ($trackerMapelHarian[$kelasId][$gm->id][$hariF] ?? 0) + $bebanBlokPaksa;
-                                        $dipasangPaksa = true;
-                                        $slotDipasang = true;
-                                        break 2;
-                                    }
-                                }
-                            }
-
-                            // Langkah B: Jika jadwal benar-benar mentok, paksa injeksi secara berurutan di hari acak
-                            if (!$dipasangPaksa) {
-                                $hariAcakF = $this->hari[array_rand($this->hari)];
-                                $maxJamHariIniF = $this->getMaxJam($hariAcakF);
-
-                                // Mulai jam ke berapa? (Penjaskes paksa jam 1 pagi, mapel lain acak)
-                                $batasJamMulai = max(1, $maxJamHariIniF - $bebanBlokPaksa + 1);
-                                $jmF = $isPenjaskes ? 1 : rand(1, $batasJamMulai);
-
-                                for ($b = 0; $b < $bebanBlokPaksa; $b++) {
-                                    $jamCek = $jmF + $b;
-                                    $matrixKelasHari[$hariAcakF][$jamCek] = true;
-                                    $matrixGuru[$gm->nip][$hariAcakF][$jamCek] = true;
-                                    $kromosom[$kelasId][] = $this->buatGenJadwal($gm, $hariAcakF, $jamCek, 999 + $bebanSudahDipasang + $b, 1);
-                                }
-                                $trackerBebanGuruKelas[$kelasId][$gm->id] = $bebanSudahDipasang + $bebanBlokPaksa;
-                                $trackerMapelHarian[$kelasId][$gm->id][$hariAcakF] = ($trackerMapelHarian[$kelasId][$gm->id][$hariAcakF] ?? 0) + $bebanBlokPaksa;
-                                $slotDipasang = true;
-                            }
-                        }
-
-                        // Keamanan infinity loop
-                        if (!$slotDipasang) break;
-                    }
+            foreach ($this->hari as $h) {
+                $maxH = $this->getMaxJam($h);
+                for ($jm = 1; $jm <= $maxH; $jm++) {
+                    $matrixKelasHari[$kelasId][$h][$jm] = false;
                 }
             }
-            $populasi[] = $kromosom;
         }
 
-        return $populasi;
-    }
-    private function buatGenJadwal($gm, $hari, $jam, $indeksBlok, $bebanBlok)
-    {
-        $waktu = $this->getSlotWaktu($hari, $jam);
+        $shuffledKelasArray = $kelasArray;
+        shuffle($shuffledKelasArray);
 
+        foreach ($shuffledKelasArray as $kls) {
+            $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
+            if (!$kelasId) continue;
+
+            $mapelKelas = $guruMapelPerKelas[$kelasId] ?? [];
+            if (empty($mapelKelas)) continue;
+
+            $kromosom[$kelasId] = [];
+            $gmPriority = [];
+            $gmRegular = [];
+
+            foreach ($mapelKelas as $gm) {
+                $namaMapelLower = strtolower($gm->nama_mapel ?? '');
+                $isPenjaskes = str_contains($namaMapelLower, 'penjaskes') || str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
+
+                if (!empty($gm->is_prioritas_pagi) || $isPenjaskes) {
+                    $gmPriority[] = $gm;
+                } else {
+                    $gmRegular[] = $gm;
+                }
+            }
+
+            // SORTING BERDASARKAN TOTAL BEBAN GURU
+            usort($gmRegular, function($a, $b) use ($totalBebanGuru) {
+                $gIdA = $a->guru_id ?? $a->nip ?? 'none';
+                $gIdB = $b->guru_id ?? $b->nip ?? 'none';
+                $bebanA = $totalBebanGuru[$gIdA] ?? 0;
+                $bebanB = $totalBebanGuru[$gIdB] ?? 0;
+
+                if ($bebanA !== $bebanB) return $bebanB <=> $bebanA;
+                return (int) $b->beban_jam <=> (int) $a->beban_jam;
+            });
+
+            shuffle($gmPriority);
+            $mapelKelasTerurut = array_merge($gmPriority, $gmRegular);
+
+            foreach ($mapelKelasTerurut as $gm) {
+                $bebanSeharusnya = (int) $gm->beban_jam;
+                if ($bebanSeharusnya <= 0) continue;
+
+                $namaMapelLower = strtolower($gm->nama_mapel ?? '');
+                $isPenjaskes = str_contains($namaMapelLower, 'penjaskes') || str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
+
+                $guruId = 'none';
+                if (!empty($gm->guru_id)) {
+                    $guruId = 'g_' . $gm->guru_id;
+                } elseif (!empty($gm->nip)) {
+                    $guruId = 'n_' . $gm->nip;
+                }
+
+                // PEMBAGIAN CHUNK
+                $chunks = [];
+                if ($bebanSeharusnya == 6) { $chunks = [3, 3]; }
+                elseif ($bebanSeharusnya == 5) { $chunks = [3, 2]; }
+                elseif ($bebanSeharusnya == 4) { $chunks = [2, 2]; }
+                elseif ($bebanSeharusnya == 3) { $chunks = [3]; }
+                elseif ($bebanSeharusnya == 2) { $chunks = [2]; }
+                elseif ($bebanSeharusnya == 1) { $chunks = [1]; }
+                else {
+                    $sisa = $bebanSeharusnya;
+                    while ($sisa > 0) {
+                        if ($sisa > 6) { $chunks[] = 3; $sisa -= 3; }
+                        elseif ($sisa == 6) { array_push($chunks, 3, 3); $sisa = 0; }
+                        elseif ($sisa == 5) { array_push($chunks, 3, 2); $sisa = 0; }
+                        elseif ($sisa == 4) { array_push($chunks, 2, 2); $sisa = 0; }
+                        elseif ($sisa == 3) { $chunks[] = 3; $sisa = 0; }
+                        elseif ($sisa == 2) { $chunks[] = 2; $sisa = 0; }
+                    }
+                }
+
+                foreach ($chunks as $chunkIndex => $durasiChunk) {
+                    $gmId = $gm->id;
+                    $chunkId = 'gm_' . $gmId . '_block_' . $chunkIndex;
+
+                    $hariAcak = $this->hari;
+                    shuffle($hariAcak);
+
+                    $assignedHari = null;
+                    $assignedJam = null;
+                    $metodePenempatan = 'NONE'; // Tracker untuk Log
+
+                    // PASS 1: Cari Slot Ideal (Kelas & Guru Kosong)
+                    foreach ($hariAcak as $hari) {
+                        $maxH = $this->getMaxJam($hari);
+                        $batasPencarian = ($isPenjaskes || !empty($gm->is_prioritas_pagi))
+                            ? min(4, $maxH - $durasiChunk + 1)
+                            : ($maxH - $durasiChunk + 1);
+
+                        for ($jm = 1; $jm <= $batasPencarian; $jm++) {
+                            if ($durasiChunk == 1 && $jm == $maxH) continue;
+
+                            $bisa = true;
+                            for ($d = 0; $d < $durasiChunk; $d++) {
+                                $jamCek = $jm + $d;
+                                $guruBentrok = (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]));
+
+                                if (!empty($matrixKelasHari[$kelasId][$hari][$jamCek]) || $guruBentrok) {
+                                    $bisa = false; break;
+                                }
+                            }
+
+                            if ($bisa) {
+                                $assignedHari = $hari;
+                                $assignedJam = $jm;
+                                $metodePenempatan = 'PASS 1';
+                                break 2;
+                            }
+                        }
+                    }
+
+                    // PASS 2: Slot 1 Jam di Jam Terakhir
+                    if (!$assignedHari && $durasiChunk == 1) {
+                        foreach ($hariAcak as $hari) {
+                            $maxH = $this->getMaxJam($hari);
+                            $jm = $maxH;
+                            $guruBentrok = (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jm]));
+
+                            if (empty($matrixKelasHari[$kelasId][$hari][$jm]) && !$guruBentrok) {
+                                $assignedHari = $hari;
+                                $assignedJam = $jm;
+                                $metodePenempatan = 'PASS 2';
+                                break;
+                            }
+                        }
+                    }
+
+                    // PASS 3: Guru Bentrok (Abaikan Ketersediaan Guru, cari slot Kelas kosong)
+                    if (!$assignedHari) {
+                        foreach ($hariAcak as $hari) {
+                            $maxH = $this->getMaxJam($hari);
+                            $batasPencarian = $maxH - $durasiChunk + 1;
+
+                            for ($jm = 1; $jm <= $batasPencarian; $jm++) {
+                                $bisaKelasSaja = true;
+                                for ($d = 0; $d < $durasiChunk; $d++) {
+                                    if (!empty($matrixKelasHari[$kelasId][$hari][$jm + $d])) {
+                                        $bisaKelasSaja = false; break;
+                                    }
+                                }
+                                if ($bisaKelasSaja) {
+                                    $assignedHari = $hari;
+                                    $assignedJam = $jm;
+                                    $metodePenempatan = 'PASS 3';
+                                    break 2;
+                                }
+                            }
+                        }
+                    }
+
+                    // PASS 4: Absolute Force (Slot Kelas HABIS, Timpa Paksa)
+                    if (!$assignedHari) {
+                        $assignedHari = $hariAcak[0];
+                        $maxH = $this->getMaxJam($assignedHari);
+                        $assignedJam = rand(1, max(1, $maxH - $durasiChunk + 1));
+                        $metodePenempatan = 'PASS 4';
+                    }
+
+                    // --- PENCATATAN LOG ---
+                    if ($metodePenempatan === 'PASS 3' && $i === 0) { // Log di kromosom pertama saja agar tidak spam
+                        \Illuminate\Support\Facades\Log::warning("BENTROK GURU (Pass 3): Guru {$guruId} (Mapel: {$gm->nama_mapel}) dipaksa mengajar di Kelas {$kelasId} pada Hari {$assignedHari} Jam {$assignedJam}.");
+                    } elseif ($metodePenempatan === 'PASS 4' && $i === 0) {
+                        \Illuminate\Support\Facades\Log::error("JADWAL TERTUMPUK (Pass 4): Kelas {$kelasId} kepenuhan! Mapel {$gm->nama_mapel} (Durasi {$durasiChunk}) ditimpa paksa pada Hari {$assignedHari} Jam {$assignedJam}. Beban jam akan terlihat tidak sesuai di frontend!");
+                    }
+
+                    // SIMPAN KE MATRIKS SESUAI DURASI ASLINYA
+                    for ($d = 0; $d < $durasiChunk; $d++) {
+                        $jamCek = $assignedJam + $d;
+                        $matrixKelasHari[$kelasId][$assignedHari][$jamCek] = true;
+                        if (!$isPenjaskes && $guruId !== 'none') {
+                            $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
+                        }
+                    }
+
+                    // SIMPAN KE KROMOSOM
+                    $kromosom[$kelasId][$chunkId] = $this->buildKromosomData(
+                        $gm, $chunkIndex, $kelasId, $assignedHari, $assignedJam, $durasiChunk, $isPenjaskes
+                    );
+                }
+            }
+        }
+        $populasi[] = $kromosom;
+    }
+
+    return $populasi;
+}
+    private function buildKromosomData($gm, $chunkIndex, $kelasId, $hari, $jm, $durasi, $isPenjaskes) {
         return [
-            'nip'                  => $gm->nip,
-            't_list_guru_id'       => $gm->t_list_guru_id ?? null,
+            'guru_id'              => $gm->guru_id ?? null,
+            'nip'                  => $gm->nip ?? null,
             't_list_guru_mapel_id' => $gm->id,
-            'blok_id'              => $gm->id . '_' . $indeksBlok,
+            'blok_id'              => $gm->id . '_' . $chunkIndex,
             'mapel_id'             => $gm->mapel_id,
-            'kelas_id'             => $gm->kelas_id,
+            'nama_mapel' => $gm->nama_mapel,
+            'nama_guru' => $gm->nama_guru,
+            'kelas_id'             => $kelasId,
             'hari'                 => $hari,
-            'jam'                  => (int) $jam,
-            'jam_mulai'            => $waktu['mulai'],
-            'jam_selesai'          => $waktu['selesai'],
-            'beban_jam'            => $bebanBlok
+            'jam_mulai'            => (int) $jm,
+            'durasi'               => (int) $durasi,
+            'is_penjaskes'         => $isPenjaskes
         ];
     }
-
-    private function hitungFitness($kromosom)
+ private function hitungFitness($kromosom, $enableDetailedLog = false)
     {
         $penalty = 0;
+        $penaltySlotKosong = 0;
+        $penaltyKelebihanJam = 0;
+        $penaltyBentrokKelas = 0;
+        $penaltyBentrokGuru = 0;
+        $penaltyHariKurangPenuh = 0;
+        $penaltyPecahJam = 0;
+
         $trackerGuru = [];
         $trackerKelas = [];
-        $jadwalHarianKelas = [];
-        $hitungBebanGuruMapel = [];
-        $mapelHarian = []; // Untuk melacak jumlah jam suatu mapel pada hari yang sama
-        $maxJamPerHari = $this->maxJamPerHari;
+        $akumulasiJamPerHari = [];
+        $mapelTracker = [];
+
+        // Array penyimpan detail masalah untuk Log
+        $detailMasalah = [];
 
         foreach ($kromosom as $kelasId => $gens) {
             foreach ($gens as $gen) {
-                $hari = $gen['hari'];
-                $jam = (int) $gen['jam'];
-                $nip = $gen['nip'];
-                $gmId = $gen['t_list_guru_mapel_id'];
+                $hari = $gen['hari'] ?? null;
+                $jamMulai = $gen['jam_mulai'] ?? null;
+                $durasi = $gen['durasi'] ?? 0;
+                $mapelNama = $gen['nama_mapel'] ?? 'Unknown';
 
-                $batasJamMax = $maxJamPerHari[$hari] ?? 11;
-                if ($jam > $batasJamMax || $jam < 1) {
-                    $penalty += 5.0;
+                // Ambil nama guru jika ada, jika tidak fallback ke guru_id
+                $guruId = 'none';
+                if (!empty($gen['guru_id'])) {
+                    $guruId = 'g_' . $gen['guru_id'];
+                } elseif (!empty($gen['nip'])) {
+                    $guruId = 'n_' . $gen['nip'];
+                }
+                $guruNama = $gen['nama_guru'] ?? $guruId;
+
+                if (!$hari || !$jamMulai) {
+                    $penalty += 100.0;
+                    $penaltySlotKosong += 100.0;
+                    if ($enableDetailedLog) $detailMasalah[] = "[Slot Kosong] Mapel {$mapelNama} di Kelas {$kelasId} tidak memiliki hari/jam.";
+                    continue;
                 }
 
-                if (isset($trackerGuru[$nip][$hari][$jam])) {
-                    $penalty += 4.0;
-                } else {
-                    $trackerGuru[$nip][$hari][$jam] = true;
+                if (!isset($akumulasiJamPerHari[$kelasId][$hari])) {
+                    $akumulasiJamPerHari[$kelasId][$hari] = 0;
                 }
+                $akumulasiJamPerHari[$kelasId][$hari] += $durasi;
 
-                if (isset($trackerKelas[$kelasId][$hari][$jam])) {
-                    $penalty += 4.0;
-                } else {
-                    $trackerKelas[$kelasId][$hari][$jam] = true;
-                }
+                // ========================================================
+                // TRACKER PECAHAN JAM
+                // ========================================================
+                $identitasMapel = $gen['t_list_guru_mapel_id'] ?? ($guruId . '_' . ($gen['mapel_id'] ?? 'unknown'));
 
-                // Pelacakan Jam Tertinggi untuk Hukuman Jam Bolong
-                if (!isset($jadwalHarianKelas[$kelasId][$hari])) {
-                    $jadwalHarianKelas[$kelasId][$hari] = [
-                        'max' => $jam,
-                        'count' => 1
+                if (!isset($mapelTracker[$kelasId][$identitasMapel])) {
+                    $mapelTracker[$kelasId][$identitasMapel] = [
+                        'nama_mapel' => $mapelNama,
+                        'hari_mengajar' => []
                     ];
-                } else {
-                    if ($jam > $jadwalHarianKelas[$kelasId][$hari]['max']) $jadwalHarianKelas[$kelasId][$hari]['max'] = $jam;
-                    $jadwalHarianKelas[$kelasId][$hari]['count']++;
                 }
 
-                $hitungBebanGuruMapel[$gmId] = ($hitungBebanGuruMapel[$gmId] ?? 0) + 1;
-                $mapelHarian[$kelasId][$hari][$gmId] = ($mapelHarian[$kelasId][$hari][$gmId] ?? 0) + 1;
-            }
-        }
-
-        // PERBAIKAN 1: Kalkulasi Penalti Jam Bolong (Memaksa Mulai dari Jam Pertama)
-        foreach ($jadwalHarianKelas as $kelasId => $hariList) {
-            foreach ($hariList as $hari => $stats) {
-                // Jika max jam = 5, maka count juga harus 5. Jika count < 5, berarti ada jam bolong di antara 1 sampai 5.
-                if ($stats['max'] > $stats['count']) {
-                    $penalty += ($stats['max'] - $stats['count']) * 20.0; // Bobot dinaikkan agar dirapatkan
+                if (!in_array($hari, $mapelTracker[$kelasId][$identitasMapel]['hari_mengajar'])) {
+                    $mapelTracker[$kelasId][$identitasMapel]['hari_mengajar'][] = $hari;
                 }
-            }
-        }
 
-        // PERBAIKAN 2: Penalti Mapel Beruntun > 3 Jam per hari
-        foreach ($mapelHarian as $kelasId => $hariList) {
-            foreach ($hariList as $hari => $mapels) {
-                foreach ($mapels as $gmId => $totalJamMapel) {
-                    if ($totalJamMapel > 3) {
-                        $penalty += ($totalJamMapel - 3) * 20.0; // Bobot sangat besar untuk mencegahnya
+                // Pengecekan Slot per Jam (Durasi)
+                for ($d = 0; $d < $durasi; $d++) {
+                    $jam = $jamMulai + $d;
+
+                    // 1. Pengecekan kelebihan jam
+                    if ($jam > ($this->maxJamPerHari[$hari] ?? 12) || $jam < 1) {
+                        $penalty += 100.0;
+                        $penaltyKelebihanJam += 100.0;
+                        if ($enableDetailedLog) $detailMasalah[] = "[Lebih Jam] Kelas {$kelasId}, Hari {$hari} Jam {$jam} melampaui batas maksimal jam.";
+                    }
+
+                    // 2. Pengecekan Kelas Tertumpuk
+                    if (isset($trackerKelas[$kelasId][$hari][$jam])) {
+                        $penalty += 1000.0;
+                        $penaltyBentrokKelas += 1000.0;
+                        if ($enableDetailedLog) {
+                            $mapelEksisting = $trackerKelas[$kelasId][$hari][$jam];
+                            $detailMasalah[] = "[Bentrok Kelas] Kelas {$kelasId} bertumpuk: {$mapelNama} menimpa {$mapelEksisting} di Hari {$hari} Jam {$jam}.";
+                        }
+                    } else {
+                        // Simpan nama mapel untuk log bentrok kelas yang lebih informatif
+                        $trackerKelas[$kelasId][$hari][$jam] = $mapelNama;
+                    }
+
+                    // 3. Pengecekan Guru Bentrok
+                    if ($guruId !== 'none') {
+                        $isPenjaskes = $gen['is_penjaskes'] ?? false;
+                        if (!$isPenjaskes) {
+                            if (!isset($trackerGuru[$guruId][$hari][$jam])) {
+                                $trackerGuru[$guruId][$hari][$jam] = [];
+                            }
+
+                            // Cek apakah kelas ini sudah masuk ke tracker guru
+                            $kelasSudahAda = false;
+                            foreach ($trackerGuru[$guruId][$hari][$jam] as $infoGuru) {
+                                if ($infoGuru['kelas'] == $kelasId) {
+                                    $kelasSudahAda = true;
+                                    break;
+                                }
+                            }
+
+                            if (!$kelasSudahAda) {
+                                // Simpan struktur informasi lengkap untuk log
+                                $trackerGuru[$guruId][$hari][$jam][] = [
+                                    'kelas' => $kelasId,
+                                    'mapel' => $mapelNama,
+                                    'guru_nama' => $guruNama
+                                ];
+                            }
+
+                            // Jika guru mengajar di lebih dari 1 kelas di jam yang sama
+                            if (count($trackerGuru[$guruId][$hari][$jam]) > 1) {
+                                $penalty += 800.0;
+                                $penaltyBentrokGuru += 800.0;
+
+                                if ($enableDetailedLog) {
+                                    $rincianBentrok = [];
+                                    foreach ($trackerGuru[$guruId][$hari][$jam] as $info) {
+                                        $rincianBentrok[] = "{$info['mapel']} (Kls {$info['kelas']})";
+                                    }
+                                    $teksBentrok = implode(' BERSAMAAN DENGAN ', $rincianBentrok);
+                                    $detailMasalah[] = "[Bentrok Guru] Guru {$guruNama} mengajar: {$teksBentrok} pada Hari {$hari} Jam {$jam}.";
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // Validasi Beban Jam Guru Mapel
-        foreach ($this->targetBebanJam as $gmId => $seharusnyaJam) {
-            $aktualJam = $hitungBebanGuruMapel[$gmId] ?? 0;
-            if ($aktualJam !== $seharusnyaJam) {
-                $penalty += abs($aktualJam - $seharusnyaJam) * 20.0;
+        // ========================================================
+        // EVALUASI PENALTI PECAHAN JAM
+        // ========================================================
+        foreach ($mapelTracker as $kelasId => $mapels) {
+            foreach ($mapels as $idMapel => $data) {
+                $jumlahHari = count($data['hari_mengajar']);
+                if ($jumlahHari > 2) {
+                    $hukumanPecahan = ($jumlahHari - 2) * 500.0;
+                    $penalty += $hukumanPecahan;
+                    $penaltyPecahJam += $hukumanPecahan;
+                    if ($enableDetailedLog) {
+                        $hariTersebar = implode(', ', $data['hari_mengajar']);
+                        $detailMasalah[] = "[Pecah Jam] Mapel {$data['nama_mapel']} di Kelas {$kelasId} tersebar berantakan di {$jumlahHari} hari ({$hariTersebar}).";
+                    }
+                }
             }
         }
 
-        return 1 / (1 + $penalty);
-    }
+        // 4. Pengecekan Hari Kurang Penuh
+        foreach ($this->hari as $hariCek) {
+            $maxJamHariIni = $this->getMaxJam($hariCek);
+            foreach ($kromosom as $kelasId => $gens) {
+                $totalTerisi = $akumulasiJamPerHari[$kelasId][$hariCek] ?? 0;
+                if ($totalTerisi < $maxJamHariIni) {
+                    $kekurangan = $maxJamHariIni - $totalTerisi;
+                    $hukumanKurang = $kekurangan * 10.0;
+                    $penalty += $hukumanKurang;
+                    $penaltyHariKurangPenuh += $hukumanKurang;
+                }
+            }
+        }
 
+        // Cetak Rekap Singkat
+        \Illuminate\Support\Facades\Log::info("DEBUG FITNESS -> Total: {$penalty} | Kosong: {$penaltySlotKosong} | Lbh Jam: {$penaltyKelebihanJam} | Bntrk Kls: {$penaltyBentrokKelas} | Bntrk Guru: {$penaltyBentrokGuru} | Pch Jam: {$penaltyPecahJam}");
+
+        // CETAK LOG DETAIL
+        if ($enableDetailedLog && count($detailMasalah) > 0) {
+            // Kita reverse array lalu unique, agar log mengambil status bentrok terakhir yang paling lengkap (misal A bentrok B bentrok C)
+            $uniqueMasalah = array_unique(array_reverse($detailMasalah));
+            $logTeks = "=== DETAIL PELANGGARAN KROMOSOM ===\n" . implode("\n", $uniqueMasalah);
+            \Illuminate\Support\Facades\Log::debug($logTeks);
+        }
+
+        $fitness = max(0.0001, 1.0 / (1.0 + ($penalty / 10.0)));
+        return round($fitness, 4);
+    }
+ private function repairKromosom($kromosom)
+    {
+        $matrixGuru = [];
+        $matrixKelas = [];
+        $unassignedQueue = [];
+
+        // Pass 1: Validasi slot yang ada, amankan yang tidak bentrok.
+        foreach ($kromosom as $kelasId => &$gens) {
+            $sisaGens = [];
+            foreach ($gens as $chunkId => $gen) {
+                $hari = $gen['hari'] ?? null;
+                $jamMulai = $gen['jam_mulai'] ?? null;
+                $durasi = $gen['durasi'] ?? 0;
+
+                $guruId = !empty($gen['guru_id']) ? 'g_' . $gen['guru_id'] : (!empty($gen['nip']) ? 'n_' . $gen['nip'] : 'none');
+                $isPenjaskes = $gen['is_penjaskes'] ?? false;
+
+                $isBentrok = false;
+
+                if (!$hari || !$jamMulai || $durasi <= 0) {
+                    $isBentrok = true;
+                } else {
+                    for ($d = 0; $d < $durasi; $d++) {
+                        $jamCek = $jamMulai + $d;
+                        $cekGuruBentrok = (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]));
+
+                        if ($jamCek > ($this->maxJamPerHari[$hari] ?? 12) || !empty($matrixKelas[$kelasId][$hari][$jamCek]) || $cekGuruBentrok) {
+                            $isBentrok = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ($isBentrok) {
+                    $unassignedQueue[] = ['kelasId' => $kelasId, 'chunkId' => $chunkId, 'gen' => $gen];
+                } else {
+                    for ($d = 0; $d < $durasi; $d++) {
+                        $jamCek = $jamMulai + $d;
+                        $matrixKelas[$kelasId][$hari][$jamCek] = true;
+                        if (!$isPenjaskes && $guruId !== 'none') {
+                            $matrixGuru[$guruId][$hari][$jamCek] = true;
+                        }
+                    }
+                    $sisaGens[$chunkId] = $gen; // Simpan gen yang aman
+                }
+            }
+            $gens = $sisaGens; // Perbarui gen kelas hanya dengan yang valid
+        }
+        unset($gens);
+
+        // Sortir antrean yang gagal masuk berdasarkan durasi (Prioritaskan blok besar dulu)
+        usort($unassignedQueue, function ($a, $b) {
+            return ($b['gen']['durasi'] ?? 0) <=> ($a['gen']['durasi'] ?? 0);
+        });
+
+        // Pass 2: Eksekusi antrean unassigned dengan teknik Dynamic Splitting
+        while (!empty($unassignedQueue)) {
+            $item = array_shift($unassignedQueue);
+            $kelasId = $item['kelasId'];
+            $chunkId = $item['chunkId'];
+            $gen = $item['gen'];
+            $durasi = $gen['durasi'];
+            $guruId = !empty($gen['guru_id']) ? 'g_' . $gen['guru_id'] : (!empty($gen['nip']) ? 'n_' . $gen['nip'] : 'none');
+            $isPenjaskes = $gen['is_penjaskes'] ?? false;
+
+            // Cari hari yang paling sedikit terisi untuk kelas ini (Distribusi merata)
+            $jamTerisiPerHari = [];
+            foreach ($this->hari as $h) {
+                $totalJamHari = 0;
+                $maxH = $this->getMaxJam($h);
+                for ($jm = 1; $jm <= $maxH; $jm++) {
+                    if (!empty($matrixKelas[$kelasId][$h][$jm])) {
+                        $totalJamHari++;
+                    }
+                }
+                $jamTerisiPerHari[$h] = $totalJamHari;
+            }
+
+            $hariList = $this->hari;
+            usort($hariList, function ($h1, $h2) use ($jamTerisiPerHari) {
+                return $jamTerisiPerHari[$h1] <=> $jamTerisiPerHari[$h2];
+            });
+
+            $ditemukan = false;
+
+            // Coba pasang di hari kosong
+            foreach ($hariList as $hariCoba) {
+                $maxH = $this->getMaxJam($hariCoba);
+                for ($jm = 1; $jm <= ($maxH - $durasi + 1); $jm++) {
+                    $slotAman = true;
+                    for ($d = 0; $d < $durasi; $d++) {
+                        $jCek = $jm + $d;
+                        $cekGuru = (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hariCoba][$jCek]));
+
+                        if (!empty($matrixKelas[$kelasId][$hariCoba][$jCek]) || $cekGuru) {
+                            $slotAman = false;
+                            break;
+                        }
+                    }
+
+                    if ($slotAman) {
+                        $gen['hari'] = $hariCoba;
+                        $gen['jam_mulai'] = $jm;
+                        for ($d = 0; $d < $durasi; $d++) {
+                            $jCek = $jm + $d;
+                            $matrixKelas[$kelasId][$hariCoba][$jCek] = true;
+                            if (!$isPenjaskes && $guruId !== 'none') {
+                                $matrixGuru[$guruId][$hariCoba][$jCek] = true;
+                            }
+                        }
+                        $kromosom[$kelasId][$chunkId] = $gen;
+                        $ditemukan = true;
+                        break 2;
+                    }
+                }
+            }
+
+            // JIKA GAGAL MENEMUKAN SLOT (Bentrok): Lakukan Splitting atau Force Placement
+            if (!$ditemukan) {
+                if ($durasi > 1) {
+                    // Pecah gen menjadi potongan lebih kecil (durasi dikurangi 1 dan sisa 1) agar muat di celah sempit
+                    $gen1 = $gen;
+                    $gen1['durasi'] = $durasi - 1;
+                    $gen2 = $gen;
+                    $gen2['durasi'] = 1;
+
+                    // Masukkan kembali ke antrean untuk dicari ulang
+                    array_unshift($unassignedQueue, ['kelasId' => $kelasId, 'chunkId' => $chunkId . '_s2', 'gen' => $gen2]);
+                    array_unshift($unassignedQueue, ['kelasId' => $kelasId, 'chunkId' => $chunkId . '_s1', 'gen' => $gen1]);
+                } else {
+                    // Jika durasi sudah 1 dan tetap gagal (artinya guru bentrok di SEMUA slot kosong kelas ini),
+                    // Paksa isi ke slot kelas yang kosong (abaikan bentrok guru) agar tidak ada nilai NULL.
+                    // Algoritma Genetika (melalui fungsi Fitness) akan mengurus penaltinya dan memperbaikinya di generasi selanjutnya.
+                    foreach ($this->hari as $hariCoba) {
+                        $maxH = $this->getMaxJam($hariCoba);
+                        for ($jm = 1; $jm <= $maxH; $jm++) {
+                            if (empty($matrixKelas[$kelasId][$hariCoba][$jm])) {
+                                $gen['hari'] = $hariCoba;
+                                $gen['jam_mulai'] = $jm;
+
+                                $matrixKelas[$kelasId][$hariCoba][$jm] = true;
+                                if (!$isPenjaskes && $guruId !== 'none') {
+                                    $matrixGuru[$guruId][$hariCoba][$jm] = true; // Akan dicatat bentrok
+                                }
+
+                                $kromosom[$kelasId][$chunkId] = $gen;
+                                break 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $kromosom;
+    }
     private function seleksi($fitnessPopulasi)
     {
-        $kandidat1 = $fitnessPopulasi[array_rand($fitnessPopulasi)];
-        $kandidat2 = $fitnessPopulasi[array_rand($fitnessPopulasi)];
-        return ($kandidat1['fitness'] > $kandidat2['fitness']) ? $kandidat1['kromosom'] : $kandidat2['kromosom'];
+        $k1 = $fitnessPopulasi[array_rand($fitnessPopulasi)];
+        $k2 = $fitnessPopulasi[array_rand($fitnessPopulasi)];
+        return ($k1['fitness'] > $k2['fitness']) ? $k1['kromosom'] : $k2['kromosom'];
     }
 
     private function crossover($parent1, $parent2)
-    {
-        if ((mt_rand() / mt_getrandmax()) > $this->crossoverRate) return $parent1;
-
-        $child = [];
-        foreach ($parent1 as $kelasId => $gensP1) {
-            if (mt_rand(0, 1) === 1) {
-                $child[$kelasId] = $gensP1;
-            } else {
-                $child[$kelasId] = $parent2[$kelasId] ?? $gensP1;
+        {
+            // Jika gagal melewati rate crossover, kembalikan parent1 langsung
+            if ((mt_rand() / mt_getrandmax()) > $this->crossoverRate) {
+                return $parent1;
             }
-        }
-        return $child;
-    }
 
-    private function mutasi($kromosom)
+            $child = [];
+
+            // PERBAIKAN: Gunakan array_merge dan array_unique agar kelas dari kedua parent tergabung sempurna
+            $allKelasIds = array_unique(array_merge(array_keys($parent1), array_keys($parent2)));
+
+            foreach ($allKelasIds as $kelasId) {
+                $gens1 = $parent1[$kelasId] ?? [];
+                $gens2 = $parent2[$kelasId] ?? [];
+
+                if (empty($gens1)) {
+                    $child[$kelasId] = $gens2;
+                    continue;
+                }
+                if (empty($gens2)) {
+                    $child[$kelasId] = $gens1;
+                    continue;
+                }
+
+                $child[$kelasId] = [];
+
+                // Ambil semua unik chunk ID dari kedua parent untuk kelas ini
+                $allChunkIds = array_unique(array_merge(array_keys($gens1), array_keys($gens2)));
+
+                foreach ($allChunkIds as $chunkId) {
+                    // Pilih secara acak dari parent 1 atau parent 2, dengan fallback jika salah satu kosong
+                    if (isset($gens1[$chunkId]) && isset($gens2[$chunkId])) {
+                        $child[$kelasId][$chunkId] = (mt_rand(0, 1) === 1) ? $gens1[$chunkId] : $gens2[$chunkId];
+                    } else {
+                        $child[$kelasId][$chunkId] = $gens1[$chunkId] ?? $gens2[$chunkId];
+                    }
+                }
+            }
+
+            return $child;
+        }
+
+ private function mutasi($kromosom)
     {
         if ((mt_rand() / mt_getrandmax()) > $this->mutationRate) return $kromosom;
 
-        foreach ($kromosom as $kelasId => &$gens) {
-            if (count($gens) > 1 && (mt_rand() / mt_getrandmax()) < 0.5) {
-                $idx1 = array_rand($gens);
-                $idx2 = array_rand($gens);
+        $matrixGuru = [];
+        $matrixKelasHari = [];
 
-                $attempts = 0;
-                while ($idx1 === $idx2 && $attempts < 3) {
-                    $idx2 = array_rand($gens);
-                    $attempts++;
-                }
+        // 1. Petakan matriks jadwal saat ini yang sudah terisi valid
+        foreach ($kromosom as $kId => $gens) {
+            foreach ($gens as $gen) {
+                $h = $gen['hari'] ?? null;
+                $jMulai = $gen['jam_mulai'] ?? null;
+                $durasi = $gen['durasi'] ?? 0;
+                if (!$h || !$jMulai) continue;
 
-                if ($idx1 !== $idx2) {
-                    $maxJamHari1 = $this->getMaxJam($gens[$idx2]['hari']);
-                    $maxJamHari2 = $this->getMaxJam($gens[$idx1]['hari']);
+                $guruId = !empty($gen['guru_id']) ? 'g_' . $gen['guru_id'] : (!empty($gen['nip']) ? 'n_' . $gen['nip'] : 'none');
+                $isPenjaskes = $gen['is_penjaskes'] ?? false;
 
-                    if ($gens[$idx1]['jam'] <= $maxJamHari1 && $gens[$idx2]['jam'] <= $maxJamHari2) {
-                        $tempHari = $gens[$idx1]['hari'];
-                        $tempJam  = $gens[$idx1]['jam'];
-
-                        $gens[$idx1]['hari'] = $gens[$idx2]['hari'];
-                        $gens[$idx1]['jam']  = $gens[$idx2]['jam'];
-                        $waktu1 = $this->getSlotWaktu($gens[$idx1]['hari'], $gens[$idx1]['jam']);
-                        $gens[$idx1]['jam_mulai'] = $waktu1['mulai'];
-                        $gens[$idx1]['jam_selesai'] = $waktu1['selesai'];
-
-                        $gens[$idx2]['hari'] = $tempHari;
-                        $gens[$idx2]['jam']  = $tempJam;
-                        $waktu2 = $this->getSlotWaktu($gens[$idx2]['hari'], $gens[$idx2]['jam']);
-                        $gens[$idx2]['jam_mulai'] = $waktu2['mulai'];
-                        $gens[$idx2]['jam_selesai'] = $waktu2['selesai'];
+                for ($d = 0; $d < $durasi; $d++) {
+                    $matrixKelasHari[$kId][$h][$jMulai + $d] = true;
+                    if (!$isPenjaskes && $guruId !== 'none') {
+                        $matrixGuru[$guruId][$h][$jMulai + $d] = true;
                     }
                 }
             }
         }
-        unset($gens);
+
+        // 2. CARI APAKAH ADA GEN YANG BERSTATUS NULL (Belum mendapat hari/jam)
+        $targetGen = null;
+        $targetKelasId = null;
+
+        foreach ($kromosom as $kId => &$gens) {
+            foreach ($gens as &$gen) {
+                if (empty($gen['hari']) || empty($gen['jam_mulai'])) {
+                    $targetGen = &$gen;
+                    $targetKelasId = $kId;
+                    break 2; // Prioritaskan perbaiki yang null duluan!
+                }
+            }
+        }
+        unset($gen, $gens);
+
+        // 3. JIKA TIDAK ADA YANG NULL, LAKUKAN MUTASI NORMAL (Geser jadwal acak yang sudah ada)
+        if (!$targetGen) {
+            $kelasKeys = array_keys($kromosom);
+            if (empty($kelasKeys)) return $kromosom;
+
+            $randomKelasId = $kelasKeys[array_rand($kelasKeys)];
+            if (empty($kromosom[$randomKelasId])) return $kromosom;
+
+            $chunkIds = array_keys($kromosom[$randomKelasId]);
+            $randomChunkId = $chunkIds[array_rand($chunkIds)];
+            $targetGen = &$kromosom[$randomKelasId][$randomChunkId];
+            $targetKelasId = $randomKelasId;
+
+            $durasi = $targetGen['durasi'] ?? 0;
+            $oldH = $targetGen['hari'] ?? null;
+            $oldJMulai = $targetGen['jam_mulai'] ?? null;
+            if (!$oldH || !$oldJMulai || $durasi <= 0) return $kromosom;
+
+            $guruId = !empty($targetGen['guru_id']) ? 'g_' . $targetGen['guru_id'] : (!empty($targetGen['nip']) ? 'n_' . $targetGen['nip'] : 'none');
+            $isPenjaskes = $targetGen['is_penjaskes'] ?? false;
+
+            // Hapus sementara slot lama untuk dipindah
+            for ($d = 0; $d < $durasi; $d++) {
+                unset($matrixKelasHari[$targetKelasId][$oldH][$oldJMulai + $d]);
+                if (!$isPenjaskes && $guruId !== 'none') {
+                    unset($matrixGuru[$guruId][$oldH][$oldJMulai + $d]);
+                }
+            }
+        }
+
+        // Ambil atribut gen target (baik yang tadinya null maupun hasil geseran normal)
+        $durasi = $targetGen['durasi'] ?? 0;
+        if ($durasi <= 0) return $kromosom;
+
+        $guruId = !empty($targetGen['guru_id']) ? 'g_' . $targetGen['guru_id'] : (!empty($targetGen['nip']) ? 'n_' . $targetGen['nip'] : 'none');
+        $isPenjaskes = $targetGen['is_penjaskes'] ?? false;
+        $oldH = $targetGen['hari'] ?? null;
+        $oldJMulai = $targetGen['jam_mulai'] ?? null;
+
+        // 4. CARI SLOT BARU YANG 100% STERIL
+        $hariList = $this->hari;
+        shuffle($hariList);
+        $ditemukan = false;
+
+        foreach ($hariList as $randomHari) {
+            $maxJam = $this->getMaxJam($randomHari);
+            for ($jm = 1; $jm <= ($maxJam - $durasi + 1); $jm++) {
+                $bisa = true;
+                for ($d = 0; $d < $durasi; $d++) {
+                    $jamCek = $jm + $d;
+                    if (!empty($matrixKelasHari[$targetKelasId][$randomHari][$jamCek]) ||
+                        (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$randomHari][$jamCek]))) {
+                        $bisa = false;
+                        break;
+                    }
+                }
+
+                if ($bisa) {
+                    $targetGen['hari'] = $randomHari;
+                    $targetGen['jam_mulai'] = (int) $jm;
+                    $ditemukan = true;
+                    break 2;
+                }
+            }
+        }
+
+        // Jika tadinya bukan null dan gagal cari slot baru, rollback ke posisi lama
+        if (!$ditemukan && $oldH && $oldJMulai) {
+            $targetGen['hari'] = $oldH;
+            $targetGen['jam_mulai'] = $oldJMulai;
+        }
 
         return $kromosom;
     }

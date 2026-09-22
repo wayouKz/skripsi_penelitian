@@ -5,6 +5,7 @@ import {
     Plus,
     Trash2,
     Check,
+    Wand2, // Tambahkan ikon ini dari lucide-react jika ingin mempercantik tombol generator
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -16,6 +17,12 @@ export default function SlotWaktu({
     const [activeHari, setActiveHari] = useState("Senin");
     const [copiedSlots, setCopiedSlots] = useState(null);
     const [isCopied, setIsCopied] = useState(false);
+
+    // State untuk Generator Otomatis
+    const [genJamMulai, setGenJamMulai] = useState("07:00");
+    const [genJumlahJam, setGenJumlahJam] = useState(12);
+    const [genDurasiMenit, setGenDurasiMenit] = useState(35);
+    const [terapkanSemuaHari, setTerapkanSemuaHari] = useState(true);
 
     const STORAGE_KEY = "slots_per_hari_data";
 
@@ -75,6 +82,47 @@ export default function SlotWaktu({
         }));
     };
 
+    // Fungsi Generate Jam Otomatis
+    const handleGenerateSlots = () => {
+        if (!genJamMulai || genJumlahJam <= 0 || genDurasiMenit <= 0) return;
+
+        let [hours, minutes] = genJamMulai.split(":").map(Number);
+        let generated = [];
+
+        for (let i = 1; i <= genJumlahJam; i++) {
+            // Format waktu mulai
+            const mulaiStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+            // Tambahkan menit
+            minutes += Number(genDurasiMenit);
+            while (minutes >= 60) {
+                hours += 1;
+                minutes -= 60;
+            }
+
+            // Format waktu selesai
+            const selesaiStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+            generated.push({
+                id: Date.now() + i,
+                mulai: mulaiStr,
+                selesai: selesaiStr,
+            });
+        }
+
+        setSlotsPerHari((prev) => {
+            let updated = { ...prev };
+            if (terapkanSemuaHari) {
+                daftarHari.forEach((hari) => {
+                    updated[hari] = generated;
+                });
+            } else {
+                updated[activeHari] = generated;
+            }
+            return updated;
+        });
+    };
+
     // Fungsi Copy
     const handleCopy = () => {
         setCopiedSlots([...currentSlots]);
@@ -113,6 +161,77 @@ export default function SlotWaktu({
                         className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-lg hover:bg-green-100 flex items-center gap-1 transition-colors border border-green-200"
                     >
                         <Plus size={12} /> Tambah
+                    </button>
+                </div>
+            </div>
+
+            {/* UI GENERATOR OTOMATIS */}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
+                <span className="text-[11px] font-bold text-gray-700 block mb-2 flex items-center gap-1">
+                    <Wand2 size={12} className="text-green-600" /> Generator Jam
+                    Otomatis
+                </span>
+                <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div>
+                        <label className="text-[10px] text-gray-500 block mb-1">
+                            Jam Mulai
+                        </label>
+                        <input
+                            type="time"
+                            value={genJamMulai}
+                            onChange={(e) => setGenJamMulai(e.target.value)}
+                            className="text-xs font-medium px-2 py-1 border border-gray-300 rounded-lg w-full bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] text-gray-500 block mb-1">
+                            Jumlah Jam
+                        </label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={genJumlahJam}
+                            onChange={(e) =>
+                                setGenJumlahJam(Number(e.target.value))
+                            }
+                            className="text-xs font-medium px-2 py-1 border border-gray-300 rounded-lg w-full bg-white"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-[10px] text-gray-500 block mb-1">
+                            Durasi (Menit)
+                        </label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="120"
+                            value={genDurasiMenit}
+                            onChange={(e) =>
+                                setGenDurasiMenit(Number(e.target.value))
+                            }
+                            className="text-xs font-medium px-2 py-1 border border-gray-300 rounded-lg w-full bg-white"
+                        />
+                    </div>
+                </div>
+                <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-[11px] text-gray-600">
+                        <input
+                            type="checkbox"
+                            checked={terapkanSemuaHari}
+                            onChange={(e) =>
+                                setTerapkanSemuaHari(e.target.checked)
+                            }
+                            className="rounded border-gray-300 text-green-600 focus:ring-green-500 w-3.5 h-3.5"
+                        />
+                        Terapkan ke semua hari (Senin - Jumat)
+                    </label>
+                    <button
+                        type="button"
+                        onClick={handleGenerateSlots}
+                        className="text-[10px] bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                    >
+                        Generate
                     </button>
                 </div>
             </div>

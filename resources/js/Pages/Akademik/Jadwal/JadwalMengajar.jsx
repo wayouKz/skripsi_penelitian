@@ -1,5 +1,5 @@
 import { useAlert } from "@/Components/AlertContext";
-import RenderTabelJadwal from "./renderTabelJadwal";
+import RenderTabelJadwal from "./RenderTabelJadwal";
 import { useEffect, useState } from "react";
 import { usePage } from "@inertiajs/react";
 

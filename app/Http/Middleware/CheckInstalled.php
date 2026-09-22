@@ -16,22 +16,22 @@ class CheckInstalled
          * ❌ BELUM INSTALLED
          * ===================================
          */
-        if (!$installed) {
+        // if (!$installed) {
 
-            // XHR / Inertia → jangan redirect (hindari reload)
-            if (
-                $request->ajax() ||
-                $request->wantsJson() ||
-                $request->header('X-Inertia')
-            ) {
+        //     // XHR / Inertia → jangan redirect (hindari reload)
+        //     if (
+        //         $request->ajax() ||
+        //         $request->wantsJson() ||
+        //         $request->header('X-Inertia')
+        //     ) {
 
-            }
+        //     }
 
-            // Web biasa → paksa ke installer
-            if (!$request->is('install*')) {
-                return redirect('/install');
-            }
-        }
+        //     // Web biasa → paksa ke installer
+        //     if (!$request->is('install*')) {
+        //         return redirect('/install');
+        //     }
+        // }
 
         /**
          * ===================================

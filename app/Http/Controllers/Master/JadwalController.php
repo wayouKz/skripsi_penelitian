@@ -30,11 +30,14 @@ class JadwalController extends Controller
     // ]);
     $prioritasPagi = $request->input('prioritas_pagi', []); // Diharapkan array of object
 
-    $guruMapels = DB::table('t_list_guru_mapels')
-        ->join('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-        ->join('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-        ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
-        ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id'])
+$guruMapels = DB::table('t_list_guru_mapels')
+        // Pindahkan filter tahun ajaran ke dalam ON, agar data yang tidak punya guru tidak ikut terbuang
+        ->leftJoin('t_list_gurus', function ($join) use ($params) {
+            $join->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+                 ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id']);
+        })
+        ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+        ->leftJoin('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
         ->select(
             't_list_gurus.guru_id',
             't_list_guru_mapels.id',
@@ -50,6 +53,11 @@ class JadwalController extends Controller
 
     $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
         $item->is_prioritas_pagi = false;
+
+        // Handle jika nama_guru atau nama_mapel bernilai null akibat Left Join
+        $item->nama_guru = $item->nama_guru ?? 'None';
+        $item->nama_mapel = $item->nama_mapel ?? 'Unknown Mapel';
+
         foreach ($prioritasPagi as $p) {
             if ($item->nip === $p['nip'] && $item->kelas_id === (int)$p['kelas_id']) {
                 $item->is_prioritas_pagi = true;
@@ -58,6 +66,7 @@ class JadwalController extends Controller
         }
         return $item;
     });
+
     $kelas = DB::table('m_kelas')->get();
 
    return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {

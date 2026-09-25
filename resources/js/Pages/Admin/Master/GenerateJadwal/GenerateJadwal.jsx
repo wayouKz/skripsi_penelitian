@@ -128,6 +128,11 @@ export default function GenerateJadwal() {
             value: "history",
         },
     ];
+    const onMaximize = () => {
+        setActiveTab("proses");
+    };
+    const showMinimizedWidget = isGenerating && activeTab !== "proses";
+    console.log(isGenerating, activeTab);
     return (
         <AuthenticatedLayout header="Generate Jadwal Mengajar (Algoritma Genetika)">
             <Head title="Generate Jadwal" />
@@ -210,6 +215,8 @@ export default function GenerateJadwal() {
                                 generation={generation}
                                 fitness={fitness}
                                 logs={logs}
+                                isGenerating={isGenerating}
+                                activeTab={activeTab}
                             />
                         )}
                         {activeTab === "hasil" && (
@@ -244,6 +251,26 @@ export default function GenerateJadwal() {
                     </div>
                 </div>
             </div>
+            {showMinimizedWidget && (
+                <div className="fixed bottom-4 right-4 z-50 ">
+                    <button
+                        onClick={onMaximize}
+                        type="button"
+                        className="flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-2xl shadow-lg border border-slate-700 text-xs font-medium transition-all cursor-pointer"
+                    >
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                        <div className="flex flex-col text-left">
+                            <span className="font-bold">
+                                Memproses Penjadwalan...
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                                {progress}% selesai
+                            </span>
+                        </div>
+                        <i className="fa fa-expand text-slate-400 ml-1"></i>
+                    </button>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

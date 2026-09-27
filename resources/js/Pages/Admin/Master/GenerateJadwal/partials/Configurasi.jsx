@@ -36,9 +36,10 @@ export default function Configurasi({
     setGeneration,
     setFitness,
     setLogs,
+    fetchDataAwal,
 }) {
-    const [pop, setpop] = useState(100);
-    const [gen, setgen] = useState(2000);
+    const [pop, setpop] = useState(400);
+    const [gen, setgen] = useState(800);
     const [selectedMapelFilter, setSelectedMapelFilter] = useState(null);
 
     const daftarHari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
@@ -242,6 +243,7 @@ export default function Configurasi({
                                 );
                                 setIsGenerating(false);
                                 setTimeout(() => setActiveTab("hasil"), 1500);
+                                fetchDataAwal();
                             } else if (parsedData.type === "error") {
                                 setLogs((prev) =>
                                     [

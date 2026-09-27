@@ -31,7 +31,6 @@ class JadwalController extends Controller
     $prioritasPagi = $request->input('prioritas_pagi', []); // Diharapkan array of object
 
 $guruMapels = DB::table('t_list_guru_mapels')
-        // Pindahkan filter tahun ajaran ke dalam ON, agar data yang tidak punya guru tidak ikut terbuang
         ->leftJoin('t_list_gurus', function ($join) use ($params) {
             $join->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
                  ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id']);
@@ -49,8 +48,10 @@ $guruMapels = DB::table('t_list_guru_mapels')
             'm_mapels.nama_mapel',
             'm_gurus.nama_guru'
         )
+        // Tambahkan kondisi agar kelas_id dan mapel_id bersifat unik / tidak ganda
+        ->whereNotNull('t_list_gurus.kelas_id')
+        ->distinct() // Menghindari baris duplikat yang tidak sengaja ter-join
         ->get();
-
     $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
         $item->is_prioritas_pagi = false;
 
@@ -66,7 +67,7 @@ $guruMapels = DB::table('t_list_guru_mapels')
         }
         return $item;
     });
-
+    // dd($guruMapels);
     $kelas = DB::table('m_kelas')->get();
 
    return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
@@ -122,7 +123,7 @@ $guruMapels = DB::table('t_list_guru_mapels')
         $durasi = round(microtime(true) - $waktuMulai, 2);
 
         \Illuminate\Support\Facades\Log::info("GA Selesai dalam $durasi detik.", ['status' => $hasil['status'] ?? 'unknown']);
-        \Illuminate\Support\Facades\Log::info("Jadwal: " . json_encode($hasil['jadwal']) . "totalData" . count($hasil['jadwal']));
+        // \Illuminate\Support\Facades\Log::info("Jadwal: " . json_encode($hasil['jadwal']) . "totalData" . count($hasil['jadwal']));
 
         // 4. CEK APAKAH JADWAL BENAR-BENAR TERBENTUK
         if (!empty($hasil['jadwal'])) {

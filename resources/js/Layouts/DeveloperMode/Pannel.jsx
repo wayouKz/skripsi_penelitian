@@ -207,6 +207,51 @@ export default function Panel({ url, user }) {
             setLoading(false);
         }
     };
+    const onCheckGuruMengajar = async () => {
+        if (!selectedTahunAjaranId) {
+            addLog("Pilih Tahun Ajaran terlebih dahulu!", "warning");
+            return;
+        }
+        setLoading(true);
+        addLog(
+            `Executing: GET /developer/cek-guru-mengajar?tahun_ajaran_id=${selectedTahunAjaranId}...`,
+            "info",
+        );
+        try {
+            const response = await axios.get(route("dev.cek-guru-mengajar"), {
+                params: { tahun_ajaran_id: selectedTahunAjaranId },
+            });
+
+            if (response.data.success === true) {
+                const data = response.data.data;
+
+                if (data.length === 0) {
+                    addLog(
+                        "✔ Tidak ada bentrok jadwal guru yang ditemukan.",
+                        "success",
+                    );
+                } else {
+                    addLog(
+                        `⚠ Ditemukan ${data.length} potensi bentrok jadwal guru!`,
+                        "warning",
+                    );
+                    data.forEach((item) => {
+                        addLog(
+                            `   • Guru **${item.nama_guru}** bentrok pada hari **${item.hari}** (Jam ${item.jam_mulai} - ${item.jam_selesai}): Mengajar di kelas **${item.kelas_pertama}** (${item.mapel_di_kelas_pertama}) & **${item.kelas_kedua}** (${item.mapel_di_kelas_kedua})`,
+                            "error",
+                        );
+                    });
+                }
+            } else {
+                addLog("Gagal memeriksa jadwal mengajar guru.", "error");
+            }
+        } catch (error) {
+            console.error("Gagal cek guru mengajar:", error);
+            addLog("Error API: Gagal memeriksa jadwal guru.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full bg-white border-l border-gray-200 p-4 shadow-sm text-left">
@@ -374,6 +419,17 @@ export default function Panel({ url, user }) {
                                 <i className="fa fa-search"></i>
                             </span>{" "}
                             Cek Beban Mengajar Guru
+                        </button>
+                        <button
+                            type="button"
+                            disabled={loading}
+                            onClick={onCheckGuruMengajar}
+                            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-semibold py-1.5 px-2 rounded transition-colors shadow-sm flex items-center justify-center gap-1"
+                        >
+                            <span>
+                                <i className="fa fa-search"></i>
+                            </span>{" "}
+                            Cek Mengajar Guru
                         </button>
                     </div>
                 </div>

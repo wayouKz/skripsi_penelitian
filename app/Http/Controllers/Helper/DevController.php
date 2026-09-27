@@ -148,7 +148,9 @@ ORDER BY
             "success" => true
         ]);
     }
-    public function cekGuruMengajar(){
+
+    public function cekGuruMengajar(Request $request){
+        $tahun_ajaran = $request->input('tahun_ajaran_id');
         $sql = "SELECT
     j1.hari,
     j1.jam_mulai,
@@ -200,3 +202,4 @@ ORDER BY
         ]);
     }
 }
+

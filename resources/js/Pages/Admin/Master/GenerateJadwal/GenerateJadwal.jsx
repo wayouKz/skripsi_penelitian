@@ -204,6 +204,7 @@ export default function GenerateJadwal() {
                                 setGeneration={setGeneration}
                                 setFitness={setFitness}
                                 setLogs={setLogs}
+                                fetchDataAwal={fetchDataAwal}
                             />
                         )}
 

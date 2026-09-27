@@ -215,7 +215,7 @@ Route::middleware('auth')->group(function () {
        Route::get('/cek-beban-jam-mengajar-per-kelas',  'cekBebanJamMengajarPerKelas')->name('cek-beban-jam-mengajar-per-kelas');
        Route::get('/cek-jadwal-permapel/{id}','cekJadwalPerMapel');
        Route::get('/ambil-jadwal','ambilJadwal');
-       Route::get('/cek-guru-mengajar','cekGuruMengajar');
+       Route::get('/cek-guru-mengajar','cekGuruMengajar')->name('cek-guru-mengajar');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

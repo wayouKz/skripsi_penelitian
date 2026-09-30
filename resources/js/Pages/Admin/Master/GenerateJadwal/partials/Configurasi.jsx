@@ -38,8 +38,8 @@ export default function Configurasi({
     setLogs,
     fetchDataAwal,
 }) {
-    const [pop, setpop] = useState(400);
-    const [gen, setgen] = useState(800);
+    const [pop, setpop] = useState(200);
+    const [gen, setgen] = useState(500);
     const [selectedMapelFilter, setSelectedMapelFilter] = useState(null);
 
     const daftarHari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import ProsesViewJadwal from "./component/ProsesViewJadwal";
 
 export default function Proses({
     progress,
@@ -6,8 +7,11 @@ export default function Proses({
     logs = [],
     isGenerating,
     activeTab,
+    setActiveTab,
     onReset,
     onMaximize,
+    openView,
+    setOpenView,
 }) {
     const logEndRef = useRef(null);
 
@@ -106,6 +110,24 @@ export default function Proses({
                             ? "Proses telah berhasil diselesaikan."
                             : "Mohon tunggu sebentar, proses berjalan otomatis."}
                     </p>
+                </div>
+                <div className="h-0.5 bg-slate-100"></div>
+                <div className="flex justify-center">
+                    <button
+                        onClick={() => {
+                            setOpenView(!openView);
+                            setActiveTab("konfigurasi");
+                        }}
+                        type="button"
+                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-xl text-[11px] transition-all shadow-sm cursor-pointer"
+                    >
+                        <i
+                            className={`fa ${
+                                openView ? "fa-eye" : "fa-eye"
+                            } text-[10px]`}
+                        ></i>
+                        {openView ? "Membuka Jadwal." : "Lihat Jadwal"}
+                    </button>
                 </div>
 
                 {/* Error Log Container */}

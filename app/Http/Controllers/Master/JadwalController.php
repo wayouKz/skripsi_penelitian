@@ -110,10 +110,18 @@ public function generate(Request $request)
                         'generation' => $generasi,
                         'fitness' => $fitness,
                         'kromosom' => $kromosom
+                        
                     ]) . "\n\n";
                     flush();
                 };
 
+                $gaEngine->onLog = function($logData) {
+                    echo "data: " . json_encode([
+                        'type' => 'log_update',
+                        'log'  => $logData
+                    ]) . "\n\n";
+                    flush();
+                };
                 $hasil = $gaEngine->generate();
                 $durasi = round(microtime(true) - $waktuMulai, 2);
 

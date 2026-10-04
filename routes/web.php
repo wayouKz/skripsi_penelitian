@@ -218,7 +218,7 @@ Route::middleware('auth')->group(function () {
        Route::get('/cek-guru-mengajar','cekGuruMengajar')->name('cek-guru-mengajar');
        Route::get('/live-monitor', function () {
             return view('dev.monitor');
-        });
+        })->name('monitor-dev');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

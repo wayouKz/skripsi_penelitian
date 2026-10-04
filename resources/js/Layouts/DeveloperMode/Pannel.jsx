@@ -431,6 +431,15 @@ export default function Panel({ url, user }) {
                             </span>{" "}
                             Cek Mengajar Guru
                         </button>
+                        <a
+                            href={route("dev.monitor-dev")}
+                            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-semibold py-1.5 px-2 rounded transition-colors shadow-sm flex items-center justify-center gap-1"
+                        >
+                            <span>
+                                <i className="fa fa-search"></i>
+                            </span>{" "}
+                            Monitor Jadwal Real Time
+                        </a>
                     </div>
                 </div>
 

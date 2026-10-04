@@ -131,6 +131,8 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                         <TextInput
                             id="name"
                             type="text"
+                            icon="user"
+                            placeholder="Masukkan nama user"
                             className="mt-1 block w-full text-xs py-1.5 px-3 rounded-xl"
                             value={data.name}
                             onChange={(e) => setData("name", e.target.value)}
@@ -151,6 +153,7 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                             id="username"
                             type="text"
                             icon="tag"
+                            placeholder="Masukkan Username"
                             className="mt-1 block w-full text-xs py-1.5 px-3 rounded-xl"
                             value={data.username}
                             onChange={(e) =>

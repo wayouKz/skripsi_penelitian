@@ -9,10 +9,30 @@
             0% { opacity: 0; transform: scale(0.98); }
             100% { opacity: 1; transform: scale(1); }
         }
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0rem rgba(234, 179, 8, 0.7); border-color: rgba(234, 179, 8, 1); }
+            50% { box-shadow: 0 0 20px 4px rgba(234, 179, 8, 0.5); border-color: rgba(234, 179, 8, 1); }
+            100% { box-shadow: 0 0 0 0rem rgba(234, 179, 8, 0); }
+        }
+        @keyframes toastSlideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
         .animate-chromosome { animation: fadeInScale 0.25s ease-in-out forwards; }
+        .highlight-update { animation: highlightPulse 1.2s ease-in-out infinite; }
+        .toast-animate { animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Custom scrollbar untuk log */
+        .log-scroll::-webkit-scrollbar { width: 6px; }
+        .log-scroll::-webkit-scrollbar-track { background: #111827; }
+        .log-scroll::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-gray-900 text-white p-6 font-sans">
+<body class="bg-gray-900 text-white p-6 font-sans relative">
+
+    <!-- CONTAINER NOTIFIKASI TOAST MELAYANG -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
+
     <div class="max-w-7xl mx-auto space-y-6">
 
         <!-- Header & Konfigurasi Parameter -->
@@ -69,20 +89,35 @@
                 </div>
             </div>
 
-            <!-- Blok Pelacakan Bentrok & Tumpang Tindih -->
+            <!-- Pelacakan Bentrok -->
             <div class="bg-gray-800 p-5 rounded-xl shadow border border-gray-700 md:col-span-2 flex flex-col">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">🚨 Pelacakan Bentrok & Tumpang Tindih</h2>
                     <span id="clashBadge" class="text-xs font-mono bg-gray-700 text-gray-300 px-2 py-1 rounded border border-gray-600">Menunggu...</span>
                 </div>
-                <div id="clashContainer" class="bg-black p-3 rounded-lg border border-gray-900 flex-1 h-48 overflow-y-auto space-y-2 font-mono text-xs text-gray-500">
-                    <div>[System] Log bentrok akan muncul di sini saat proses selesai atau optimal ditemukan. (Note: Penjaskes dikecualikan dari tracking guru)</div>
+                <div id="clashContainer" class="bg-black p-3 rounded-lg border border-gray-900 flex-1 h-48 overflow-y-auto log-scroll space-y-2 font-mono text-xs text-gray-500">
+                    <div>[System] Log bentrok akan muncul di sini saat proses selesai atau optimal ditemukan.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Blok Visualisasi Matriks -->
+        <!-- ================= PANEL BARU: LIVE ACTIVITY LOG ================= -->
         <div class="bg-gray-800 p-5 rounded-xl shadow border border-gray-700">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                    <span class="animate-pulse h-2 w-2 bg-red-500 rounded-full inline-block"></span> 
+                    Live Activity Log
+                </h2>
+                <span id="logCounterBadge" class="text-xs font-mono bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-700">0 Events Terpantau</span>
+            </div>
+            <div id="activityLogContainer" class="bg-black p-3 rounded-lg border border-gray-900 h-64 overflow-y-auto log-scroll space-y-2 font-mono text-xs text-gray-400">
+                <div id="emptyLogText" class="text-gray-600 italic">[System] Menunggu log mutasi & relokasi mapel...</div>
+            </div>
+        </div>
+        <!-- =============================================================== -->
+
+        <!-- Matriks Jadwal -->
+        <div id="matrixSection" class="bg-gray-800 p-5 rounded-xl shadow border border-gray-700 transition-all duration-300">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Visualisasi Matriks Jadwal Per Kelas</h2>
                 <span id="kromosomGenInfo" class="text-xs font-mono bg-indigo-900/50 text-indigo-300 px-2 py-1 rounded border border-indigo-700">Gen: -</span>
@@ -93,7 +128,7 @@
             </div>
         </div>
 
-        <!-- Blok Tabel Rekapitulasi Guru -->
+        <!-- Rekapitulasi Guru -->
         <div class="bg-gray-800 p-5 rounded-xl shadow border border-gray-700">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">📋 Rekapitulasi Guru, Mapel, Beban Jam & Kelas</h2>
@@ -137,7 +172,7 @@
                 { "id": 5, "mulai": "09:20", "selesai": "09:55" }, { "id": 6, "mulai": "09:55", "selesai": "10:30" },
                 { "id": 7, "mulai": "10:30", "selesai": "11:05" }, { "id": 8, "mulai": "11:05", "selesai": "11:40" },
                 { "id": 9, "mulai": "11:40", "selesai": "12:15" }, { "id": 10, "mulai": "12:15", "selesai": "12:50" },
-                { "id": 11, "mulai": "12:50", "selesai": "13:25" }, { "id": 12, "mulai": "13:25", "selesai": "14:00" }
+                { "id": 11, "mulai": "12:50", "selesai": "13:25" }
             ],
             "Rabu": [
                 { "id": 1, "mulai": "07:00", "selesai": "07:35" }, { "id": 2, "mulai": "07:35", "selesai": "08:10" },
@@ -178,12 +213,124 @@
             { bg: 'bg-pink-950/80', border: 'border-pink-500', text: 'text-pink-200', title: 'text-pink-300' }
         ];
 
+        let lastFitness = 0;
+        let totalLogCount = 0; // State untuk menghitung log live event
+
         function getSubjectColor(mapelName) {
             let hash = 0;
             for (let i = 0; i < mapelName.length; i++) {
                 hash = mapelName.charCodeAt(i) + ((hash << 5) - hash);
             }
             return colorPalette[Math.abs(hash) % colorPalette.length];
+        }
+
+        function showToastAlert(gen, oldFit, newFit, clashCount) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const fitDiff = (newFit - oldFit).toFixed(6);
+            const isClashFree = clashCount === 0;
+
+            toast.className = `toast-animate pointer-events-auto bg-gray-800 border ${isClashFree ? 'border-green-500' : 'border-yellow-500'} p-4 rounded-xl shadow-2xl space-y-1 text-xs`;
+            toast.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-yellow-400 flex items-center gap-1">⚡ Generasi ${gen} Updated!</span>
+                    <span class="text-[10px] font-mono bg-gray-900 text-gray-400 px-2 py-0.5 rounded">GA Event</span>
+                </div>
+                <div class="text-gray-200">
+                    Fitness: <strong class="text-green-400 font-mono">${parseFloat(newFit).toFixed(6)}</strong>
+                    <span class="text-emerald-400 text-[10px]">(+${fitDiff})</span>
+                </div>
+                <div class="text-gray-400 text-[11px]">
+                    Status Bentrok: <strong class="${isClashFree ? 'text-green-400' : 'text-red-400'}">${isClashFree ? '0 Bentrok (Optimal!)' : clashCount + ' Bentrok Terdeteksi'}</strong>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease-in-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ================= FUNGSI UNTUK APPEND LOG KE UI =================
+        function appendLiveLog(logObj) {
+            const container = document.getElementById('activityLogContainer');
+            const emptyText = document.getElementById('emptyLogText');
+            const badgeCount = document.getElementById('logCounterBadge');
+
+            if (emptyText) emptyText.remove(); // Hapus text waiting saat log pertama masuk
+            totalLogCount++;
+            badgeCount.innerText = `${totalLogCount} Events Terpantau`;
+
+            // Tentukan style badge berdasarkan "tahap"
+            let badgeClass = "bg-gray-700 text-gray-300";
+            if (logObj.tahap === 'TUKAR_MAPEL') badgeClass = "bg-blue-900 border border-blue-600 text-blue-300";
+            else if (logObj.tahap === 'RELOKASI_MAPEL') badgeClass = "bg-orange-900 border border-orange-600 text-orange-300";
+            else if (logObj.tahap === 'STAGNASI') badgeClass = "bg-red-900 border border-red-600 text-red-300";
+            else if (logObj.tahap === 'NEW_BEST') badgeClass = "bg-green-900 border border-green-600 text-green-300";
+            else if (logObj.tahap === 'START' || logObj.tahap === 'FINISH') badgeClass = "bg-purple-900 border border-purple-600 text-purple-300";
+
+            // Parse jam dari datetime (misal "2026-10-03 19:35:00" -> "19:35:00")
+            let timeOnly = logObj.waktu;
+            if(logObj.waktu && logObj.waktu.includes(' ')) timeOnly = logObj.waktu.split(' ')[1];
+
+            // Render Detail Data JSON
+            let detailHtml = '';
+            if (logObj.data && Object.keys(logObj.data).length > 0) {
+                detailHtml = `<div class="mt-1 pl-3 border-l-2 border-gray-700 text-[10px] text-gray-500 ml-1">`;
+                for (const [key, val] of Object.entries(logObj.data)) {
+                    detailHtml += `<span class="text-gray-400 capitalize">${key.replace('_', ' ')}:</span> <span class="text-gray-300">${val}</span> &nbsp; | &nbsp; `;
+                }
+                // Hapus separator terakhir
+                detailHtml = detailHtml.substring(0, detailHtml.length - 15) + `</div>`;
+            }
+
+            const item = document.createElement('div');
+            item.className = "border-b border-gray-800/80 pb-2 mb-2 last:border-0 hover:bg-gray-800/30 transition-colors";
+            item.innerHTML = `
+                <div class="flex items-start gap-2">
+                    <span class="text-[10px] text-gray-600 whitespace-nowrap">[${timeOnly}]</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded ${badgeClass} font-bold whitespace-nowrap">${logObj.tahap}</span>
+                    <span class="text-gray-200">${logObj.pesan}</span>
+                </div>
+                ${detailHtml}
+            `;
+            
+            container.appendChild(item);
+
+            // Auto-scroll kebawah
+            container.scrollTop = container.scrollHeight;
+
+            // Batasi elemen max 200 agar DOM / browser tidak lag
+            if (container.children.length > 200) {
+                container.removeChild(container.firstElementChild);
+            }
+        }
+        // =================================================================
+
+        function focusOnUpdate(kromosomData) {
+            if (!kromosomData) return;
+
+            const kelasIds = Object.keys(kromosomData);
+            if (kelasIds.length === 0) return;
+
+            const randomKelasId = kelasIds[Math.floor(Math.random() * kelasIds.length)];
+            const targetCard = document.getElementById(`kelas-card-${randomKelasId}`);
+
+            if (targetCard) {
+                targetCard.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+
+                targetCard.classList.add('highlight-update');
+                setTimeout(() => {
+                    targetCard.classList.remove('highlight-update');
+                }, 1200);
+            }
         }
 
         async function mulaiGenerate() {
@@ -197,11 +344,18 @@
             const groupedTableBody = document.getElementById('groupedTeacherTableBody');
             const clashContainer = document.getElementById('clashContainer');
             const clashBadge = document.getElementById('clashBadge');
+            
+            // Log Container Reset
+            const activityLogContainer = document.getElementById('activityLogContainer');
+            activityLogContainer.innerHTML = '<div id="emptyLogText" class="text-gray-600 italic">[System] Proses dimulai, memantau log mutasi...</div>';
+            totalLogCount = 0;
+            document.getElementById('logCounterBadge').innerText = "0 Events Terpantau";
 
             const populasiInput = parseInt(document.getElementById('inputPopulasi').value) || 50;
             const generasiInput = parseInt(document.getElementById('inputGenerasi').value) || 500;
-            const tahunAjaranId = 1;
+            const tahunAjaranId = 1; // Ubah sesuai controller Anda
 
+            lastFitness = 0;
             btn.disabled = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');
 
@@ -210,7 +364,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Pastikan format ini sesuai di framework Anda
                         'Accept': 'text/event-stream'
                     },
                     body: JSON.stringify({
@@ -233,7 +387,7 @@
 
                     buffer += decoder.decode(value, { stream: true });
                     let lines = buffer.split('\n\n');
-                    buffer = lines.pop();
+                    buffer = lines.pop(); // Sisa stream dimasukkan kembali ke buffer
 
                     for (let line of lines) {
                         if (line.startsWith('data: ')) {
@@ -241,7 +395,12 @@
                             try {
                                 const data = JSON.parse(jsonStr);
 
-                                if (data.type === 'progress') {
+                                // ====== EVENT: LOG ACTIVITY ======
+                                if (data.type === 'log_update') {
+                                    appendLiveLog(data.log);
+                                }
+                                // ====== EVENT: PROGRESS ======
+                                else if (data.type === 'progress') {
                                     if (data.generation !== undefined) {
                                         const percent = Math.round((data.generation / generasiInput) * 100);
                                         progressBar.style.width = percent + '%';
@@ -253,9 +412,12 @@
                                         statusMessage.innerText = data.message;
                                     }
                                 }
+                                // ====== EVENT: NEW_BEST / DONE ======
                                 else if (data.type === 'new_best' || data.type === 'done') {
+                                    let currentFitness = parseFloat(data.fitness || 0);
+
                                     if (data.type === 'new_best') {
-                                        fitnessVal.innerText = parseFloat(data.fitness).toFixed(6);
+                                        fitnessVal.innerText = currentFitness.toFixed(6);
                                         kromosomGenInfo.innerText = `Gen: ${data.generation}`;
                                     } else {
                                         statusMessage.innerText = data.message;
@@ -275,7 +437,7 @@
                                         let teacherGroupedMap = {};
                                         let clashReports = [];
 
-                                        // 1. Rekap data guru & pengisian matriks ketersediaan guru
+                                        // 1. Rekap data guru
                                         for (const [kelasId, blocks] of Object.entries(kromosomData)) {
                                             for (const [blokKey, gen] of Object.entries(blocks)) {
                                                 let guruId = gen.guru_id ? String(gen.guru_id) : 'none';
@@ -284,7 +446,6 @@
                                                 let durasi = parseInt(gen.durasi || 1);
                                                 let namaMapel = gen.nama_mapel || 'Mapel';
 
-                                                // Logika Pengecualian Penjaskes
                                                 let isPenjaskes = gen.is_penjaskes === true || String(namaMapel).toLowerCase().includes('penjas') || String(namaMapel).toLowerCase().includes('olahraga');
 
                                                 if (!teacherGroupedMap[guruId]) {
@@ -294,7 +455,6 @@
                                                 teacherGroupedMap[guruId].total_beban += durasi;
                                                 teacherGroupedMap[guruId].kelas.add(`Kelas ${kelasId}`);
 
-                                                // HANYA simpan slot guru untuk mapel non-penjaskes untuk menghindari tracking guru Penjaskes
                                                 if (guruId && guruId !== 'none' && guruId !== '0' && !isPenjaskes) {
                                                     if (!teacherSlots[guruId]) teacherSlots[guruId] = {};
                                                     if (!teacherSlots[guruId][h]) teacherSlots[guruId][h] = {};
@@ -317,7 +477,7 @@
                                             }
                                         }
 
-                                        // Evaluasi Laporan Bentrok: Bentrok Jadwal Guru
+                                        // Laporan Bentrok Guru
                                         for (const [gId, hariData] of Object.entries(teacherSlots)) {
                                             for (const [h, jamData] of Object.entries(hariData)) {
                                                 for (const [j, jadwalList] of Object.entries(jamData)) {
@@ -333,6 +493,23 @@
                                             }
                                         }
 
+                                        // Badge Bentrok
+                                        if (clashReports.length === 0) {
+                                            clashBadge.className = "text-xs font-mono bg-green-900/80 text-green-300 px-2.5 py-1 rounded border border-green-600 font-bold";
+                                            clashBadge.innerText = "0 Bentrok (Optimal!)";
+                                            clashContainer.innerHTML = `<div class="text-green-400 font-semibold p-2">✅ Jadwal Bebas Bentrok! Semua guru & kelas memiliki slot steril.</div>`;
+                                        } else {
+                                            clashBadge.className = "text-xs font-mono bg-red-900/80 text-red-300 px-2.5 py-1 rounded border border-red-600 font-bold";
+                                            clashBadge.innerText = `${clashReports.length} Bentrok`;
+                                            clashContainer.innerHTML = '';
+                                            clashReports.forEach(rep => {
+                                                let item = document.createElement('div');
+                                                item.className = "bg-red-950/40 p-2 rounded border border-red-900/50 text-red-300";
+                                                item.innerHTML = `<strong class="text-red-400">${rep.title}</strong><br>${rep.desc}`;
+                                                clashContainer.appendChild(item);
+                                            });
+                                        }
+
                                         // Render Rekap Guru
                                         for (const [gId, info] of Object.entries(teacherGroupedMap)) {
                                             let tr = document.createElement('tr');
@@ -346,20 +523,15 @@
                                             groupedTableBody.appendChild(tr);
                                         }
 
-                                        // 2. Render Matriks Kelas & Evaluasi Tumpang Tindih Slot Kelas
+                                        // Render Matriks Kelas
                                         for (const [kelasId, blocks] of Object.entries(kromosomData)) {
                                             let totalBlok = Object.keys(blocks).length;
                                             let totalJam = 0;
                                             let classSubjects = new Set();
-
                                             let jadwalMatrix = {};
-                                            hariList.forEach(h => {
-                                                jadwalMatrix[h] = {};
-                                                let limitJam = (h === 'Kamis' || h === 'Jumat') ? 12 : 11;
-                                                for (let j = 1; j <= limitJam; j++) {
-                                                    jadwalMatrix[h][j] = [];
-                                                }
-                                            });
+                                            let maxJamKelas = 12;
+
+                                            hariList.forEach(h => { jadwalMatrix[h] = {}; });
 
                                             for (const [blokKey, gen] of Object.entries(blocks)) {
                                                 let h = gen.hari;
@@ -369,21 +541,26 @@
                                                 totalJam += durasi;
                                                 if(gen.nama_mapel) classSubjects.add(gen.nama_mapel);
 
+                                                let endJam = jMulai + durasi - 1;
+                                                if(endJam > maxJamKelas) maxJamKelas = endJam;
+
                                                 if (jadwalMatrix[h]) {
                                                     for (let d = 0; d < durasi; d++) {
                                                         let jamKe = jMulai + d;
-                                                        if (jadwalMatrix[h][jamKe]) {
-                                                            jadwalMatrix[h][jamKe].push({
-                                                                ...gen,
-                                                                is_start: (d === 0)
-                                                            });
+                                                        if (!jadwalMatrix[h][jamKe]) {
+                                                            jadwalMatrix[h][jamKe] = [];
                                                         }
+                                                        jadwalMatrix[h][jamKe].push({
+                                                            ...gen,
+                                                            is_start: (d === 0)
+                                                        });
                                                     }
                                                 }
                                             }
 
                                             let kelasWrapper = document.createElement('div');
                                             kelasWrapper.className = "bg-gray-900 p-4 rounded-lg border border-gray-700 overflow-x-auto space-y-3 animate-chromosome";
+                                            kelasWrapper.id = `kelas-card-${kelasId}`;
 
                                             let title = document.createElement('div');
                                             title.className = "flex justify-between items-center";
@@ -414,7 +591,8 @@
                                             let headerRow = document.createElement('tr');
                                             headerRow.className = "bg-gray-800 text-gray-300";
                                             headerRow.innerHTML = `<th class="border border-gray-700 p-2 w-24">Hari / Jam</th>`;
-                                            for(let j=1; j<=12; j++) {
+
+                                            for(let j = 1; j <= maxJamKelas; j++) {
                                                 headerRow.innerHTML += `<th class="border border-gray-700 p-2">Jam ${j}</th>`;
                                             }
                                             thead.appendChild(headerRow);
@@ -422,133 +600,58 @@
 
                                             let tbody = document.createElement('tbody');
                                             hariList.forEach(h => {
-                                                let limitJam = (h === 'Kamis' || h === 'Jumat') ? 12 : 11;
+                                                let limitHari = (h === 'Kamis' || h === 'Jumat') ? 12 : 11;
                                                 let row = document.createElement('tr');
                                                 row.className = "hover:bg-gray-800/50 transition duration-150";
                                                 row.innerHTML = `<td class="border border-gray-700 p-2 font-bold bg-gray-800/80 text-cyan-300">${h}</td>`;
 
-                                                for(let j=1; j<=12; j++) {
-                                                    if (j > limitJam) {
-                                                        row.innerHTML += `<td class="border border-gray-700 p-2 bg-gray-950/40 text-gray-700">-</td>`;
-                                                        continue;
-                                                    }
-
+                                                for(let j = 1; j <= maxJamKelas; j++) {
                                                     let slots = jadwalMatrix[h][j];
 
                                                     if (!slots || slots.length === 0) {
-                                                        row.innerHTML += `<td class="border border-gray-700 p-2 text-gray-600">-</td>`;
+                                                        if (j > limitHari) {
+                                                            row.innerHTML += `<td class="border border-gray-700 p-2 bg-gray-950/60 text-gray-700 font-bold">-</td>`;
+                                                        } else {
+                                                            row.innerHTML += `<td class="border border-gray-700 p-2 text-gray-600 font-bold bg-gray-950/20">-</td>`;
+                                                        }
                                                         continue;
                                                     }
 
                                                     let isBentrok = slots.length > 1;
+                                                    let cellContent = slots.map(s => {
+                                                        let col = getSubjectColor(s.nama_mapel || 'Mapel');
+                                                        return `<div class="${col.bg} ${col.border} ${col.text} p-1 rounded border text-[10px] font-bold">
+                                                            ${s.nama_mapel}<br><span class="text-[9px] text-gray-400">Guru ID: ${s.guru_id}</span>
+                                                        </div>`;
+                                                    }).join('<div class="text-red-500 font-bold my-0.5">VS</div>');
 
-                                                    if (isBentrok) {
-                                                        let mapelListStr = slots.map(s => `${s.nama_mapel} (Guru ID: ${s.guru_id})`).join(' vs ');
-                                                        clashReports.push({
-                                                            type: 'Kelas',
-                                                            title: `Bentrok Mapel (Kelas ${kelasId})`,
-                                                            desc: `${h}, Jam ke-${j} : ${mapelListStr}`
-                                                        });
-                                                    }
-
-                                                    let hasTeacherClash = false;
-                                                    slots.forEach(s => {
-                                                        let isPenjas = s.is_penjaskes === true || String(s.nama_mapel).toLowerCase().includes('penjas') || String(s.nama_mapel).toLowerCase().includes('olahraga');
-                                                        let guruIdStr = s.guru_id ? String(s.guru_id) : null;
-
-                                                        // Validasi bentrok guru dipastikan kebal terhadap penjaskes
-                                                        if (!isPenjas && guruIdStr && guruIdStr !== 'none' && teacherSlots[guruIdStr]?.[h]?.[j]?.length > 1) {
-                                                            hasTeacherClash = true;
-                                                        }
-                                                    });
-
-                                                    if (hasTeacherClash) isBentrok = true;
-
-                                                    if (isBentrok) {
-                                                        let mapelListStr = slots.map(s => `<span class="underline">${s.nama_mapel}</span>`).join(' & ');
-                                                        row.innerHTML += `
-                                                            <td class="border border-gray-700 p-2 bg-red-950/90 border-red-500 text-red-200 animate-pulse">
-                                                                <div class="font-bold text-red-300 truncate text-[10px]" title="Bentrok: ${slots.map(s=>s.nama_mapel).join(', ')}">⚠️ TUMPANG TINDIH</div>
-                                                                <div class="text-[9px] text-red-200 font-semibold truncate leading-tight mt-1">${mapelListStr}</div>
-                                                            </td>
-                                                        `;
-                                                    } else {
-                                                        let primarySlot = slots[0];
-
-                                                        let blockIsClean = true;
-                                                        for (let d = 0; d < primarySlot.durasi; d++) {
-                                                            let checkJam = primarySlot.jam_mulai + d;
-                                                            if (jadwalMatrix[h][checkJam] && jadwalMatrix[h][checkJam].length > 1) {
-                                                                blockIsClean = false;
-                                                            }
-                                                        }
-
-                                                        if (blockIsClean) {
-                                                            if (primarySlot.is_start) {
-                                                                let subColor = getSubjectColor(primarySlot.nama_mapel || 'Mapel');
-                                                                let bgClass = `${subColor.bg} ${subColor.border} ${subColor.text}`;
-                                                                row.innerHTML += `
-                                                                    <td colspan="${primarySlot.durasi}" class="border border-gray-700 p-2 ${bgClass}">
-                                                                        <div class="font-bold ${subColor.title} truncate" title="${primarySlot.nama_mapel}">${primarySlot.nama_mapel || 'Mapel'}</div>
-                                                                        <div class="text-[10px] text-gray-400 truncate">Guru ID: ${primarySlot.guru_id}</div>
-                                                                    </td>
-                                                                `;
-                                                            }
-                                                        } else {
-                                                            let subColor = getSubjectColor(primarySlot.nama_mapel || 'Mapel');
-                                                            let bgClass = `${subColor.bg} ${subColor.border} ${subColor.text}`;
-                                                            row.innerHTML += `
-                                                                <td colspan="1" class="border border-gray-700 p-2 ${bgClass}">
-                                                                    <div class="font-bold ${subColor.title} truncate" title="${primarySlot.nama_mapel}">${primarySlot.nama_mapel || 'Mapel'}</div>
-                                                                    <div class="text-[10px] text-gray-400 truncate">Guru ID: ${primarySlot.guru_id}</div>
-                                                                </td>
-                                                            `;
-                                                        }
-                                                    }
+                                                    let bgCell = isBentrok ? 'bg-red-950/60 border-red-600' : '';
+                                                    row.innerHTML += `<td class="border border-gray-700 p-1.5 ${bgCell}">${cellContent}</td>`;
                                                 }
                                                 tbody.appendChild(row);
                                             });
+
                                             table.appendChild(tbody);
                                             kelasWrapper.appendChild(table);
                                             matrixContainer.appendChild(kelasWrapper);
                                         }
 
-                                        // Render UI Laporan Bentrok
-                                        clashContainer.innerHTML = '';
-                                        if (clashReports.length === 0) {
-                                            clashBadge.className = "text-xs font-mono bg-green-900/50 text-green-400 px-2 py-1 rounded border border-green-700";
-                                            clashBadge.innerText = "Aman (0 Bentrok)";
-                                            clashContainer.innerHTML = `<div class="bg-green-950/30 border border-green-900 text-green-400 p-4 rounded-lg text-sm flex items-center justify-center h-full">✅ Tidak ada tumpang tindih mapel atau bentrok jadwal guru.</div>`;
-                                        } else {
-                                            clashBadge.className = "text-xs font-mono bg-red-900/50 text-red-400 px-2 py-1 rounded border border-red-700 animate-pulse";
-                                            clashBadge.innerText = `${clashReports.length} Bentrok`;
-
-                                            const uniqueClashList = Array.from(new Set(clashReports.map(a => JSON.stringify(a)))).map(a => JSON.parse(a));
-
-                                            uniqueClashList.forEach(c => {
-                                                let icon = c.type === 'Guru' ? '🧑‍🏫' : '🏫';
-                                                clashContainer.innerHTML += `
-                                                    <div class="bg-red-950/20 border border-red-900/50 p-3 rounded-lg flex flex-col md:flex-row items-start gap-3 text-left">
-                                                        <div class="text-xl">${icon}</div>
-                                                        <div>
-                                                            <div class="text-red-300 font-bold text-[13px]">${c.title}</div>
-                                                            <div class="text-red-200/80 text-[11px] mt-0.5">${c.desc}</div>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            });
+                                        if (data.type === 'new_best') {
+                                            showToastAlert(data.generation, lastFitness, currentFitness, clashReports.length);
+                                            lastFitness = currentFitness;
+                                            focusOnUpdate(kromosomData); 
                                         }
                                     }
                                 }
                             } catch (e) {
-                                console.error("Gagal parse JSON dari stream:", e);
+                                console.error("JSON parse error", e);
                             }
                         }
                     }
                 }
-            } catch (err) {
-                console.error("Error saat fetch SSE:", err);
-                statusMessage.innerText = "Error koneksi ke server.";
+            } catch (error) {
+                console.error("Fetch error", error);
+                statusMessage.innerText = "Terjadi kesalahan koneksi streaming.";
                 statusMessage.className = "text-sm text-red-400 font-bold";
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');

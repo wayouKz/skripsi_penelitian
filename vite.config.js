@@ -10,23 +10,23 @@ export default defineConfig({
         }),
         react(),
     ],
-    server: {
-        host: "0.0.0.0",
-        port: 5173,
-        cors: true,
-        allowedHosts: ["cdn.dev-whostech.my.id"],
-        hmr: {
-            host: "cdn.dev-whostech.my.id",
-            protocol: "wss",
-            clientPort: 443, // Menggunakan port HTTPS standar di sisi browser
-            https: {
-                key: fs.readFileSync(
-                    "/etc/letsencrypt/live/cdn.dev-whostech.my.id/privkey.pem",
-                ),
-                cert: fs.readFileSync(
-                    "/etc/letsencrypt/live/cdn.dev-whostech.my.id/fullchain.pem",
-                ),
-            },
-        },
-    },
+    // server: {
+    //     host: "0.0.0.0",
+    //     port: 5173,
+    //     cors: true,
+    //     allowedHosts: ["cdn.dev-whostech.my.id"],
+    //     hmr: {
+    //         host: "cdn.dev-whostech.my.id",
+    //         protocol: "wss",
+    //         clientPort: 443, // Menggunakan port HTTPS standar di sisi browser
+    //         https: {
+    //             key: fs.readFileSync(
+    //                 "/etc/letsencrypt/live/cdn.dev-whostech.my.id/privkey.pem",
+    //             ),
+    //             cert: fs.readFileSync(
+    //                 "/etc/letsencrypt/live/cdn.dev-whostech.my.id/fullchain.pem",
+    //             ),
+    //         },
+    //     },
+    // },
 });

@@ -28,4 +28,4 @@ jobs:
 
       # 4. Jalankan proses Build atau Test
       - name: Run Build
-        run: su npm run build # Sesuaikan dengan perintah build di package.json Anda
+        run: sudo npm run build # Sesuaikan dengan perintah build di package.json Anda

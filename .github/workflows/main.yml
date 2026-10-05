@@ -3,29 +3,29 @@ name: CI/CD Auto Build
 # Menentukan kapan workflow ini akan berjalan
 on:
   push:
-    branches: [ "main", "master" ] # Berjalan saat ada push ke branch main atau master
+    branches: ["main", "master"] # Berjalan saat ada push ke branch main atau master
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
 jobs:
   build:
     runs-on: ubuntu-latest # Menggunakan server virtual Ubuntu terbaru
 
     steps:
-    # 1. Mengambil kode dari repository Anda
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      # 1. Mengambil kode dari repository Anda
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    # 2. Setup environment (Contoh: Node.js)
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20' # Sesuaikan dengan versi Node.js proyek Anda
+      # 2. Setup environment (Contoh: Node.js)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Sesuaikan dengan versi Node.js proyek Anda
 
-    # 3. Installdependencies
-    - name: Install Dependencies
-      run: npm install
+      # 3. Installdependencies
+      - name: Install Dependencies
+        run: npm install
 
-    # 4. Jalankan proses Build atau Test
-    - name: Run Build
-      run: npm run build # Sesuaikan dengan perintah build di package.json Anda
+      # 4. Jalankan proses Build atau Test
+      - name: Run Build
+        run: su npm run build # Sesuaikan dengan perintah build di package.json Anda

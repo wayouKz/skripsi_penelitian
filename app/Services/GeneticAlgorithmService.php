@@ -387,211 +387,167 @@ class GeneticAlgorithmService
         ];
     }
 
-   private function inisialisasiPopulasi()
-    {
-        $populasi = [];
+  private function inisialisasiPopulasi()
+{
+    $populasi = [];
 
-        $guruMapelsArray = $this->guruMapels instanceof \Illuminate\Support\Collection
-            ? $this->guruMapels->all()
-            : (array) $this->guruMapels;
+    $guruMapelsArray = $this->guruMapels instanceof \Illuminate\Support\Collection
+        ? $this->guruMapels->all()
+        : (array) $this->guruMapels;
 
-        $totalBebanGuru = [];
-        $guruMapelPerKelas = [];
+    $totalBebanGuru = [];
+    $guruMapelPerKelas = [];
 
-        foreach ($guruMapelsArray as $gm) {
-            $guruMapelPerKelas[$gm->kelas_id][] = $gm;
-            $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : (!empty($gm->nip) ? 'n_' . $gm->nip : 'none');
-            if ($gId !== 'none') {
-                $totalBebanGuru[$gId] = ($totalBebanGuru[$gId] ?? 0) + (int) $gm->beban_jam;
+    foreach ($guruMapelsArray as $gm) {
+        $guruMapelPerKelas[$gm->kelas_id][] = $gm;
+        $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : (!empty($gm->nip) ? 'n_' . $gm->nip : 'none');
+        if ($gId !== 'none') {
+            $totalBebanGuru[$gId] = ($totalBebanGuru[$gId] ?? 0) + (int) $gm->beban_jam;
+        }
+    }
+
+    $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection ? $this->kelas->all() : (array) $this->kelas;
+
+    $kelasPrioritas = $kelasArray;
+    usort($kelasPrioritas, function($a, $b) use ($guruMapelPerKelas, $totalBebanGuru) {
+        $aId = is_object($a) ? ($a->id ?? $a->kelas_id ?? null) : $a;
+        $bId = is_object($b) ? ($b->id ?? $b->kelas_id ?? null) : $b;
+
+        $bebanA = 0;
+        foreach (($guruMapelPerKelas[$aId] ?? []) as $gm) {
+            $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : 'none';
+            $bebanA += $totalBebanGuru[$gId] ?? 0;
+        }
+
+        $bebanB = 0;
+        foreach (($guruMapelPerKelas[$bId] ?? []) as $gm) {
+            $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : 'none';
+            $bebanB += $totalBebanGuru[$gId] ?? 0;
+        }
+        return $bebanB <=> $bebanA;
+    });
+
+    for ($i = 0; $i < $this->populasi; $i++) {
+        $kromosom = [];
+        $matrixGuru = [];
+        $matrixKelasGlobal = [];
+        $matrixMapelGlobal = [];
+
+        foreach ($kelasPrioritas as $kls) {
+            $kId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
+            if (!$kId) continue;
+
+            foreach ($this->hari as $h) {
+                $maxH = $this->getMaxJamInternal($h);
+                $matrixKelasGlobal[$kId][$h] = array_fill(1, $maxH, false);
+                $matrixMapelGlobal[$kId][$h] = [];
             }
         }
 
-        $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection ? $this->kelas->all() : (array) $this->kelas;
+        $globalUnassignedChunks = [];
 
-        $kelasPrioritas = $kelasArray;
-        usort($kelasPrioritas, function($a, $b) use ($guruMapelPerKelas, $totalBebanGuru) {
-            $aId = is_object($a) ? ($a->id ?? $a->kelas_id ?? null) : $a;
-            $bId = is_object($b) ? ($b->id ?? $b->kelas_id ?? null) : $b;
+        foreach ($kelasPrioritas as $kls) {
+            $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
+            if (!$kelasId) continue;
 
-            $bebanA = 0;
-            foreach (($guruMapelPerKelas[$aId] ?? []) as $gm) {
-                $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : 'none';
-                $bebanA += $totalBebanGuru[$gId] ?? 0;
-            }
+            // Ambil nama kelas dari objek kelas atau fallback ke guruMapel
+            $namaKelas = is_object($kls) ? ($kls->nama_kelas ?? $kls->nama ?? null) : null;
 
-            $bebanB = 0;
-            foreach (($guruMapelPerKelas[$bId] ?? []) as $gm) {
-                $gId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : 'none';
-                $bebanB += $totalBebanGuru[$gId] ?? 0;
-            }
-            return $bebanB <=> $bebanA;
-        });
+            $mapelKelas = $guruMapelPerKelas[$kelasId] ?? [];
+            if (empty($mapelKelas)) continue;
+            if (!isset($kromosom[$kelasId])) $kromosom[$kelasId] = [];
 
-        for ($i = 0; $i < $this->populasi; $i++) {
-            $kromosom = [];
-            $matrixGuru = [];
-            $matrixKelasGlobal = [];
-            $matrixMapelGlobal = [];
+            $allChunksToAllocate = [];
+            foreach ($mapelKelas as $gm) {
+                $bebanSeharusnya = (int) $gm->beban_jam;
+                if ($bebanSeharusnya <= 0) continue;
 
-            foreach ($kelasPrioritas as $kls) {
-                $kId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
-                if (!$kId) continue;
-
-                foreach ($this->hari as $h) {
-                    $maxH = $this->getMaxJamInternal($h);
-                    $matrixKelasGlobal[$kId][$h] = array_fill(1, $maxH, false);
-                    $matrixMapelGlobal[$kId][$h] = [];
+                if (!$namaKelas && isset($gm->nama_kelas)) {
+                    $namaKelas = $gm->nama_kelas;
                 }
-            }
 
-            $globalUnassignedChunks = [];
+                $namaMapel = $gm->nama_mapel ?? 'Unknown';
+                $namaMapelLower = strtolower($namaMapel);
+                $isPenjaskes = str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
 
-            foreach ($kelasPrioritas as $kls) {
-                $kelasId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
-                if (!$kelasId) continue;
-
-                // Ambil nama kelas dari objek kelas atau fallback ke guruMapel
-                $namaKelas = is_object($kls) ? ($kls->nama_kelas ?? $kls->nama ?? null) : null;
-
-                $mapelKelas = $guruMapelPerKelas[$kelasId] ?? [];
-                if (empty($mapelKelas)) continue;
-                if (!isset($kromosom[$kelasId])) $kromosom[$kelasId] = [];
-
-                $allChunksToAllocate = [];
-                foreach ($mapelKelas as $gm) {
-                    $bebanSeharusnya = (int) $gm->beban_jam;
-                    if ($bebanSeharusnya <= 0) continue;
-
-                    if (!$namaKelas && isset($gm->nama_kelas)) {
-                        $namaKelas = $gm->nama_kelas;
-                    }
-
-                    $namaMapel = $gm->nama_mapel ?? 'Unknown';
-                    $namaMapelLower = strtolower($namaMapel);
-                    $isPenjaskes = str_contains($namaMapelLower, 'penjas') || str_contains($namaMapelLower, 'olahraga');
-
-                    $chunksDurasi = [];
-                    if ($isPenjaskes) {
+                $chunksDurasi = [];
+                if ($isPenjaskes) {
+                    $chunksDurasi = [$bebanSeharusnya];
+                } else {
+                    if ($bebanSeharusnya <= 3) {
                         $chunksDurasi = [$bebanSeharusnya];
                     } else {
-                        if ($bebanSeharusnya <= 3) {
-                            $chunksDurasi = [$bebanSeharusnya];
-                        } else {
-                            $chunk1 = (int) ceil($bebanSeharusnya / 2);
-                            $chunk2 = (int) floor($bebanSeharusnya / 2);
-                            $chunksDurasi = [$chunk1, $chunk2];
-                        }
-                    }
-
-                    foreach ($chunksDurasi as $dur) {
-                        $allChunksToAllocate[] = [
-                            'gm' => $gm, 'durasi' => $dur, 'is_penjaskes' => $isPenjaskes, 'nama_mapel' => $namaMapel
-                        ];
+                        $chunk1 = (int) ceil($bebanSeharusnya / 2);
+                        $chunk2 = (int) floor($bebanSeharusnya / 2);
+                        $chunksDurasi = [$chunk1, $chunk2];
                     }
                 }
 
-                usort($allChunksToAllocate, function($a, $b) use ($totalBebanGuru) {
-                    if ($a['is_penjaskes'] && !$b['is_penjaskes']) return -1;
-                    if (!$a['is_penjaskes'] && $b['is_penjaskes']) return 1;
-                    if ($a['durasi'] !== $b['durasi']) return $b['durasi'] <=> $a['durasi'];
-
-                    $gA = !empty($a['gm']->guru_id) ? 'g_'.$a['gm']->guru_id : 'none';
-                    $gB = !empty($b['gm']->guru_id) ? 'g_'.$b['gm']->guru_id : 'none';
-                    return ($totalBebanGuru[$gB] ?? 0) <=> ($totalBebanGuru[$gA] ?? 0);
-                });
-
-                $counterId = 1;
-                foreach ($allChunksToAllocate as $item) {
-                    $gm = $item['gm'];
-                    $durasiChunk = $item['durasi'];
-                    $isPenjaskes = $item['is_penjaskes'];
-                    $namaMapel = $item['nama_mapel'];
-                    $mapelId = $gm->mapel_id;
-                    $guruId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : (!empty($gm->nip) ? 'n_' . $gm->nip : 'none');
-
-                    $chunkId = 'gm_' . $gm->id . '_b_' . $counterId . '_p_' . $i;
-                    $counterId++;
-
-                    $assignedHari = null;
-                    $assignedJam = null;
-                    $hariAcak = $this->hari;
-                    shuffle($hariAcak);
-
-                    foreach ($hariAcak as $hari) {
-                        $maxH = $this->getMaxJamInternal($hari);
-
-                        $batasMulaiJam = $isPenjaskes ? 1 : ($maxH - $durasiChunk + 1);
-
-                        if (!$isPenjaskes && isset($matrixMapelGlobal[$kelasId][$hari][$mapelId])) continue;
-
-                        for ($jm = 1; $jm <= $batasMulaiJam; $jm++) {
-                            $bisa = true;
-                            for ($d = 0; $d < $durasiChunk; $d++) {
-                                $jamCek = $jm + $d;
-                                if (!empty($matrixKelasGlobal[$kelasId][$hari][$jamCek]) ||
-                                (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]))) {
-                                    $bisa = false; break;
-                                }
-                            }
-                            if ($bisa) {
-                                $assignedHari = $hari; $assignedJam = $jm; break 2;
-                            }
-                        }
-                    }
-
-                    if ($assignedHari && $assignedJam) {
-                        for ($d = 0; $d < $durasiChunk; $d++) {
-                            $jamCek = $assignedJam + $d;
-                            $matrixKelasGlobal[$kelasId][$assignedHari][$jamCek] = true;
-                            if (!$isPenjaskes && $guruId !== 'none') $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
-                        }
-                        if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$assignedHari][$mapelId] = true;
-
-                        $kromosom[$kelasId][$chunkId] = [
-                            'guru_id' => $gm->guru_id ?? null, 'nip' => $gm->nip ?? null,
-                            'g_id' => $guruId,
-                            't_list_guru_mapel_id' => $gm->id, 'blok_id' => $chunkId,
-                            'nama_guru' => $gm->nama_guru ?? null,
-                            'nama_kelas' => $namaKelas ?? ($gm->nama_kelas ?? null),
-                            'mapel_id' => $mapelId, 'nama_mapel' => $namaMapel, 'kelas_id' => $kelasId,
-                            'hari' => $assignedHari, 'jam_mulai' => (int) $assignedJam,
-                            'durasi' => (int) $durasiChunk, 'is_penjaskes' => $isPenjaskes
-                        ];
-                    } else {
-                        $globalUnassignedChunks[] = [
-                            'kelas_id' => $kelasId, 'gm' => $gm, 'chunk_id' => $chunkId,
-                            'durasi' => $durasiChunk, 'is_penjaskes' => $isPenjaskes,
-                            'nama_mapel' => $namaMapel, 'guru_id' => $guruId, 'mapel_id' => $mapelId,
-                            'nama_kelas' => $namaKelas ?? ($gm->nama_kelas ?? null)
-                        ];
-                    }
+                foreach ($chunksDurasi as $dur) {
+                    $allChunksToAllocate[] = [
+                        'gm' => $gm, 'durasi' => $dur, 'is_penjaskes' => $isPenjaskes, 'nama_mapel' => $namaMapel
+                    ];
                 }
             }
 
-            foreach ($globalUnassignedChunks as $unassigned) {
-                $kelasId = $unassigned['kelas_id']; $gm = $unassigned['gm'];
-                $chunkId = $unassigned['chunk_id']; $durasiChunk = $unassigned['durasi'];
-                $isPenjaskes = $unassigned['is_penjaskes']; $namaMapel = $unassigned['nama_mapel'];
-                $guruId = $unassigned['guru_id']; $mapelId = $unassigned['mapel_id'];
-                $namaKelasUnassigned = $unassigned['nama_kelas'] ?? ($gm->nama_kelas ?? null);
+            // --- HANDLE PRIORITAS: Tempatkan prioritas_pagi paling atas ---
+            usort($allChunksToAllocate, function($a, $b) use ($totalBebanGuru) {
+                $pagiA = ($a['gm']->prioritas_pagi ?? false) || ($a['gm']->nip === '196905031994032004') ? 1 : 0;
+                $pagiB = ($b['gm']->prioritas_pagi ?? false) || ($b['gm']->nip === '196905031994032004') ? 1 : 0;
 
-                $assignedHari = null; $assignedJam = null;
-                $hariAcak = $this->hari; shuffle($hariAcak);
+                if ($pagiA !== $pagiB) return $pagiB <=> $pagiA;
+                if ($a['is_penjaskes'] && !$b['is_penjaskes']) return -1;
+                if (!$a['is_penjaskes'] && $b['is_penjaskes']) return 1;
+                if ($a['durasi'] !== $b['durasi']) return $b['durasi'] <=> $a['durasi'];
 
-                foreach ($hariAcak as $hari) {
+                $gA = !empty($a['gm']->guru_id) ? 'g_'.$a['gm']->guru_id : 'none';
+                $gB = !empty($b['gm']->guru_id) ? 'g_'.$b['gm']->guru_id : 'none';
+                return ($totalBebanGuru[$gB] ?? 0) <=> ($totalBebanGuru[$gA] ?? 0);
+            });
+
+            $counterId = 1;
+            foreach ($allChunksToAllocate as $item) {
+                $gm = $item['gm'];
+                $durasiChunk = $item['durasi'];
+                $isPenjaskes = $item['is_penjaskes'];
+                $namaMapel = $item['nama_mapel'];
+
+                // --- HANDLE MAPEL_ID NULL: Buat kunci unik jika mapel_id kosong ---
+                $mapelId = $gm->mapel_id;
+                $mapelCheckKey = !empty($mapelId) ? $mapelId : 'gm_' . $gm->id;
+
+                $guruId = !empty($gm->guru_id) ? 'g_' . $gm->guru_id : (!empty($gm->nip) ? 'n_' . $gm->nip : 'none');
+                $isPrioritasPagi = ($gm->prioritas_pagi ?? false);
+
+                $chunkId = 'gm_' . $gm->id . '_b_' . $counterId . '_p_' . $i;
+                $counterId++;
+
+                $assignedHari = null;
+                $assignedJam = null;
+
+                // --- HANDLE HARI: Jangan di-acak jika prioritas pagi ---
+                $hariCekList = $this->hari;
+                if (!$isPrioritasPagi) {
+                    shuffle($hariCekList);
+                }
+
+                foreach ($hariCekList as $hari) {
                     $maxH = $this->getMaxJamInternal($hari);
+
                     $batasMulaiJam = $isPenjaskes ? 1 : ($maxH - $durasiChunk + 1);
 
+                    if (!$isPenjaskes && isset($matrixMapelGlobal[$kelasId][$hari][$mapelCheckKey])) continue;
+
                     for ($jm = 1; $jm <= $batasMulaiJam; $jm++) {
-                        $bisaSteril = true;
+                        $bisa = true;
                         for ($d = 0; $d < $durasiChunk; $d++) {
                             $jamCek = $jm + $d;
                             if (!empty($matrixKelasGlobal[$kelasId][$hari][$jamCek]) ||
-                                (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]))) {
-                                $bisaSteril = false; break;
+                            (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]))) {
+                                $bisa = false; break;
                             }
                         }
-                        if ($bisaSteril) {
+                        if ($bisa) {
                             $assignedHari = $hari; $assignedJam = $jm; break 2;
                         }
                     }
@@ -603,60 +559,119 @@ class GeneticAlgorithmService
                         $matrixKelasGlobal[$kelasId][$assignedHari][$jamCek] = true;
                         if (!$isPenjaskes && $guruId !== 'none') $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
                     }
-                    if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$assignedHari][$mapelId] = true;
+                    if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$assignedHari][$mapelCheckKey] = true;
 
                     $kromosom[$kelasId][$chunkId] = [
                         'guru_id' => $gm->guru_id ?? null, 'nip' => $gm->nip ?? null,
                         'g_id' => $guruId,
                         't_list_guru_mapel_id' => $gm->id, 'blok_id' => $chunkId,
                         'nama_guru' => $gm->nama_guru ?? null,
-                        'nama_kelas' => $namaKelasUnassigned,
+                        'nama_kelas' => $namaKelas ?? ($gm->nama_kelas ?? null),
                         'mapel_id' => $mapelId, 'nama_mapel' => $namaMapel, 'kelas_id' => $kelasId,
                         'hari' => $assignedHari, 'jam_mulai' => (int) $assignedJam,
                         'durasi' => (int) $durasiChunk, 'is_penjaskes' => $isPenjaskes
                     ];
                 } else {
-                    $sisaDurasi = $durasiChunk;
-                    foreach ($this->hari as $hCoba) {
-                        if (!$isPenjaskes && $mapelId && isset($matrixMapelGlobal[$kelasId][$hCoba][$mapelId])) continue;
+                    $globalUnassignedChunks[] = [
+                        'kelas_id' => $kelasId, 'gm' => $gm, 'chunk_id' => $chunkId,
+                        'durasi' => $durasiChunk, 'is_penjaskes' => $isPenjaskes,
+                        'nama_mapel' => $namaMapel, 'guru_id' => $guruId, 'mapel_id' => $mapelId,
+                        'mapel_check_key' => $mapelCheckKey,
+                        'nama_kelas' => $namaKelas ?? ($gm->nama_kelas ?? null)
+                    ];
+                }
+            }
+        }
 
-                        $maxHInternal = $this->getMaxJamInternal($hCoba);
-                        for ($jCoba = 1; $jCoba <= $maxHInternal; $jCoba++) {
-                            $kelasKosong = empty($matrixKelasGlobal[$kelasId][$hCoba][$jCoba]);
-                            $guruKosong = ($guruId === 'none') || empty($matrixGuru[$guruId][$hCoba][$jCoba]);
+        foreach ($globalUnassignedChunks as $unassigned) {
+            $kelasId = $unassigned['kelas_id']; $gm = $unassigned['gm'];
+            $chunkId = $unassigned['chunk_id']; $durasiChunk = $unassigned['durasi'];
+            $isPenjaskes = $unassigned['is_penjaskes']; $namaMapel = $unassigned['nama_mapel'];
+            $guruId = $unassigned['guru_id']; $mapelId = $unassigned['mapel_id'];
+            $mapelCheckKey = $unassigned['mapel_check_key'] ?? (!empty($mapelId) ? $mapelId : 'gm_' . $gm->id);
+            $namaKelasUnassigned = $unassigned['nama_kelas'] ?? ($gm->nama_kelas ?? null);
 
-                            if ($kelasKosong && $guruKosong) {
-                                $newChunkId = $chunkId . '_split_' . $sisaDurasi;
-                                $matrixKelasGlobal[$kelasId][$hCoba][$jCoba] = true;
-                                if (!$isPenjaskes && $guruId !== 'none') {
-                                    $matrixGuru[$guruId][$hCoba][$jCoba] = true;
-                                }
-                                if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$hCoba][$mapelId] = true;
+            $assignedHari = null; $assignedJam = null;
+            $hariAcak = $this->hari; shuffle($hariAcak);
 
-                                $kromosom[$kelasId][$newChunkId] = [
-                                    'guru_id' => $gm->guru_id ?? null, 'nip' => $gm->nip ?? null,
-                                    'g_id' => $guruId,
-                                    't_list_guru_mapel_id' => $gm->id, 'blok_id' => $newChunkId,
-                                    'nama_guru' => $gm->nama_guru ?? null,
-                                    'nama_kelas' => $namaKelasUnassigned,
-                                    'mapel_id' => $mapelId, 'nama_mapel' => $namaMapel, 'kelas_id' => $kelasId,
-                                    'hari' => $hCoba, 'jam_mulai' => (int) $jCoba,
-                                    'durasi' => 1, 'is_penjaskes' => $isPenjaskes
-                                ];
+            foreach ($hariAcak as $hari) {
+                $maxH = $this->getMaxJamInternal($hari);
+                $batasMulaiJam = $isPenjaskes ? 1 : ($maxH - $durasiChunk + 1);
 
-                                $sisaDurasi--;
-                                if ($sisaDurasi == 0) break 2;
+                for ($jm = 1; $jm <= $batasMulaiJam; $jm++) {
+                    $bisaSteril = true;
+                    for ($d = 0; $d < $durasiChunk; $d++) {
+                        $jamCek = $jm + $d;
+                        if (!empty($matrixKelasGlobal[$kelasId][$hari][$jamCek]) ||
+                            (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek]))) {
+                            $bisaSteril = false; break;
+                        }
+                    }
+                    if ($bisaSteril) {
+                        $assignedHari = $hari; $assignedJam = $jm; break 2;
+                    }
+                }
+            }
+
+            if ($assignedHari && $assignedJam) {
+                for ($d = 0; $d < $durasiChunk; $d++) {
+                    $jamCek = $assignedJam + $d;
+                    $matrixKelasGlobal[$kelasId][$assignedHari][$jamCek] = true;
+                    if (!$isPenjaskes && $guruId !== 'none') $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
+                }
+                if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$assignedHari][$mapelCheckKey] = true;
+
+                $kromosom[$kelasId][$chunkId] = [
+                    'guru_id' => $gm->guru_id ?? null, 'nip' => $gm->nip ?? null,
+                    'g_id' => $guruId,
+                    't_list_guru_mapel_id' => $gm->id, 'blok_id' => $chunkId,
+                    'nama_guru' => $gm->nama_guru ?? null,
+                    'nama_kelas' => $namaKelasUnassigned,
+                    'mapel_id' => $mapelId, 'nama_mapel' => $namaMapel, 'kelas_id' => $kelasId,
+                    'hari' => $assignedHari, 'jam_mulai' => (int) $assignedJam,
+                    'durasi' => (int) $durasiChunk, 'is_penjaskes' => $isPenjaskes
+                ];
+            } else {
+                $sisaDurasi = $durasiChunk;
+                foreach ($this->hari as $hCoba) {
+                    if (!$isPenjaskes && isset($matrixMapelGlobal[$kelasId][$hCoba][$mapelCheckKey])) continue;
+
+                    $maxHInternal = $this->getMaxJamInternal($hCoba);
+                    for ($jCoba = 1; $jCoba <= $maxHInternal; $jCoba++) {
+                        $kelasKosong = empty($matrixKelasGlobal[$kelasId][$hCoba][$jCoba]);
+                        $guruKosong = ($guruId === 'none') || empty($matrixGuru[$guruId][$hCoba][$jCoba]);
+
+                        if ($kelasKosong && $guruKosong) {
+                            $newChunkId = $chunkId . '_split_' . $sisaDurasi;
+                            $matrixKelasGlobal[$kelasId][$hCoba][$jCoba] = true;
+                            if (!$isPenjaskes && $guruId !== 'none') {
+                                $matrixGuru[$guruId][$hCoba][$jCoba] = true;
                             }
+                            if (!$isPenjaskes) $matrixMapelGlobal[$kelasId][$hCoba][$mapelCheckKey] = true;
+
+                            $kromosom[$kelasId][$newChunkId] = [
+                                'guru_id' => $gm->guru_id ?? null, 'nip' => $gm->nip ?? null,
+                                'g_id' => $guruId,
+                                't_list_guru_mapel_id' => $gm->id, 'blok_id' => $newChunkId,
+                                'nama_guru' => $gm->nama_guru ?? null,
+                                'nama_kelas' => $namaKelasUnassigned,
+                                'mapel_id' => $mapelId, 'nama_mapel' => $namaMapel, 'kelas_id' => $kelasId,
+                                'hari' => $hCoba, 'jam_mulai' => (int) $jCoba,
+                                'durasi' => 1, 'is_penjaskes' => $isPenjaskes
+                            ];
+
+                            $sisaDurasi--;
+                            if ($sisaDurasi == 0) break 2;
                         }
                     }
                 }
             }
-            $populasi[] = $kromosom;
         }
-
-        return $populasi;
+        $populasi[] = $kromosom;
     }
 
+    return $populasi;
+}
     private function hitungJumlahBlokIdeal($kelasId, $guruMapelsArray)
     {
         $totalBlokIdeal = 0;
@@ -826,203 +841,226 @@ class GeneticAlgorithmService
         }
         return $fitness;
     }
-    private function repairKromosom($kromosom)
-    {
-        $matrixKelas = [];
-        $matrixGuru = [];
-        $matrixMapel = [];
-        $cleanedKromosom = [];
-        $unassignedChunks = [];
+   private function repairKromosom($kromosom)
+{
+    $matrixKelas = [];
+    $matrixGuru = [];
+    $matrixMapel = [];
+    $cleanedKromosom = [];
+    $unassignedChunks = [];
 
-        $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection ? $this->kelas->all() : (array) $this->kelas;
+    $kelasArray = $this->kelas instanceof \Illuminate\Support\Collection ? $this->kelas->all() : (array) $this->kelas;
 
-        foreach ($kelasArray as $kls) {
-            $kId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
-            if (!$kId) continue;
-            foreach ($this->hari as $h) {
-                $maxH = $this->getMaxJam($h);
-                for ($jm = 1; $jm <= $maxH; $jm++) {
-                    $matrixKelas[$kId][$h][$jm] = false;
-                }
-                $matrixMapel[$kId][$h] = [];
+    foreach ($kelasArray as $kls) {
+        $kId = is_object($kls) ? ($kls->id ?? $kls->kelas_id ?? null) : $kls;
+        if (!$kId) continue;
+        foreach ($this->hari as $h) {
+            $maxH = $this->getMaxJam($h);
+            for ($jm = 1; $jm <= $maxH; $jm++) {
+                $matrixKelas[$kId][$h][$jm] = false;
             }
+            $matrixMapel[$kId][$h] = [];
         }
+    }
 
-        foreach ($kromosom as $kelasId => $gens) {
-            if (!isset($cleanedKromosom[$kelasId])) $cleanedKromosom[$kelasId] = [];
+    foreach ($kromosom as $kelasId => $gens) {
+        if (!isset($cleanedKromosom[$kelasId])) $cleanedKromosom[$kelasId] = [];
 
-            foreach ($gens as $cId => $gen) {
-                $hari = $gen['hari'] ?? null;
-                $jamMulai = $gen['jam_mulai'] ?? null;
-                $durasi = $gen['durasi'] ?? 0;
-                $mapelId = $gen['mapel_id'] ?? null;
-                $guruId = $gen['g_id'] ?? 'none';
-                $isPenjaskes = $gen['is_penjaskes'] ?? false;
+        foreach ($gens as $cId => $gen) {
+            $hari = $gen['hari'] ?? null;
+            $jamMulai = $gen['jam_mulai'] ?? null;
+            $durasi = $gen['durasi'] ?? 0;
+            $mapelId = $gen['mapel_id'] ?? null;
+            $guruId = $gen['g_id'] ?? 'none';
+            $isPenjaskes = $gen['is_penjaskes'] ?? false;
 
-                if (!$hari || !$jamMulai || $durasi <= 0 || (!$isPenjaskes && isset($matrixMapel[$kelasId][$hari][$mapelId]))) {
-                    $unassignedChunks[] = $gen;
-                    continue;
+            if (!$hari || !$jamMulai || $durasi <= 0 || (!$isPenjaskes && isset($matrixMapel[$kelasId][$hari][$mapelId]))) {
+                $unassignedChunks[] = $gen;
+                continue;
+            }
+
+            $maxH = $this->getMaxJam($hari);
+            $bisa = true;
+
+            for ($d = 0; $d < $durasi; $d++) {
+                $jamCek = $jamMulai + $d;
+                if ($jamCek > $maxH || $jamCek < 1) { $bisa = false; break; }
+                if (!empty($matrixKelas[$kelasId][$hari][$jamCek])) { $bisa = false; break; }
+                if (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek])) {
+                    $bisa = false; break;
                 }
+            }
 
-                $maxH = $this->getMaxJam($hari);
-                $bisa = true;
-
+            if ($bisa) {
                 for ($d = 0; $d < $durasi; $d++) {
                     $jamCek = $jamMulai + $d;
-                    if ($jamCek > $maxH || $jamCek < 1) { $bisa = false; break; }
-                    if (!empty($matrixKelas[$kelasId][$hari][$jamCek])) { $bisa = false; break; }
-                    if (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hari][$jamCek])) {
-                        $bisa = false; break;
+                    $matrixKelas[$kelasId][$hari][$jamCek] = true;
+                    if (!$isPenjaskes && $guruId !== 'none') {
+                        $matrixGuru[$guruId][$hari][$jamCek] = true;
                     }
                 }
-
-                if ($bisa) {
-                    for ($d = 0; $d < $durasi; $d++) {
-                        $jamCek = $jamMulai + $d;
-                        $matrixKelas[$kelasId][$hari][$jamCek] = true;
-                        if (!$isPenjaskes && $guruId !== 'none') {
-                            $matrixGuru[$guruId][$hari][$jamCek] = true;
-                        }
-                    }
-                    if (!$isPenjaskes && $mapelId) {
-                        $matrixMapel[$kelasId][$hari][$mapelId] = true;
-                    }
-                    $cleanedKromosom[$kelasId][$cId] = $gen;
-                } else {
-                    $unassignedChunks[] = $gen;
+                if (!$isPenjaskes && $mapelId) {
+                    $matrixMapel[$kelasId][$hari][$mapelId] = true;
                 }
-            }
-        }
-
-        $failedChunks = [];
-        foreach ($unassignedChunks as $gen) {
-            $kelasId = $gen['kelas_id'] ?? null;
-            if (!$kelasId) continue;
-
-            $durasi = $gen['durasi'] ?? 1;
-            $mapelId = $gen['mapel_id'] ?? null;
-            $guruId = $gen['g_id'] ?? 'none';
-            $isPenjaskes = $gen['is_penjaskes'] ?? false;
-            $cId = $gen['blok_id'] ?? ('chunk_' . uniqid());
-
-            $assignedHari = null;
-            $assignedJam = null;
-
-            foreach ($this->hari as $hariCoba) {
-                if (!$isPenjaskes && $mapelId && isset($matrixMapel[$kelasId][$hariCoba][$mapelId])) continue;
-
-                $maxH = $this->getMaxJam($hariCoba);
-                $batasMulai = $isPenjaskes ? min(3, $maxH - $durasi + 1) : ($maxH - $durasi + 1);
-
-                for ($jmCoba = 1; $jmCoba <= $batasMulai; $jmCoba++) {
-                    $bisaSteril = true;
-                    for ($d = 0; $d < $durasi; $d++) {
-                        $jamCek = $jmCoba + $d;
-                        if (!empty($matrixKelas[$kelasId][$hariCoba][$jamCek]) ||
-                            (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hariCoba][$jamCek]))) {
-                            $bisaSteril = false;
-                            break;
-                        }
-                    }
-                    if ($bisaSteril) {
-                        $assignedHari = $hariCoba;
-                        $assignedJam = $jmCoba;
-                        break 2;
-                    }
-                }
-            }
-
-            if ($assignedHari && $assignedJam) {
-                for ($d = 0; $d < $durasi; $d++) {
-                    $jamCek = $assignedJam + $d;
-                    $matrixKelas[$kelasId][$assignedHari][$jamCek] = true;
-                    if (!$isPenjaskes && $guruId !== 'none') $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
-                }
-                if (!$isPenjaskes && $mapelId) $matrixMapel[$kelasId][$assignedHari][$mapelId] = true;
-
-                $gen['hari'] = $assignedHari;
-                $gen['jam_mulai'] = (int) $assignedJam;
                 $cleanedKromosom[$kelasId][$cId] = $gen;
             } else {
-                $failedChunks[] = $gen;
+                $unassignedChunks[] = $gen;
             }
         }
-
-        foreach ($failedChunks as $gen) {
-            $kelasId = $gen['kelas_id'] ?? null;
-            if (!$kelasId) continue;
-
-            $durasi = $gen['durasi'] ?? 1;
-            $mapelId = $gen['mapel_id'] ?? null;
-            $guruId = $gen['g_id'] ?? 'none';
-            $isPenjaskes = $gen['is_penjaskes'] ?? false;
-            $cId = $gen['blok_id'] ?? ('chunk_p3_' . uniqid());
-
-            $placed = false;
-
-            foreach ($this->hari as $hCoba) {
-                if (!$isPenjaskes && $mapelId && isset($matrixMapel[$kelasId][$hCoba][$mapelId])) continue;
-
-                $maxH = $this->getMaxJam($hCoba);
-                $batasMulai = $maxH - $durasi + 1;
-
-                for ($jCoba = 1; $jCoba <= $batasMulai; $jCoba++) {
-                    $kelasKosong = true;
-                    for ($d = 0; $d < $durasi; $d++) {
-                        if (!empty($matrixKelas[$kelasId][$hCoba][$jCoba + $d])) {
-                            $kelasKosong = false;
-                            break;
-                        }
-                    }
-
-                    if ($kelasKosong) {
-                        for ($d = 0; $d < $durasi; $d++) {
-                            $jamCek = $jCoba + $d;
-                            $matrixKelas[$kelasId][$hCoba][$jamCek] = true;
-                            if (!$isPenjaskes && $guruId !== 'none') {
-                                $matrixGuru[$guruId][$hCoba][$jamCek] = true;
-                            }
-                        }
-                        if (!$isPenjaskes && $mapelId) $matrixMapel[$kelasId][$hCoba][$mapelId] = true;
-
-                        $gen['hari'] = $hCoba;
-                        $gen['jam_mulai'] = (int) $jCoba;
-                        $cleanedKromosom[$kelasId][$cId] = $gen;
-                        $placed = true;
-                        break 2;
-                    }
-                }
-            }
-
-            if (!$placed) {
-                $sisaJP = $durasi;
-                foreach ($this->hari as $hCoba) {
-                    $maxH = $this->getMaxJam($hCoba);
-                    for ($jCoba = 1; $jCoba <= $maxH; $jCoba++) {
-                        if ($sisaJP > 0 && empty($matrixKelas[$kelasId][$hCoba][$jCoba])) {
-                            $newSubId = $cId . '_p4_' . $sisaJP . '_' . uniqid();
-                            $genP4 = $gen;
-                            $genP4['hari'] = $hCoba;
-                            $genP4['jam_mulai'] = $jCoba;
-                            $genP4['durasi'] = 1;
-
-                            $matrixKelas[$kelasId][$hCoba][$jCoba] = true;
-                            if (!$isPenjaskes && $guruId !== 'none') {
-                                $matrixGuru[$guruId][$hCoba][$jCoba] = true;
-                            }
-
-                            $cleanedKromosom[$kelasId][$newSubId] = $genP4;
-                            $sisaJP--;
-                        }
-                    }
-                }
-            }
-        }
-
-      $kromosom = $this->fixInternalClassOverlaps($cleanedKromosom);
-
-        return $this->restoreBebanJamDatabase($kromosom);
     }
+
+    // --- SORT UNASSIGNED CHUNKS: Prioritaskan repair untuk item prioritas pagi agar didahulukan ---
+    usort($unassignedChunks, function($a, $b) {
+        $pagiA = ($a['prioritas_pagi'] ?? false) ;
+        $pagiB = ($b['prioritas_pagi'] ?? false) ;
+        return $pagiB <=> $pagiA;
+    });
+
+    $failedChunks = [];
+    foreach ($unassignedChunks as $gen) {
+        $kelasId = $gen['kelas_id'] ?? null;
+        if (!$kelasId) continue;
+
+        $durasi = $gen['durasi'] ?? 1;
+        $mapelId = $gen['mapel_id'] ?? null;
+        $guruId = $gen['g_id'] ?? 'none';
+        $isPenjaskes = $gen['is_penjaskes'] ?? false;
+        $cId = $gen['blok_id'] ?? ('chunk_' . uniqid());
+
+        // Cek status prioritas pagi / NIP khusus
+        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false) || (($gen['nip'] ?? '') === '196905031994032004');
+
+        $assignedHari = null;
+        $assignedJam = null;
+
+        // Tentukan list hari: jika prioritas pagi, jangan di-acak (berurutan dari hari pertama)
+        $hariCekList = $this->hari;
+        if (!$isPrioritasPagi) {
+            shuffle($hariCekList);
+        }
+
+        foreach ($hariCekList as $hariCoba) {
+            if (!$isPenjaskes && $mapelId && isset($matrixMapel[$kelasId][$hariCoba][$mapelId])) continue;
+
+            $maxH = $this->getMaxJam($hariCoba);
+            $batasMulai = $isPenjaskes ? min(3, $maxH - $durasi + 1) : ($maxH - $durasi + 1);
+
+            for ($jmCoba = 1; $jmCoba <= $batasMulai; $jmCoba++) {
+                $bisaSteril = true;
+                for ($d = 0; $d < $durasi; $d++) {
+                    $jamCek = $jmCoba + $d;
+                    if (!empty($matrixKelas[$kelasId][$hariCoba][$jamCek]) ||
+                        (!$isPenjaskes && $guruId !== 'none' && !empty($matrixGuru[$guruId][$hariCoba][$jamCek]))) {
+                        $bisaSteril = false;
+                        break;
+                    }
+                }
+                if ($bisaSteril) {
+                    $assignedHari = $hariCoba;
+                    $assignedJam = $jmCoba;
+                    break 2;
+                }
+            }
+        }
+
+        if ($assignedHari && $assignedJam) {
+            for ($d = 0; $d < $durasi; $d++) {
+                $jamCek = $assignedJam + $d;
+                $matrixKelas[$kelasId][$assignedHari][$jamCek] = true;
+                if (!$isPenjaskes && $guruId !== 'none') $matrixGuru[$guruId][$assignedHari][$jamCek] = true;
+            }
+            if (!$isPenjaskes && $mapelId) $matrixMapel[$kelasId][$assignedHari][$mapelId] = true;
+
+            $gen['hari'] = $assignedHari;
+            $gen['jam_mulai'] = (int) $assignedJam;
+            $cleanedKromosom[$kelasId][$cId] = $gen;
+        } else {
+            $failedChunks[] = $gen;
+        }
+    }
+
+    foreach ($failedChunks as $gen) {
+        $kelasId = $gen['kelas_id'] ?? null;
+        if (!$kelasId) continue;
+
+        $durasi = $gen['durasi'] ?? 1;
+        $mapelId = $gen['mapel_id'] ?? null;
+        $guruId = $gen['g_id'] ?? 'none';
+        $isPenjaskes = $gen['is_penjaskes'] ?? false;
+        $cId = $gen['blok_id'] ?? ('chunk_p3_' . uniqid());
+
+        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false) || (($gen['nip'] ?? '') === '196905031994032004');
+
+        $placed = false;
+
+        $hariCekList = $this->hari;
+        if (!$isPrioritasPagi) {
+            // Jika ingin tetap ada variasi untuk non-prioritas pada fallback, biarkan atau sesuaikan
+        }
+
+        foreach ($hariCekList as $hCoba) {
+            if (!$isPenjaskes && $mapelId && isset($matrixMapel[$kelasId][$hCoba][$mapelId])) continue;
+
+            $maxH = $this->getMaxJam($hCoba);
+            $batasMulai = $maxH - $durasi + 1;
+
+            for ($jCoba = 1; $jCoba <= $batasMulai; $jCoba++) {
+                $kelasKosong = true;
+                for ($d = 0; $d < $durasi; $d++) {
+                    if (!empty($matrixKelas[$kelasId][$hCoba][$jCoba + $d])) {
+                        $kelasKosong = false;
+                        break;
+                    }
+                }
+
+                if ($kelasKosong) {
+                    for ($d = 0; $d < $durasi; $d++) {
+                        $jamCek = $jCoba + $d;
+                        $matrixKelas[$kelasId][$hCoba][$jamCek] = true;
+                        if (!$isPenjaskes && $guruId !== 'none') {
+                            $matrixGuru[$guruId][$hCoba][$jamCek] = true;
+                        }
+                    }
+                    if (!$isPenjaskes && $mapelId) $matrixMapel[$kelasId][$hCoba][$mapelId] = true;
+
+                    $gen['hari'] = $hCoba;
+                    $gen['jam_mulai'] = (int) $jCoba;
+                    $cleanedKromosom[$kelasId][$cId] = $gen;
+                    $placed = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (!$placed) {
+            $sisaJP = $durasi;
+            foreach ($this->hari as $hCoba) {
+                $maxH = $this->getMaxJam($hCoba);
+                for ($jCoba = 1; $jCoba <= $maxH; $jCoba++) {
+                    if ($sisaJP > 0 && empty($matrixKelas[$kelasId][$hCoba][$jCoba])) {
+                        $newSubId = $cId . '_p4_' . $sisaJP . '_' . uniqid();
+                        $genP4 = $gen;
+                        $genP4['hari'] = $hCoba;
+                        $genP4['jam_mulai'] = $jCoba;
+                        $genP4['durasi'] = 1;
+
+                        $matrixKelas[$kelasId][$hCoba][$jCoba] = true;
+                        if (!$isPenjaskes && $guruId !== 'none') {
+                            $matrixGuru[$guruId][$hCoba][$jCoba] = true;
+                        }
+
+                        $cleanedKromosom[$kelasId][$newSubId] = $genP4;
+                        $sisaJP--;
+                    }
+                }
+            }
+        }
+    }
+
+    $kromosom = $this->fixInternalClassOverlaps($cleanedKromosom);
+
+    return $this->restoreBebanJamDatabase($kromosom);
+}
 
     private function restoreBebanJamDatabase($kromosom)
     {

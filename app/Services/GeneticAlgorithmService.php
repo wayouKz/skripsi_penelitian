@@ -492,8 +492,8 @@ class GeneticAlgorithmService
 
             // --- HANDLE PRIORITAS: Tempatkan prioritas_pagi paling atas ---
             usort($allChunksToAllocate, function($a, $b) use ($totalBebanGuru) {
-                $pagiA = ($a['gm']->prioritas_pagi ?? false) || ($a['gm']->nip === '196905031994032004') ? 1 : 0;
-                $pagiB = ($b['gm']->prioritas_pagi ?? false) || ($b['gm']->nip === '196905031994032004') ? 1 : 0;
+                $pagiA = ($a['gm']->prioritas_pagi ?? false) ;
+                $pagiB = ($b['gm']->prioritas_pagi ?? false) ;
 
                 if ($pagiA !== $pagiB) return $pagiB <=> $pagiA;
                 if ($a['is_penjaskes'] && !$b['is_penjaskes']) return -1;
@@ -928,7 +928,7 @@ class GeneticAlgorithmService
         $cId = $gen['blok_id'] ?? ('chunk_' . uniqid());
 
         // Cek status prioritas pagi / NIP khusus
-        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false) || (($gen['nip'] ?? '') === '196905031994032004');
+        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false);
 
         $assignedHari = null;
         $assignedJam = null;
@@ -989,13 +989,13 @@ class GeneticAlgorithmService
         $isPenjaskes = $gen['is_penjaskes'] ?? false;
         $cId = $gen['blok_id'] ?? ('chunk_p3_' . uniqid());
 
-        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false) || (($gen['nip'] ?? '') === '196905031994032004');
+        $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false) || (($gen['nip'] ?? ''));
 
         $placed = false;
 
         $hariCekList = $this->hari;
         if (!$isPrioritasPagi) {
-            // Jika ingin tetap ada variasi untuk non-prioritas pada fallback, biarkan atau sesuaikan
+            shuffle($hariCekList);
         }
 
         foreach ($hariCekList as $hCoba) {
@@ -1211,7 +1211,7 @@ private function crossover($parent1, $parent2)
     // Ganti dengan repairKromosom agar validasi guru global ikut bekerja
     return $this->repairKromosom($child);
 }
-    private function mutasi($kromosom)
+ private function mutasi($kromosom)
     {
         $globalMatrixGuru = [];
         $globalMatrixKelas = [];
@@ -1271,6 +1271,9 @@ private function crossover($parent1, $parent2)
                 $hariLama = $gen['hari'] ?? null;
                 $jamLama = $gen['jam_mulai'] ?? null;
 
+                // --- CEK APAKAH GEN INI MASUK PRIORITAS PAGI ---
+                $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false);
+
                 if ($hariLama && $jamLama) {
                     for ($d = 0; $d < $dur; $d++) {
                         $jCek = $jamLama + $d;
@@ -1281,8 +1284,11 @@ private function crossover($parent1, $parent2)
                     }
                 }
 
+                // --- TENTUKAN URUTAN HARI (JANGAN DI-ACAK JIKA PRIORITAS PAGI) ---
                 $hariList = $this->hari;
-                shuffle($hariList);
+                if (!$isPrioritasPagi) {
+                    shuffle($hariList);
+                }
 
                 $slotFound = false;
                 foreach ($hariList as $hCoba) {
@@ -1312,9 +1318,17 @@ private function crossover($parent1, $parent2)
                 }
 
                 if (!$slotFound) {
-                    $hAcak = $this->hari[array_rand($this->hari)];
-                    $maxH = $this->getMaxJamInternal($hAcak);
-                    $jAcak = mt_rand(1, max(1, $maxH - $dur + 1));
+                    // Jika tidak ditemukan slot steril secara natural, fallback
+                    if ($isPrioritasPagi) {
+                        // Untuk prioritas pagi, paksa ambil hari pertama dan jam paling pagi yang tersedia
+                        $hAcak = $this->hari[0] ?? $this->hari[array_rand($this->hari)];
+                        $maxH = $this->getMaxJamInternal($hAcak);
+                        $jAcak = 1; // Mulai dari jam pertama (pagi)
+                    } else {
+                        $hAcak = $this->hari[array_rand($this->hari)];
+                        $maxH = $this->getMaxJamInternal($hAcak);
+                        $jAcak = mt_rand(1, max(1, $maxH - $dur + 1));
+                    }
 
                     $gen['hari'] = $hAcak;
                     $gen['jam_mulai'] = $jAcak;
@@ -1334,9 +1348,8 @@ private function crossover($parent1, $parent2)
         // PADATKAN KELAS SETELAH MUTASI AGAR TIDAK ADA OVERLAP
         $kromosom = $this->padatkanJadwalHarian($kromosom);
 
-      return $this->fixInternalClassOverlaps($kromosom);
+        return $this->fixInternalClassOverlaps($kromosom);
     }
-
   private function smartMergeMapelKepecah($kromosom)
     {
         $dbBebanMap = [];

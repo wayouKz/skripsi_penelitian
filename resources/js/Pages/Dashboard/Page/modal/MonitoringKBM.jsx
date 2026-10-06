@@ -9,6 +9,25 @@ const STATUS_BERMASALAH = ["Belum Absen", "Belum Absen / Kosong", "Kosong"];
 const isStatusBermasalah = (status) =>
     STATUS_BERMASALAH.some((s) => status?.includes(s));
 
+// ─── Helper untuk cek apakah jam sesi saat ini sudah masuk / lewat ──────────
+const isJamAktif = (jamSesi) => {
+    if (!jamSesi) return true; // Jika tidak ada info jam, anggap periksa langsung
+
+    // Format jamSesi umumnya "07:30 - 08:15"
+    const parts = jamSesi.split("-");
+    if (parts.length < 2) return true;
+
+    const currentTime = new Date();
+    const currentHours = String(currentTime.getHours()).padStart(2, "0");
+    const currentMinutes = String(currentTime.getMinutes()).padStart(2, "0");
+    const currentTimeStr = `${currentHours}:${currentMinutes}`;
+
+    const jamMulai = parts[0].trim();
+
+    // Anomali aktif hanya jika waktu sekarang sudah melewati atau sama dengan jam mulai pelajaran
+    return currentTimeStr >= jamMulai;
+};
+
 // ─── Skeleton card untuk loading state AI (Kanan) ─────────────────────────
 function SkeletonCard() {
     return (
@@ -60,12 +79,15 @@ export default function MonitoringKBM({ title, onClose, open }) {
         }
     }, [open]);
 
-    // ── Deteksi anomali setiap kali data kelas berubah ──────────────────────
+    // ── Deteksi anomali berdasarkan status bermasalah & jam aktif ───────────
     useEffect(() => {
         const anomali = [];
         Object.entries(kelasAktif).forEach(([, jadwalArray]) => {
             jadwalArray.forEach((kls) => {
-                if (isStatusBermasalah(kls.status_kbm)) {
+                if (
+                    isStatusBermasalah(kls.status_kbm) &&
+                    isJamAktif(kls.jam_sesi)
+                ) {
                     anomali.push(kls);
                 }
             });
@@ -224,7 +246,8 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                 const bermasalah =
                                                     isStatusBermasalah(
                                                         kls.status_kbm,
-                                                    );
+                                                    ) &&
+                                                    isJamAktif(kls.jam_sesi);
                                                 const isSelected =
                                                     selectedAnomali?.nama_kelas ===
                                                         kls.nama_kelas &&
@@ -337,7 +360,8 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                             Semua Kelas Normal
                                         </h4>
                                         <p className="text-[10px] text-emerald-700 mt-0.5">
-                                            Tidak ada anomali yang terdeteksi.
+                                            Tidak ada anomali yang terdeteksi
+                                            saat ini.
                                         </p>
                                     </div>
                                 </div>
@@ -454,7 +478,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                         <i className="fa-solid fa-circle-check text-emerald-500 mr-1"></i>
                                                         {guru.alasan}
                                                     </p>
-                                                    <button className="w-full mt-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[10px] font-bold py-1.5 rounded-md transition-all duration-300 flex items-center justify-center gap-1.5">
+                                                    <button
+                                                        className="w-full mt-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[10px] font-bold py-1.5 rounded-md transition-all duration-300 flex items-center justify-center gap-1.5"
+                                                        onClick={() => {
+                                                            handleAssignGuru(
+                                                                guru,
+                                                            );
+                                                        }}
+                                                    >
                                                         <i className="fa-solid fa-paper-plane"></i>
                                                         Tugaskan
                                                     </button>

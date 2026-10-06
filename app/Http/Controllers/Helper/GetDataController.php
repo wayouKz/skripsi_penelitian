@@ -632,9 +632,9 @@ public function getSiswaInKelas(Request $request){
         )
     ->join('t_jadwals', function($join) use ($hariIni, $jamSekarang) {
             $join->on('m_kelas.id', '=', 't_jadwals.kelas_id')
-                ->where('t_jadwals.hari', '=', $hariIni)
-                ->whereTime('t_jadwals.jam_mulai', '<=', $jamSekarang)
-                ->whereTime('t_jadwals.jam_selesai', '>=', $jamSekarang);
+                ->where('t_jadwals.hari', '=', "Selasa");
+                // ->whereTime('t_jadwals.jam_mulai', '<=', $jamSekarang)
+                 // ->whereTime('t_jadwals.jam_selesai', '>=', $jamSekarang);
         })
     ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
     ->leftJoin('t_absen_gurus', 't_jadwals.kode_jadwal', '=', 't_absen_gurus.kode_jadwal')

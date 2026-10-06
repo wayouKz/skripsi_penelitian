@@ -265,7 +265,7 @@ export default function SuperAdmin({ user, tglStr, total }) {
             </div>
 
             {/* ── MODAL ── */}
-            <Modal show={open} onClose={() => setOpen(false)} maxWidth="2xl">
+            <Modal show={open} onClose={() => setOpen(false)} maxWidth="full">
                 <MonitoringKBM
                     title="Monitoring KBM"
                     onClose={() => setOpen(false)}

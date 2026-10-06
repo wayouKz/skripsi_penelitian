@@ -6,72 +6,144 @@ import Select from "react-select";
 // 1. EXTRAKSI STYLE & KONSTANTA
 // ==========================================
 const DAFTAR_HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
+const DAFTAR_JAM = Array.from({ length: 12 }, function (_, i) {
+    return i + 1;
+});
+
+// Palet warna yang sangat kontras dan mencolok satu sama lain untuk Legend Mapel
+const COLOR_PALETTE = [
+    {
+        bg: "bg-red-100",
+        border: "border-red-400",
+        hover: "hover:bg-red-200",
+        text: "text-red-900",
+    },
+    {
+        bg: "bg-blue-100",
+        border: "border-blue-400",
+        hover: "hover:bg-blue-200",
+        text: "text-blue-900",
+    },
+    {
+        bg: "bg-emerald-100",
+        border: "border-emerald-400",
+        hover: "hover:bg-emerald-200",
+        text: "text-emerald-900",
+    },
+    {
+        bg: "bg-amber-100",
+        border: "border-amber-400",
+        hover: "hover:bg-amber-200",
+        text: "text-amber-900",
+    },
+    {
+        bg: "bg-purple-100",
+        border: "border-purple-400",
+        hover: "hover:bg-purple-200",
+        text: "text-purple-900",
+    },
+    {
+        bg: "bg-pink-100",
+        border: "border-pink-400",
+        hover: "hover:bg-pink-200",
+        text: "text-pink-900",
+    },
+    {
+        bg: "bg-cyan-100",
+        border: "border-cyan-400",
+        hover: "hover:bg-cyan-200",
+        text: "text-cyan-900",
+    },
+    {
+        bg: "bg-orange-100",
+        border: "border-orange-400",
+        hover: "hover:bg-orange-200",
+        text: "text-orange-900",
+    },
+    {
+        bg: "bg-lime-100",
+        border: "border-lime-400",
+        hover: "hover:bg-lime-200",
+        text: "text-lime-900",
+    },
+    {
+        bg: "bg-indigo-100",
+        border: "border-indigo-400",
+        hover: "hover:bg-indigo-200",
+        text: "text-indigo-900",
+    },
+    {
+        bg: "bg-teal-100",
+        border: "border-teal-400",
+        hover: "hover:bg-teal-200",
+        text: "text-teal-900",
+    },
+    {
+        bg: "bg-rose-100",
+        border: "border-rose-400",
+        hover: "hover:bg-rose-200",
+        text: "text-rose-900",
+    },
+];
 
 const customSelectStyles = {
-    control: (base, state) => ({
-        ...base,
-        backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
-        borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
-        borderRadius: "0.5rem",
-        padding: "0.05rem 0.1rem",
-        minHeight: "32px",
-        boxShadow: state.isFocused
-            ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
-            : "none",
-        cursor: state.isDisabled ? "not-allowed" : "pointer",
-        "&:hover": {
-            borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
-        },
-    }),
-    valueContainer: (base) => ({ ...base, padding: "0px 6px" }),
-    placeholder: (base) => ({
-        ...base,
-        color: "#9CA3AF",
-        fontSize: "11px",
-        fontWeight: "normal",
-    }),
-    singleValue: (base) => ({
-        ...base,
-        color: "#1F2937",
-        fontSize: "11px",
-        fontWeight: "600",
-    }),
-    option: (base, state) => ({
-        ...base,
-        backgroundColor: state.isSelected
-            ? "#10B981"
-            : state.isFocused
-              ? "#ECFDF5"
-              : "white",
-        color: state.isSelected ? "white" : "#1F2937",
-        fontSize: "11px",
-        fontWeight: "500",
-        cursor: "pointer",
-    }),
-    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    control: function (base, state) {
+        return {
+            ...base,
+            backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
+            borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
+            borderRadius: "0.5rem",
+            padding: "0.05rem 0.1rem",
+            minHeight: "32px",
+            boxShadow: state.isFocused
+                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
+                : "none",
+            cursor: state.isDisabled ? "not-allowed" : "pointer",
+            "&:hover": {
+                borderColor: state.isDisabled ? "#E5E7EB" : "#10B981",
+            },
+        };
+    },
+    valueContainer: function (base) {
+        return { ...base, padding: "0px 6px" };
+    },
+    placeholder: function (base) {
+        return {
+            ...base,
+            color: "#9CA3AF",
+            fontSize: "11px",
+            fontWeight: "normal",
+        };
+    },
+    singleValue: function (base) {
+        return {
+            ...base,
+            color: "#1F2937",
+            fontSize: "11px",
+            fontWeight: "600",
+        };
+    },
+    option: function (base, state) {
+        return {
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#10B981"
+                : state.isFocused
+                  ? "#ECFDF5"
+                  : "white",
+            color: state.isSelected ? "white" : "#1F2937",
+            fontSize: "11px",
+            fontWeight: "500",
+            cursor: "pointer",
+        };
+    },
+    menuPortal: function (base) {
+        return { ...base, zIndex: 9999 };
+    },
 };
 
 // ==========================================
-// 2. SUB-KOMPONEN UNTUK ITEM JADWAL (KARTU)
-// ==========================================
-const JadwalCard = ({ jadwal }) => (
-    <div className="flex flex-col bg-white border border-green-100 rounded-md p-2 shadow-sm hover:shadow-md transition-shadow border-l-[3px] border-l-green-500">
-        <span className="inline-block bg-green-50 text-green-700 text-[9px] font-extrabold px-1 py-0.5 rounded border border-green-200 mb-1 w-max">
-            {jadwal.jam_mulai.substring(0, 5)} -{" "}
-            {jadwal.jam_selesai.substring(0, 5)}
-        </span>
-        <span className="font-bold text-gray-800 text-xs leading-tight mb-0.5">
-            {jadwal.nama_mapel}
-        </span>
-        <span className="text-[10px] font-semibold text-green-600 mt-0.5 flex items-center gap-1">
-            <i className="fa fa-user-circle text-green-400"></i>
-            {jadwal.nama_guru}
-        </span>
-    </div>
-);
-
-// ==========================================
-// 3. KOMPONEN UTAMA
+// 2. KOMPONEN UTAMA
 // ==========================================
 export default function DaftarJadwal({
     historyJadwal,
@@ -86,39 +158,79 @@ export default function DaftarJadwal({
     const [selectedGuru, setSelectedGuru] = useState(null);
     const [openPdfModal, setOpenPdfModal] = useState(false);
 
-    // --- Pemrosesan Data (Memoized agar tidak berulang kali dikalkulasi) ---
+    // --- Pemrosesan Data ---
     const groupedByKelas = useMemo(() => {
         if (!historyJadwal) return {};
-        return historyJadwal.reduce((acc, curr) => {
-            if (!acc[curr.nama_kelas]) acc[curr.nama_kelas] = [];
-            acc[curr.nama_kelas].push(curr);
+        return historyJadwal.reduce(function (acc, curr) {
+            if (curr && curr.nama_kelas) {
+                if (!acc[curr.nama_kelas]) acc[curr.nama_kelas] = [];
+                acc[curr.nama_kelas].push(curr);
+            }
             return acc;
         }, {});
+    }, [historyJadwal]);
+
+    // Ekstrak daftar seluruh mata pelajaran unik untuk legend warna
+    const mapelList = useMemo(() => {
+        if (!historyJadwal) return [];
+        const uniqueMapel = [];
+        historyJadwal.forEach(function (item) {
+            if (
+                item &&
+                item.nama_mapel &&
+                uniqueMapel.indexOf(item.nama_mapel) === -1
+            ) {
+                uniqueMapel.push(item.nama_mapel);
+            }
+        });
+        return uniqueMapel;
+    }, [historyJadwal]);
+
+    // Mapping warna untuk setiap mata pelajaran secara konsisten
+    const mapelColorMap = useMemo(() => {
+        const map = {};
+        mapelList.forEach(function (mapel, index) {
+            map[mapel] = COLOR_PALETTE[index % COLOR_PALETTE.length];
+        });
+        return map;
+    }, [mapelList]);
+
+    // Kumpulkan seluruh jam_mulai unik yang ada di seluruh data, lalu urutkan untuk dijadikan referensi slot kolom ke-1 sampai ke-n
+    const globalTimeSlots = useMemo(() => {
+        if (!historyJadwal) return [];
+        const timeSet = new Set();
+        historyJadwal.forEach(function (item) {
+            if (item && item.jam_mulai) {
+                timeSet.add(item.jam_mulai.substring(0, 5));
+            }
+        });
+        return Array.from(timeSet).sort();
     }, [historyJadwal]);
 
     const dataGuruOptions = useMemo(() => {
         const guruMap = new Map();
 
-        listMapelGuru.forEach((mapel) => {
-            // Jika ada filter mapel, lewati mapel yang tidak sesuai
-            if (
-                selectedMapel &&
-                selectedMapel !== "all" &&
-                String(mapel.id) !== String(selectedMapel)
-            ) {
-                return;
-            }
+        if (listMapelGuru && Array.isArray(listMapelGuru)) {
+            listMapelGuru.forEach(function (mapel) {
+                if (
+                    selectedMapel &&
+                    selectedMapel !== "all" &&
+                    String(mapel.id) !== String(selectedMapel)
+                ) {
+                    return;
+                }
 
-            if (mapel.guru && Array.isArray(mapel.guru)) {
-                mapel.guru.forEach((guru) => {
-                    const id = String(guru.guru_id || guru.id);
-                    const nama = guru.nama || guru.nama_guru;
-                    if (id && nama && !guruMap.has(id)) {
-                        guruMap.set(id, { value: id, label: nama });
-                    }
-                });
-            }
-        });
+                if (mapel.guru && Array.isArray(mapel.guru)) {
+                    mapel.guru.forEach(function (guru) {
+                        const id = String(guru.guru_id || guru.id);
+                        const nama = guru.nama || guru.nama_guru;
+                        if (id && nama && !guruMap.has(id)) {
+                            guruMap.set(id, { value: id, label: nama });
+                        }
+                    });
+                }
+            });
+        }
 
         return [
             { value: "all", label: "Semua Guru" },
@@ -130,28 +242,34 @@ export default function DaftarJadwal({
         const baseList = [
             { value: "", label: "Semua Kelas" },
             ...Object.keys(groupedByKelas)
-                .sort((a, b) =>
-                    a.localeCompare(b, undefined, { numeric: true }),
-                )
-                .map((kelas) => ({ value: kelas, label: kelas })),
+                .sort(function (a, b) {
+                    return a.localeCompare(b, undefined, { numeric: true });
+                })
+                .map(function (kelas) {
+                    return { value: kelas, label: kelas };
+                }),
         ];
 
         return selectedKelas
-            ? baseList.filter((item) => item.value === selectedKelas)
-            : baseList.filter((item) => item.value !== "");
+            ? baseList.filter(function (item) {
+                  return item.value === selectedKelas;
+              })
+            : baseList.filter(function (item) {
+                  return item.value !== "";
+              });
     }, [groupedByKelas, selectedKelas]);
 
     // --- Handler Functions ---
-    const handleMapelChange = (option) => {
+    const handleMapelChange = function (option) {
         const newMapel =
             option && option.value !== "" && option.value !== "all"
                 ? option.value
                 : null;
         setSelectedMapel(newMapel);
-        setSelectedGuru(null); // Reset guru jika mapel berubah
+        setSelectedGuru(null);
     };
 
-    const handleGuruChange = (option) => {
+    const handleGuruChange = function (option) {
         setSelectedGuru(
             option && option.value !== ""
                 ? { value: option.value, label: option.label }
@@ -160,218 +278,373 @@ export default function DaftarJadwal({
     };
 
     // --- Konfigurasi PDF ---
+    const tahunAjaranId =
+        historyJadwal && historyJadwal[0]
+            ? historyJadwal[0].tahun_ajaran_id
+            : null;
     const pdfUrl = route("pdf.jadwal", {
-        tahun_ajaran_id: historyJadwal?.[0]?.tahun_ajaran_id || null,
+        tahun_ajaran_id: tahunAjaranId || "all",
         kelas_id: selectedKelas || "all",
         mapel_id: selectedMapel || "all",
-        guru_id: selectedGuru?.value || "all",
+        guru_id: selectedGuru ? selectedGuru.value : "all",
     });
 
-    const titlePdf = `Jadwal Pelajaran - ${selectedNamaTahunAjaran} ${selectedKelas ? ` - Kelas ${selectedKelas}` : " - Semua Kelas"}`;
+    const titlePdf =
+        "Jadwal Pelajaran - " +
+        (selectedNamaTahunAjaran || "") +
+        (selectedKelas ? " - Kelas " + selectedKelas : " - Semua Kelas");
 
     if (!historyJadwal || historyJadwal.length === 0) return null;
 
     // --- Render Component ---
     return (
-        <>
-            <div>
-                {/* 1. BAGIAN FILTER */}
-                <div className="max-w-full pb-3">
-                    <div className="flex justify-between items-center gap-2">
-                        <div className="flex gap-2 flex-wrap">
-                            {/* Select Kelas */}
-                            <div className="min-w-[200px]">
-                                <Select
-                                    options={filteredKelasList}
-                                    value={
-                                        filteredKelasList?.find(
-                                            (opt) =>
-                                                opt.value ===
-                                                (selectedKelas || ""),
-                                        ) || null
-                                    }
-                                    onChange={(opt) =>
-                                        setSelectedKelas(
-                                            opt && opt.value !== ""
-                                                ? opt.value
-                                                : null,
-                                        )
-                                    }
-                                    styles={customSelectStyles}
-                                    isSearchable
-                                    isClearable
-                                    placeholder="Pilih Kelas..."
-                                />
-                            </div>
-
-                            {/* Select Mapel */}
-                            <div className="min-w-[200px]">
-                                <Select
-                                    options={dataMapel || []}
-                                    value={
-                                        dataMapel?.find(
-                                            (opt) =>
-                                                opt.value ===
-                                                (selectedMapel || ""),
-                                        ) || null
-                                    }
-                                    onChange={handleMapelChange}
-                                    styles={customSelectStyles}
-                                    isSearchable
-                                    isClearable
-                                    placeholder="Pilih Mapel..."
-                                />
-                            </div>
-
-                            {/* Select Guru */}
-                            <div className="min-w-[200px]">
-                                <Select
-                                    options={dataGuruOptions}
-                                    value={
-                                        dataGuruOptions?.find(
-                                            (opt) =>
-                                                opt.value ===
-                                                (selectedGuru?.value || ""),
-                                        ) || null
-                                    }
-                                    onChange={handleGuruChange}
-                                    styles={customSelectStyles}
-                                    isSearchable
-                                    isClearable
-                                    placeholder="Pilih Guru..."
-                                />
-                            </div>
+        <div>
+            {/* 1. BAGIAN FILTER & CETAK */}
+            <div className="max-w-full pb-3">
+                <div className="flex justify-between items-center gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                        <div className="min-w-[200px]">
+                            <Select
+                                options={filteredKelasList}
+                                value={
+                                    filteredKelasList.find(function (opt) {
+                                        return (
+                                            opt.value === (selectedKelas || "")
+                                        );
+                                    }) || null
+                                }
+                                onChange={function (opt) {
+                                    setSelectedKelas(
+                                        opt && opt.value !== ""
+                                            ? opt.value
+                                            : null,
+                                    );
+                                }}
+                                styles={customSelectStyles}
+                                isSearchable
+                                isClearable
+                                placeholder="Pilih Kelas..."
+                            />
                         </div>
 
-                        {/* Tombol Cetak PDF */}
-                        <button
-                            type="button"
-                            className="mt-2 px-3 py-2 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors"
-                            onClick={() => setOpenPdfModal(true)}
-                        >
-                            <span className="mr-1 text-xs">Cetak PDF</span>
-                            <i className="fa fa-print"></i>
-                        </button>
+                        <div className="min-w-[200px]">
+                            <Select
+                                options={dataMapel || []}
+                                value={
+                                    dataMapel
+                                        ? dataMapel.find(function (opt) {
+                                              return (
+                                                  opt.value ===
+                                                  (selectedMapel || "")
+                                              );
+                                          }) || null
+                                        : null
+                                }
+                                onChange={handleMapelChange}
+                                styles={customSelectStyles}
+                                isSearchable
+                                isClearable
+                                placeholder="Pilih Mapel..."
+                            />
+                        </div>
+
+                        <div className="min-w-[200px]">
+                            <Select
+                                options={dataGuruOptions}
+                                value={
+                                    dataGuruOptions.find(function (opt) {
+                                        return (
+                                            opt.value ===
+                                            (selectedGuru
+                                                ? selectedGuru.value
+                                                : "")
+                                        );
+                                    }) || null
+                                }
+                                onChange={handleGuruChange}
+                                styles={customSelectStyles}
+                                isSearchable
+                                isClearable
+                                placeholder="Pilih Guru..."
+                            />
+                        </div>
                     </div>
+
+                    <button
+                        type="button"
+                        className="mt-2 px-3 py-2 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors cursor-pointer"
+                        onClick={function () {
+                            setOpenPdfModal(true);
+                        }}
+                    >
+                        <span className="mr-1 text-xs">Cetak PDF</span>
+                        <i className="fa fa-print"></i>
+                    </button>
                 </div>
 
-                {/* 2. BAGIAN GRID JADWAL */}
-                <div className="space-y-6 h-[80vh] overflow-y-auto">
-                    <div className="min-h-[300px] overflow-y-auto space-y-4">
-                        {filteredKelasList.map((itemKelas) => {
-                            const namaKelas = itemKelas.value;
-                            const dataKelas = groupedByKelas[namaKelas] || [];
-
+                {/* LEGEND WARNA MATA PELAJARAN */}
+                {mapelList.length > 0 && (
+                    <div className="flex items-center gap-2 overflow-x-auto py-2.5 mt-2 bg-white px-3 rounded-xl border border-gray-200">
+                        <span className="text-[11px] font-bold text-gray-500 shrink-0">
+                            Legend Mapel:
+                        </span>
+                        {mapelList.map(function (mapel) {
+                            const style = mapelColorMap[mapel] || {
+                                bg: "bg-white",
+                                border: "border-gray-200",
+                            };
                             return (
                                 <div
-                                    key={namaKelas}
-                                    className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-500"
+                                    key={mapel}
+                                    className="flex items-center gap-1.5 shrink-0 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-200"
                                 >
-                                    {/* Header Kelas */}
-                                    <div className="bg-green-600 px-4 py-2.5">
-                                        <h3 className="text-sm font-black text-white tracking-wide">
-                                            JADWAL KELAS {namaKelas}
-                                        </h3>
-                                    </div>
-
-                                    {/* Kolom Hari */}
-                                    <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-gray-200 bg-gray-50/30">
-                                        {DAFTAR_HARI.map((hari) => {
-                                            // Filter jadwal spesifik untuk hari, mapel, dan guru ini
-                                            const jadwalHariIni = dataKelas
-                                                .filter((j) => {
-                                                    const matchHari =
-                                                        (
-                                                            j.hari || ""
-                                                        ).toLowerCase() ===
-                                                        hari.toLowerCase();
-                                                    const matchMapel =
-                                                        selectedMapel &&
-                                                        selectedMapel !== "all"
-                                                            ? String(
-                                                                  j.mapel_id,
-                                                              ) ===
-                                                              String(
-                                                                  selectedMapel,
-                                                              )
-                                                            : true;
-                                                    const matchGuru =
-                                                        selectedGuru &&
-                                                        selectedGuru.value !==
-                                                            "all"
-                                                            ? String(
-                                                                  j.nama_guru,
-                                                              ) ===
-                                                              String(
-                                                                  selectedGuru.label,
-                                                              )
-                                                            : true;
-
-                                                    return (
-                                                        matchHari &&
-                                                        matchMapel &&
-                                                        matchGuru
-                                                    );
-                                                })
-                                                .sort((a, b) =>
-                                                    a.jam_mulai.localeCompare(
-                                                        b.jam_mulai,
-                                                    ),
-                                                );
-
-                                            return (
-                                                <div
-                                                    key={hari}
-                                                    className="p-2.5 flex flex-col h-full"
-                                                >
-                                                    <h4 className="text-center font-extrabold text-green-800 uppercase text-xs mb-2 pb-1.5 border-b-2 border-green-200">
-                                                        {hari}
-                                                    </h4>
-
-                                                    <div className="flex flex-col gap-1.5 flex-grow">
-                                                        {jadwalHariIni.length >
-                                                        0 ? (
-                                                            jadwalHariIni.map(
-                                                                (
-                                                                    jadwal,
-                                                                    idx,
-                                                                ) => (
-                                                                    <JadwalCard
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        jadwal={
-                                                                            jadwal
-                                                                        }
-                                                                    />
-                                                                ),
-                                                            )
-                                                        ) : (
-                                                            <div className="flex items-center justify-center h-full min-h-[60px]">
-                                                                <span className="text-gray-300 font-medium text-[10px] uppercase tracking-widest">
-                                                                    - Kosong -
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                    <span
+                                        className={
+                                            "w-3 h-3 rounded-md " +
+                                            style.bg +
+                                            " border " +
+                                            style.border +
+                                            " inline-block"
+                                        }
+                                    ></span>
+                                    <span className="text-gray-800 text-[11px] font-semibold">
+                                        {mapel}
+                                    </span>
                                 </div>
                             );
                         })}
                     </div>
+                )}
+            </div>
+
+            {/* 2. BAGIAN TABEL MATRIKS JADWAL */}
+            <div className="space-y-6 h-[75vh] overflow-y-auto">
+                <div className="min-h-[300px] overflow-y-auto space-y-4">
+                    {filteredKelasList.map(function (itemKelas) {
+                        const namaKelas = itemKelas.value;
+                        const dataKelas = groupedByKelas[namaKelas] || [];
+
+                        // Buat mapping scheduleMap[hari][jam_mulai_sub] = item
+                        const scheduleMap = {};
+                        DAFTAR_HARI.forEach(function (h) {
+                            scheduleMap[h] = {};
+                        });
+
+                        dataKelas.forEach(function (item) {
+                            var matchMapel =
+                                selectedMapel && selectedMapel !== "all"
+                                    ? String(item.mapel_id) ===
+                                      String(selectedMapel)
+                                    : true;
+                            var matchGuru =
+                                selectedGuru && selectedGuru.value !== "all"
+                                    ? String(item.nama_guru) ===
+                                      String(selectedGuru.label)
+                                    : true;
+
+                            if (
+                                item &&
+                                item.hari &&
+                                item.jam_mulai &&
+                                matchMapel &&
+                                matchGuru
+                            ) {
+                                const timeKey = item.jam_mulai.substring(0, 5);
+                                if (scheduleMap[item.hari]) {
+                                    scheduleMap[item.hari][timeKey] = item;
+                                }
+                            }
+                        });
+
+                        return (
+                            <div
+                                key={namaKelas}
+                                className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+                            >
+                                {/* Header Kelas */}
+                                <div className="bg-green-600 px-4 py-2.5">
+                                    <h3 className="text-sm font-black text-white tracking-wide uppercase">
+                                        Jadwal Kelas {namaKelas}
+                                    </h3>
+                                </div>
+
+                                {/* Tabel Matriks */}
+                                <div className="p-4 overflow-x-auto bg-gray-50/30">
+                                    <div className="min-w-[1100px] bg-white rounded-xl border border-gray-200 overflow-auto shadow-xs">
+                                        <table className="w-full border-collapse text-xs text-center">
+                                            <thead>
+                                                <tr className="bg-gray-100 text-gray-700 font-bold border-b border-gray-200">
+                                                    <th className="py-2.5 px-3 text-left w-28 border-r border-gray-200">
+                                                        Hari / Jam
+                                                    </th>
+                                                    {DAFTAR_JAM.map(
+                                                        function (jamKe) {
+                                                            const slotTime =
+                                                                globalTimeSlots[
+                                                                    jamKe - 1
+                                                                ] || "";
+                                                            return (
+                                                                <th
+                                                                    key={jamKe}
+                                                                    className="py-2.5 px-1 border-r border-gray-200 font-mono text-[11px]"
+                                                                >
+                                                                    <div>
+                                                                        Jam{" "}
+                                                                        {jamKe}
+                                                                    </div>
+                                                                    {slotTime && (
+                                                                        <div className="text-[9px] font-normal text-gray-500">
+                                                                            {
+                                                                                slotTime
+                                                                            }
+                                                                        </div>
+                                                                    )}
+                                                                </th>
+                                                            );
+                                                        },
+                                                    )}
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200">
+                                                {DAFTAR_HARI.map(
+                                                    function (hari) {
+                                                        const hariMap =
+                                                            scheduleMap[hari] ||
+                                                            {};
+
+                                                        return (
+                                                            <tr
+                                                                key={hari}
+                                                                className="hover:bg-gray-50 transition-colors"
+                                                            >
+                                                                <td className="py-3 px-3 font-bold text-emerald-700 text-left border-r border-gray-200 bg-gray-50">
+                                                                    {hari}
+                                                                </td>
+                                                                {DAFTAR_JAM.map(
+                                                                    function (
+                                                                        jamKe,
+                                                                    ) {
+                                                                        const slotTime =
+                                                                            globalTimeSlots[
+                                                                                jamKe -
+                                                                                    1
+                                                                            ];
+                                                                        const item =
+                                                                            slotTime
+                                                                                ? hariMap[
+                                                                                      slotTime
+                                                                                  ]
+                                                                                : null;
+
+                                                                        if (
+                                                                            item
+                                                                        ) {
+                                                                            const mapelStyle =
+                                                                                mapelColorMap[
+                                                                                    item
+                                                                                        .nama_mapel
+                                                                                ] || {
+                                                                                    bg: "bg-gray-100",
+                                                                                    border: "border-gray-300",
+                                                                                    hover: "hover:bg-gray-200",
+                                                                                };
+
+                                                                            const jamMulaiClean =
+                                                                                item.jam_mulai
+                                                                                    ? item.jam_mulai.substring(
+                                                                                          0,
+                                                                                          5,
+                                                                                      )
+                                                                                    : "";
+                                                                            const jamSelesaiClean =
+                                                                                item.jam_selesai
+                                                                                    ? item.jam_selesai.substring(
+                                                                                          0,
+                                                                                          5,
+                                                                                      )
+                                                                                    : "";
+
+                                                                            return (
+                                                                                <td
+                                                                                    key={
+                                                                                        jamKe
+                                                                                    }
+                                                                                    className="p-1.5 border-r border-gray-200 align-middle"
+                                                                                >
+                                                                                    <div
+                                                                                        className={
+                                                                                            "rounded-xl p-2 flex flex-col items-center justify-center text-center shadow-2xs transition-all border " +
+                                                                                            mapelStyle.bg +
+                                                                                            " " +
+                                                                                            mapelStyle.border +
+                                                                                            " " +
+                                                                                            mapelStyle.hover
+                                                                                        }
+                                                                                    >
+                                                                                        <span className="text-[9px] font-bold text-gray-500 mb-0.5">
+                                                                                            {
+                                                                                                jamMulaiClean
+                                                                                            }{" "}
+                                                                                            -{" "}
+                                                                                            {
+                                                                                                jamSelesaiClean
+                                                                                            }
+                                                                                        </span>
+                                                                                        <span className="font-bold text-gray-900 text-xs mb-0.5">
+                                                                                            {
+                                                                                                item.nama_mapel
+                                                                                            }
+                                                                                        </span>
+                                                                                        <span
+                                                                                            className="text-[10px] font-semibold text-gray-600 truncate max-w-[110px]"
+                                                                                            title={
+                                                                                                item.nama_guru
+                                                                                            }
+                                                                                        >
+                                                                                            {
+                                                                                                item.nama_guru
+                                                                                            }
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </td>
+                                                                            );
+                                                                        }
+
+                                                                        return (
+                                                                            <td
+                                                                                key={
+                                                                                    jamKe
+                                                                                }
+                                                                                className="py-3 px-2 border-r border-gray-200 text-gray-300 font-mono text-[11px]"
+                                                                            >
+                                                                                -
+                                                                            </td>
+                                                                        );
+                                                                    },
+                                                                )}
+                                                            </tr>
+                                                        );
+                                                    },
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
             {/* MODAL PDF */}
             <ModalPdf
                 isOpen={openPdfModal}
-                onClose={() => setOpenPdfModal(false)}
+                onClose={function () {
+                    setOpenPdfModal(false);
+                }}
                 pdfUrl={pdfUrl}
                 title={titlePdf}
             />
-        </>
+        </div>
     );
 }

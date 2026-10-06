@@ -52,7 +52,10 @@ export default function GenerateJadwal() {
     const [fitness, setFitness] = useState(0);
     const [logs, setLogs] = useState([]);
 
+    const [openView, setOpenView] = useState(false);
+
     const { showCenterAlert } = useAlert();
+    const [newKromosom, setNewKromosom] = useState({});
 
     const fetchDataTa = async () => {
         try {
@@ -62,6 +65,21 @@ export default function GenerateJadwal() {
             console.log(error);
         }
     };
+    useEffect(() => {
+        if (progress != 0) {
+            const handleBeforeUnload = (e) => {
+                e.preventDefault();
+                e.returnValue =
+                    "Proses penjadwalan sedang berjalan. Jangan refresh atau pindah menu agar data tidak rusak!";
+                return e.returnValue;
+            };
+
+            window.addEventListener("beforeunload", handleBeforeUnload);
+            return () => {
+                window.removeEventListener("beforeunload", handleBeforeUnload);
+            };
+        }
+    }, []);
     // 5. Fetch Data API Awal
     const fetchDataAwal = async () => {
         try {
@@ -129,8 +147,10 @@ export default function GenerateJadwal() {
         },
     ];
     const onMaximize = () => {
-        setActiveTab("proses");
+        setActiveTab("konfigurasi");
+        setOpenView(true);
     };
+
     const showMinimizedWidget = isGenerating && activeTab !== "proses";
     console.log(isGenerating, activeTab);
     return (
@@ -201,10 +221,15 @@ export default function GenerateJadwal() {
                                 setIsGenerating={setIsGenerating}
                                 isGenerating={isGenerating}
                                 setActiveTab={setActiveTab}
+                                activeTab={activeTab}
                                 setGeneration={setGeneration}
                                 setFitness={setFitness}
                                 setLogs={setLogs}
                                 fetchDataAwal={fetchDataAwal}
+                                openView={openView}
+                                setOpenView={setOpenView}
+                                setNewKromosom={setNewKromosom}
+                                newKromosom={newKromosom}
                             />
                         )}
 
@@ -218,6 +243,9 @@ export default function GenerateJadwal() {
                                 logs={logs}
                                 isGenerating={isGenerating}
                                 activeTab={activeTab}
+                                setActiveTab={setActiveTab}
+                                openView={openView}
+                                setOpenView={setOpenView}
                             />
                         )}
                         {activeTab === "hasil" && (
@@ -257,9 +285,9 @@ export default function GenerateJadwal() {
                     <button
                         onClick={onMaximize}
                         type="button"
-                        className="flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-2xl shadow-lg border border-slate-700 text-xs font-medium transition-all cursor-pointer"
+                        className="flex items-center gap-2.5 bg-white  text-black px-4 py-2.5 rounded-2xl shadow-lg border shadow-xl border-secondary-300 text-xs font-medium transition-all cursor-pointer"
                     >
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                        <i className="fa fa-spinner fa-spin text-green-400 text-[12px]"></i>
                         <div className="flex flex-col text-left">
                             <span className="font-bold">
                                 Memproses Penjadwalan...

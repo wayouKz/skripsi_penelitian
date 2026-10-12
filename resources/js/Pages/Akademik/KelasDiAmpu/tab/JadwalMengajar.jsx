@@ -1,6 +1,6 @@
 import Select from "react-select";
 import { useEffect, useState } from "react";
-import axios from "axios"; // Pastikan axios diimport
+import axios from "axios";
 
 export default function JadwalMengajar({ dataKelas }) {
     const [mapel, setMapel] = useState([]);
@@ -64,15 +64,32 @@ export default function JadwalMengajar({ dataKelas }) {
         ? jadwal.filter((j) => j.kode_mapel === selectedMapel)
         : jadwal;
 
-    // --- PERBAIKAN STYLES REACT-SELECT (Lebih kecil) ---
+    // Kumpulkan semua slot jam unik yang tersedia dari data jadwal untuk dijadikan kolom
+    const jamUnikMap = new Map();
+    filteredJadwal.forEach((item) => {
+        if (item.jam_mulai && item.jam_selesai) {
+            const mulai = item.jam_mulai.substring(0, 5);
+            const selesai = item.jam_selesai.substring(0, 5);
+            const key = `${mulai}-${selesai}`;
+            if (!jamUnikMap.has(key)) {
+                jamUnikMap.set(key, { jam_mulai: mulai, jam_selesai: selesai });
+            }
+        }
+    });
+
+    const daftarJam = Array.from(jamUnikMap.values()).sort((a, b) =>
+        a.jam_mulai.localeCompare(b.jam_mulai),
+    );
+
+    // --- STYLES REACT-SELECT ---
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
             backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
             borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
-            borderRadius: "0.375rem", // sm
+            borderRadius: "0.375rem",
             padding: "0",
-            minHeight: "28px", // Diperkecil dari 32px
+            minHeight: "28px",
             boxShadow: state.isFocused
                 ? "0 0 0 2px rgba(16, 185, 129, 0.15)"
                 : "none",
@@ -88,13 +105,13 @@ export default function JadwalMengajar({ dataKelas }) {
         placeholder: (base) => ({
             ...base,
             color: "#9CA3AF",
-            fontSize: "10px", // Diperkecil
+            fontSize: "10px",
             fontWeight: "normal",
         }),
         singleValue: (base) => ({
             ...base,
             color: "#1F2937",
-            fontSize: "10px", // Diperkecil
+            fontSize: "10px",
             fontWeight: "600",
         }),
         option: (base, state) => ({
@@ -105,10 +122,10 @@ export default function JadwalMengajar({ dataKelas }) {
                   ? "#ECFDF5"
                   : "white",
             color: state.isSelected ? "white" : "#1F2937",
-            fontSize: "10px", // Diperkecil
+            fontSize: "10px",
             fontWeight: "500",
             cursor: "pointer",
-            padding: "4px 8px", // Padding opsi diperkecil
+            padding: "4px 8px",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -116,7 +133,7 @@ export default function JadwalMengajar({ dataKelas }) {
         }),
         dropdownIndicator: (base) => ({
             ...base,
-            padding: "2px", // Panah diperkecil
+            padding: "2px",
         }),
         clearIndicator: (base) => ({
             ...base,
@@ -130,9 +147,9 @@ export default function JadwalMengajar({ dataKelas }) {
     }));
 
     return (
-        <>
-            {/* Header & Filter Section (Diperkecil gap dan padding-nya) */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            {/* Header & Filter Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-6 border-b border-gray-100 bg-white">
                 <div className="flex items-center gap-2.5">
                     <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center shadow-sm">
                         <i className="fa fa-calendar text-white text-sm"></i>
@@ -142,12 +159,12 @@ export default function JadwalMengajar({ dataKelas }) {
                             Jadwal Mengajar
                         </h3>
                         <p className="text-[10px] text-slate-400 mt-0.5">
-                            Jadwal mengajar
+                            Jadwal mengajar dan kelas
                         </p>
                     </div>
                 </div>
 
-                <div className="relative w-full md:w-[160px]">
+                <div className="relative w-full md:w-[180px]">
                     <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 block">
                         Mata Pelajaran
                     </label>
@@ -170,69 +187,108 @@ export default function JadwalMengajar({ dataKelas }) {
                 </div>
             </div>
 
-            {/* Calendar / Timetable Grid Section */}
+            {/* Content Section */}
             {loading ? (
-                <div className="flex justify-center items-center py-8">
+                <div className="flex justify-center items-center py-16">
                     <i className="fa fa-spinner fa-spin text-2xl text-green-500"></i>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5">
-                    {hariKerja.map((hari, index) => {
-                        const jadwalHariIni = filteredJadwal.filter(
-                            (j) => j.hari === hari,
-                        );
-
-                        return (
-                            <div
-                                key={index}
-                                className="flex flex-col bg-gray-50 rounded-md overflow-hidden border border-gray-200"
-                            >
-                                {/* Header Hari */}
-                                <div className="bg-green-600 text-white text-center py-1.5 font-bold text-[11px] tracking-wider uppercase shadow-sm">
-                                    {hari}
-                                </div>
-
-                                {/* List Jadwal per Hari */}
-                                <div className="p-2 flex flex-col gap-2 min-h-[120px]">
-                                    {jadwalHariIni.length > 0 ? (
-                                        jadwalHariIni.map((item, idx) => (
-                                            <div
-                                                key={idx}
-                                                className="bg-white p-2 rounded-md shadow-sm border-l-[3px] border-green-500 hover:shadow-md transition-shadow relative group"
-                                            >
-                                                <div className="text-[10px] font-semibold text-gray-500 mb-0.5 flex items-center gap-1">
-                                                    <i className="fa fa-clock-o"></i>
-                                                    {item.jam_mulai.substring(
-                                                        0,
-                                                        5,
-                                                    )}{" "}
-                                                    -{" "}
-                                                    {item.jam_selesai.substring(
-                                                        0,
-                                                        5,
-                                                    )}
-                                                </div>
-                                                <div className="text-xs font-bold text-gray-800 leading-tight mb-1">
-                                                    {item.nama_mapel}
-                                                </div>
-                                                <div className="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
-                                                    <i className="fa fa-map-marker text-green-600"></i>{" "}
-                                                    {item.nama_kelas ||
-                                                        "Kelas X-1"}
-                                                </div>
+                <div className="p-6 overflow-x-auto bg-gray-50/50">
+                    <table className="w-full border-collapse min-w-max">
+                        <thead>
+                            <tr className="bg-gray-100 border-b border-gray-200 text-center">
+                                <th className="p-3 font-extrabold text-gray-700 text-xs uppercase tracking-wide border-r border-gray-200 w-32 sticky left-0 bg-gray-100 z-10">
+                                    Hari / Jam
+                                </th>
+                                {daftarJam.length > 0 ? (
+                                    daftarJam.map((jam, index) => (
+                                        <th
+                                            key={index}
+                                            className="p-3 border-r border-gray-200 min-w-[140px]"
+                                        >
+                                            <div className="font-extrabold text-gray-800 text-xs">
+                                                {jam.jam_mulai}
                                             </div>
-                                        ))
-                                    ) : (
-                                        <div className="flex-1 flex items-center justify-center text-[10px] text-gray-400 italic text-center p-2 border-2 border-dashed border-gray-200 rounded-md">
-                                            - Kosong -
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                                        </th>
+                                    ))
+                                ) : (
+                                    <th className="p-3 text-gray-400 text-xs font-normal">
+                                        Tidak ada jam tersedia
+                                    </th>
+                                )}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {hariKerja.map((hari) => {
+                                const dataHariIni = filteredJadwal.filter(
+                                    (item) => item.hari === hari,
+                                );
+
+                                return (
+                                    <tr
+                                        key={hari}
+                                        className="border-b border-gray-200 hover:bg-gray-50/80"
+                                    >
+                                        {/* Kolom Hari */}
+                                        <td className="p-3 font-extrabold text-gray-800 text-xs uppercase tracking-wide bg-gray-50 border-r border-gray-200 text-center sticky left-0 z-10">
+                                            {hari}
+                                        </td>
+
+                                        {/* Kolom Jam Pelajaran Berdasarkan Indeks Universal */}
+                                        {daftarJam.map((jam, index) => {
+                                            const matchItem = dataHariIni.find(
+                                                (item) =>
+                                                    item.jam_mulai &&
+                                                    item.jam_selesai &&
+                                                    item.jam_mulai.substring(
+                                                        0,
+                                                        5,
+                                                    ) === jam.jam_mulai &&
+                                                    item.jam_selesai.substring(
+                                                        0,
+                                                        5,
+                                                    ) === jam.jam_selesai,
+                                            );
+
+                                            return (
+                                                <td
+                                                    key={index}
+                                                    className="p-2 border-r border-gray-200 text-center align-middle"
+                                                >
+                                                    {matchItem ? (
+                                                        <div className="p-2.5 bg-white border border-green-200 rounded-xl shadow-2xs hover:shadow-md transition-all flex flex-col justify-center min-h-[70px]">
+                                                            <div className="font-mono text-[10px] text-gray-400 mb-1">
+                                                                {matchItem.jam_mulai.substring(
+                                                                    0,
+                                                                    5,
+                                                                )}{" "}
+                                                                -{" "}
+                                                                {matchItem.jam_selesai.substring(
+                                                                    0,
+                                                                    5,
+                                                                )}
+                                                            </div>
+                                                            <div className="font-bold text-gray-900 text-xs line-clamp-2">
+                                                                {
+                                                                    matchItem.nama_mapel
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-gray-300 text-xs italic py-4">
+                                                            -
+                                                        </div>
+                                                    )}
+                                                </td>
+                                            );
+                                        })}
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             )}
-        </>
+        </div>
     );
 }

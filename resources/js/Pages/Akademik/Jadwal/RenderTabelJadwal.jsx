@@ -2,11 +2,10 @@ export default function RenderTabelJadwal({
     historyJadwal,
     selectedNamaTahunAjaran = "Tahun Ajaran Aktif",
 }) {
-    // 1. CEK DATA KOSONG (Menggunakan logika Empty State Anda)
+    // 1. CEK DATA KOSONG
     if (!historyJadwal || historyJadwal.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl">
-                {/* Tambahan Ikon Opsional (Bisa dihapus jika tidak pakai FontAwesome) */}
                 <i className="fa fa-calendar-times-o text-4xl text-gray-300 mb-3"></i>
                 <div className="text-gray-500 font-medium text-sm">
                     Tidak ada jadwal yang tersedia.
@@ -18,8 +17,9 @@ export default function RenderTabelJadwal({
         );
     }
 
-    const daftarHari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const daftarHari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
+    // 2. KELOMPOKKAN BERDASARKAN KELAS
     const groupedByKelas = historyJadwal.reduce((acc, curr) => {
         if (!acc[curr.nama_kelas]) acc[curr.nama_kelas] = [];
         acc[curr.nama_kelas].push(curr);
@@ -33,20 +33,33 @@ export default function RenderTabelJadwal({
                 .map((kelas) => {
                     const dataKelas = groupedByKelas[kelas];
 
-                    const jamUnikKelas = Array.from(
-                        new Set(
-                            dataKelas.map(
-                                (item) =>
-                                    `${item.jam_mulai} - ${item.jam_selesai}`,
-                            ),
-                        ),
-                    ).sort();
+                    // Ambil semua slot jam unik yang tersedia untuk kelas ini, urutkan berdasarkan jam mulai
+                    const jamUnikMap = new Map();
+                    dataKelas.forEach((item) => {
+                        if (item.jam_mulai && item.jam_selesai) {
+                            const mulai = item.jam_mulai.substring(0, 5);
+                            const selesai = item.jam_selesai.substring(0, 5);
+                            const key = `${mulai}-${selesai}`;
+                            if (!jamUnikMap.has(key)) {
+                                jamUnikMap.set(key, {
+                                    jam_mulai: mulai,
+                                    jam_selesai: selesai,
+                                });
+                            }
+                        }
+                    });
+
+                    // Urutkan kolom jam berdasarkan jam mulai
+                    const daftarJam = Array.from(jamUnikMap.values()).sort(
+                        (a, b) => a.jam_mulai.localeCompare(b.jam_mulai),
+                    );
 
                     return (
                         <div
                             key={kelas}
                             className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-in fade-in zoom-in-95 duration-500"
                         >
+                            {/* Header Kelas */}
                             <div className="bg-green-600 px-6 py-4 flex items-center justify-between">
                                 <h3 className="text-lg font-black text-white tracking-wide">
                                     JADWAL KELAS {kelas}
@@ -56,81 +69,107 @@ export default function RenderTabelJadwal({
                                 </span>
                             </div>
 
-                            <div className="overflow-x-auto custom-scrollbar">
-                                <table className="w-full text-sm text-left border-collapse">
-                                    {/* ... BAGIAN THEAD DAN TBODY SAMA SEPERTI SEBELUMNYA ... */}
-                                    <thead className="bg-green-50 border-b border-green-100 text-green-900">
-                                        <tr>
-                                            <th className="px-4 py-3 text-center w-32 border-r border-green-100 font-extrabold uppercase text-xs">
-                                                Waktu
+                            {/* Kontainer Tabel Matriks */}
+                            <div className="p-6 overflow-x-auto bg-gray-50/50">
+                                <table className="w-full border-collapse min-w-max">
+                                    <thead>
+                                        <tr className="bg-gray-100 border-b border-gray-200 text-center">
+                                            <th className="p-3 font-extrabold text-gray-700 text-xs uppercase tracking-wide border-r border-gray-200 w-32 sticky left-0 bg-gray-100 z-10">
+                                                Hari / Jam
                                             </th>
-                                            {daftarHari.map((hari) => (
+                                            {daftarJam.map((jam, index) => (
                                                 <th
-                                                    key={hari}
-                                                    className="px-4 py-3 text-center border-r border-green-100 font-extrabold uppercase text-xs min-w-[200px]"
+                                                    key={index}
+                                                    className="p-3 border-r border-gray-200 min-w-[140px]"
                                                 >
-                                                    {hari}
+                                                    <div className="font-extrabold text-gray-800 text-xs">
+                                                        {jam.jam_mulai} -{" "}
+                                                        {jam.jam_selesai}
+                                                    </div>
                                                 </th>
                                             ))}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-100">
-                                        {jamUnikKelas.map((waktu, rowIndex) => {
-                                            const [mulai, selesai] =
-                                                waktu.split(" - ");
-                                            const jamTampil = `${mulai.slice(0, 5)} - ${selesai.slice(0, 5)}`;
+                                    <tbody>
+                                        {daftarHari.map((hari) => {
+                                            // Filter data untuk hari ini
+                                            const dataHariIni =
+                                                dataKelas.filter(
+                                                    (item) =>
+                                                        item.hari === hari,
+                                                );
 
                                             return (
                                                 <tr
-                                                    key={rowIndex}
-                                                    className="hover:bg-gray-50/50 transition-colors"
+                                                    key={hari}
+                                                    className="border-b border-gray-200 hover:bg-gray-50/80"
                                                 >
-                                                    <td className="px-4 py-3 text-center font-bold text-gray-600 bg-gray-50 border-r border-gray-100 whitespace-nowrap">
-                                                        {jamTampil}
+                                                    {/* Kolom Hari */}
+                                                    <td className="p-3 font-extrabold text-gray-800 text-xs uppercase tracking-wide bg-gray-50 border-r border-gray-200 text-center sticky left-0 z-10">
+                                                        {hari}
                                                     </td>
 
-                                                    {daftarHari.map((hari) => {
-                                                        const mapelDitemukan =
-                                                            dataKelas.find(
-                                                                (j) =>
-                                                                    j.hari ===
-                                                                        hari &&
-                                                                    j.jam_mulai ===
-                                                                        mulai &&
-                                                                    j.jam_selesai ===
-                                                                        selesai,
-                                                            );
+                                                    {/* Kolom Jam Pelajaran */}
+                                                    {daftarJam.map(
+                                                        (jam, index) => {
+                                                            // Cari mapel yang cocok dengan hari dan rentang jam tersebut
+                                                            const matchItem =
+                                                                dataHariIni.find(
+                                                                    (item) =>
+                                                                        item.jam_mulai &&
+                                                                        item.jam_selesai &&
+                                                                        item.jam_mulai.substring(
+                                                                            0,
+                                                                            5,
+                                                                        ) ===
+                                                                            jam.jam_mulai &&
+                                                                        item.jam_selesai.substring(
+                                                                            0,
+                                                                            5,
+                                                                        ) ===
+                                                                            jam.jam_selesai,
+                                                                );
 
-                                                        return (
-                                                            <td
-                                                                key={`${hari}-${waktu}`}
-                                                                className="px-4 py-3 border-r border-gray-100 relative group"
-                                                            >
-                                                                {mapelDitemukan ? (
-                                                                    <div className="flex flex-col h-full bg-white border border-green-100 rounded-lg p-3 shadow-sm group-hover:shadow-md transition-shadow border-l-4 border-l-green-500">
-                                                                        <span className="font-bold text-gray-800 leading-tight mb-1">
-                                                                            {
-                                                                                mapelDitemukan.nama_mapel
-                                                                            }
-                                                                        </span>
-                                                                        <span className="text-xs font-semibold text-green-600 mt-auto flex items-center gap-1.5">
-                                                                            <i className="fa fa-user-circle text-green-400"></i>
-                                                                            {mapelDitemukan.nama_guru ||
-                                                                                mapelDitemukan.kode_jadwal}
-                                                                        </span>
-                                                                    </div>
-                                                                ) : (
-                                                                    <div className="flex items-center justify-center h-full min-h-[60px]">
-                                                                        <span className="text-gray-300 font-medium text-xs uppercase tracking-widest">
+                                                            return (
+                                                                <td
+                                                                    key={index}
+                                                                    className="p-2 border-r border-gray-200 text-center align-middle"
+                                                                >
+                                                                    {matchItem ? (
+                                                                        <div className="p-2.5 bg-white border border-green-200 rounded-xl shadow-2xs hover:shadow-md transition-all flex flex-col justify-center min-h-[70px]">
+                                                                            <div className="font-mono text-[10px] text-gray-400 mb-1">
+                                                                                {matchItem.jam_mulai.substring(
+                                                                                    0,
+                                                                                    5,
+                                                                                )}{" "}
+                                                                                -{" "}
+                                                                                {matchItem.jam_selesai.substring(
+                                                                                    0,
+                                                                                    5,
+                                                                                )}
+                                                                            </div>
+                                                                            <div className="font-bold text-gray-900 text-xs line-clamp-2">
+                                                                                {
+                                                                                    matchItem.nama_mapel
+                                                                                }
+                                                                            </div>
+                                                                            <div className="text-[10px] font-semibold text-green-700 truncate flex items-center justify-center gap-1 mt-1">
+                                                                                <i className="fa fa-user-circle text-green-400"></i>
+                                                                                <span className="truncate">
+                                                                                    {matchItem.nama_guru ||
+                                                                                        matchItem.kode_jadwal}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="text-gray-300 text-xs italic py-4">
                                                                             -
-                                                                            Kosong
-                                                                            -
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </td>
-                                                        );
-                                                    })}
+                                                                        </div>
+                                                                    )}
+                                                                </td>
+                                                            );
+                                                        },
+                                                    )}
                                                 </tr>
                                             );
                                         })}

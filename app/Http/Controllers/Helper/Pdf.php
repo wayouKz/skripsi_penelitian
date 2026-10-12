@@ -92,7 +92,7 @@ class Pdf extends Controller
         $kelas_id = $request->input('kelas_id');
         $tahunAjaran_id = $request->input('tahun_ajaran_id');
         $namaTahunAjaran = DB::table('m_tahun_ajarans')->where('id', $request->tahun_ajaran_id)->first();
-  $daftarAbsenSiswa = DB::table('t_list_siswas')
+$daftarAbsenSiswa = DB::table('t_list_siswas')
     ->where('t_list_siswas.kelas_id', $kelas_id)
     ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran_id)
     ->leftJoin('t_absen_siswas', 't_list_siswas.siswa_id', '=', 't_absen_siswas.siswa_id')
@@ -102,22 +102,24 @@ class Pdf extends Controller
     })
     ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
     ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-    // Sesuaikan 't_list_gurus' dan kolom 'nama_guru' dengan tabel database Anda
     ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
     ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
     ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id')
+    ->leftJoin('m_siswas', 't_list_siswas.siswa_id', '=', 'm_siswas.id')
     ->leftJoin('m_tahun_ajarans', 't_list_siswas.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
     ->where('t_list_guru_mapels.nip', Auth::user()->nip)
     ->select(
-        't_list_siswas.nisn',
-        't_list_siswas.nama_siswa',
+        't_list_siswas.siswa_id',
+        'm_siswas.nisn',
+        'm_siswas.nama_siswa',
+        'm_siswas.jenis_kelamin', // Pastikan mengambil jenis kelamin jika ada
         't_absen_siswas.pertemuan',
         't_absen_siswas.tanggal_absen',
         't_absen_siswas.status',
         't_absen_siswas.waktu as waktu_absen',
         't_jadwals.kode_jadwal',
         'm_mapels.nama_mapel',
-        'm_gurus.nama_guru', // Mengambil nama guru pengampu
+        'm_gurus.nama_guru',
         'm_kelas.nama_kelas',
         'm_tahun_ajarans.tahun_ajaran',
         'm_tahun_ajarans.semester',
@@ -126,20 +128,22 @@ class Pdf extends Controller
     ->get()
     ->groupBy('nama_mapel')
     ->map(function ($siswasPerMapel) {
-        // Ambil nama guru dari baris pertama mapel tersebut
         $namaGuru = $siswasPerMapel->first()->nama_guru ?? '-';
         $nip = $siswasPerMapel->first()->nip ?? '-';
         $kelas = $siswasPerMapel->first()->nama_kelas ?? '-';
         $tahunAjaran = $siswasPerMapel->first()->tahun_ajaran ?? '-';
         $semester = $siswasPerMapel->first()->semester ?? '-';
-        $mappedSiswa = $siswasPerMapel->groupBy('nisn')->map(function ($rows) {
+
+        // Kelompokkan berdasarkan siswa_id atau nisn agar semua siswa dalam kelas masuk ke daftar
+        $mappedSiswa = $siswasPerMapel->groupBy('siswa_id')->map(function ($rows) {
             $first = $rows->first();
 
+            // Petakan absensi berdasarkan nomor pertemuan (1 s.d 16) tanpa membatasi unique kode_jadwal
             $absenList = $rows->filter(function ($row) {
-                return $row->kode_jadwal !== null;
-            })->unique('kode_jadwal')->map(function ($row) {
+                return $row->pertemuan !== null;
+            })->map(function ($row) {
                 return [
-                    'pertemuan' => $row->pertemuan,
+                    'pertemuan' => (int) $row->pertemuan,
                     'kode_jadwal' => $row->kode_jadwal,
                     'tanggal_absen' => $row->tanggal_absen,
                     'status' => $row->status,
@@ -150,11 +154,11 @@ class Pdf extends Controller
             return [
                 'nisn' => $first->nisn,
                 'nama_siswa' => $first->nama_siswa,
+                'jenis_kelamin' => $first->jenis_kelamin ?? '-',
                 'absen' => $absenList
             ];
         })->values();
 
-        // Mengembalikan struktur data dengan menyertakan nama_guru di setiap mapel
         return [
             'nama_guru' => $namaGuru,
             'kelas' => $kelas,

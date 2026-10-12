@@ -613,52 +613,69 @@ public function getSiswaInKelas(Request $request){
 
     }
 
-    public function getKelasAktif(Request $request){
+public function getKelasAktif(Request $request)
+    {
+        // 1. Ambil tanggal dari request (jika ada), jika tidak gunakan tanggal hari ini (Asia/Makassar)
         $waktuSekarang = Carbon::now('Asia/Makassar');
-        $hariIni = $waktuSekarang->locale('id')->isoFormat('dddd');
-        // $hariIni = "Selasa";
-    $jamSekarang = $waktuSekarang->format('H:i:s');
+        $tanggalFilter = $request->input('tanggal');
+        $hariFilter = $request->input('hari'); // Opsional: jika ingin membatasi hari tertentu
 
-    // 2. Eksekusi Query dengan Filter Waktu
-    $jadwalMentah = MKelas::select(
-            'm_kelas.id as kelas_id',
-            'm_kelas.nama_kelas',
-            't_jadwals.kode_jadwal',
-            't_jadwals.jam_mulai',
-            't_jadwals.jam_selesai',
-            'm_gurus.nama_guru',
-            't_absen_gurus.kode_absen',
-            'm_mapels.nama_mapel'
-        )
-    ->join('t_jadwals', function($join) use ($hariIni, $jamSekarang) {
-            $join->on('m_kelas.id', '=', 't_jadwals.kelas_id')
-                ->where('t_jadwals.hari', '=', "Selasa");
-                // ->whereTime('t_jadwals.jam_mulai', '<=', $jamSekarang)
-                 // ->whereTime('t_jadwals.jam_selesai', '>=', $jamSekarang);
-        })
-    ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-    ->leftJoin('t_absen_gurus', 't_jadwals.kode_jadwal', '=', 't_absen_gurus.kode_jadwal')
-    ->leftJoin('m_tahun_ajarans', 't_jadwals.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
-    ->where('m_tahun_ajarans.status', '=', 'active')
-    ->leftJoin('m_gurus', 't_list_guru_mapels.guru_id', '=', 'm_gurus.id')
-    ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
+        $jadwalMentah = MKelas::select(
+                'm_kelas.id as kelas_id',
+                'm_kelas.nama_kelas',
+                't_jadwals.kode_jadwal',
+                't_jadwals.hari',
+                't_jadwals.jam_mulai',
+                't_jadwals.jam_selesai',
+                'm_gurus.nama_guru',
+                't_absen_gurus.kode_absen',
+                'm_mapels.nama_mapel',
+                'm_gurus.id as guru_id'
+            )
+        ->join('t_jadwals', function($join) {
+                $join->on('m_kelas.id', '=', 't_jadwals.kelas_id');
+            })
+        ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
+        // 2. Hubungkan tabel absensi berdasarkan kode jadwal dan TANGGAL YANG DIPILIH user
+        ->leftJoin('t_absen_gurus', function($join) use ($tanggalFilter) {
+                $join->on('t_jadwals.kode_jadwal', '=', 't_absen_gurus.kode_jadwal')
+                     ->whereDate('t_absen_gurus.waktu_absen', '=', $tanggalFilter);
+            })
+        ->leftJoin('m_tahun_ajarans', 't_jadwals.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
+        ->where('m_tahun_ajarans.status', '=', 'active')
+        ->leftJoin('m_gurus', 't_list_guru_mapels.guru_id', '=', 'm_gurus.id')
+        ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
+        // (Opsional) Jika Anda ingin memfilter langsung berdasarkan hari di database:
+        // ->when($hariFilter, function ($query, $hariFilter) {
+        //     return $query->where('t_jadwals.hari', $hariFilter);
+        // })
+        ->orderBy('t_jadwals.jam_mulai', 'asc')
+        ->get();
 
-    ->orderBy('t_jadwals.jam_mulai', 'asc')
-    ->get();
+        // 3. Kelompokkan terlebih dahulu berdasarkan nama_kelas
+        $data = $jadwalMentah->groupBy('nama_kelas')->map(function ($itemsKelas) {
 
-    $data = $jadwalMentah->groupBy('kode_jadwal')->map(function ($items) {
-    $first = $items->first();
+            // 4. Di dalam kelas, kelompokkan lagi berdasarkan hari (Senin, Selasa, dll)
+            return $itemsKelas->groupBy('hari')->map(function ($itemsHari) {
 
-    return [
-        'nama_kelas' => $first->nama_kelas,
-        'nama_mapel' => $first->nama_mapel,
-        'nama_guru'  => $first->nama_guru,
-        'status_kbm' => is_null($first->kode_absen) ? 'Belum Absen' : 'Hadir',
-        'warna_badge'=> is_null($first->kode_absen) ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-        // Mengumpulkan semua jam menjadi array
-        'jam_sesi'   =>  $first->jam_mulai . ' - ' . $first->jam_selesai,
-    ];
-    })->groupBy('nama_kelas');
+                // 5. Petakan detail jadwal per sesi/kode_jadwal di hari tersebut
+                return $itemsHari->groupBy('kode_jadwal')->map(function ($itemsJadwal) {
+                    $first = $itemsJadwal->first();
+                    $belumAbsen = is_null($first->kode_absen);
+
+                    return [
+                        'guru_id'    => $first->guru_id,
+                        'kode_jadwal' => $first->kode_jadwal,
+                        'nama_mapel'  => $first->nama_mapel,
+                        'nama_guru'   => $first->nama_guru,
+                        'status_kbm'  => $belumAbsen ? 'Belum Absen' : 'Hadir',
+                        'warna_badge' => $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
+                        'jam_sesi'    => $first->jam_mulai . ' - ' . $first->jam_selesai,
+                    ];
+                })->values();
+
+            });
+        });
 
         return response()->json([
             "data" => $data,

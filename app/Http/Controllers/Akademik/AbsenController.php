@@ -55,6 +55,7 @@ public function store(Request $request)
         'kode_absen'    => $kodeSesiAbsensi,
         'kode_jadwal'     => $kode_jadwal,
         'nip'             => Auth::user()->nip,
+        'guru_id'         => Auth::user()->guru->id,
         'waktu_absen'   => $tanggal,
         'waktu'             => $jam,
     ];

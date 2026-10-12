@@ -10,6 +10,7 @@ use App\Models\WAHYU\MKelas;
 use App\Models\WAHYU\MMapel;
 use App\Models\WAHYU\MSiswa;
 use Gemini;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -66,4 +67,29 @@ class DashboardController extends Controller
         //
     }
 
+    public function assignGuruPengganti(Request $request){
+
+        $fokus = $request->input('fokus_permintaan');
+        $guruIdPengganti = $request->input('guru_id');
+        $guruIdAsli = $fokus['guru_id'] ?? null;
+        $kodeJadwal = $fokus['kode_jadwal'];
+        $tanggal = date('Y-m-d');
+
+        $data = [
+        'kode_jadwal' => $kodeJadwal,
+        'guru_id_pennganti' => $guruIdPengganti,
+        'guru_id' => $guruIdAsli,
+        'tanggal_pergantian' => $tanggal,
+        'alasan' => $fokus['alasan'] ?? 'Tidak ada alasan yang diberikan',
+        ];
+
+        $save = DB::table('t_guru_penggantis')->insert($data);
+
+
+        if(!$save){
+            return response()->json(['message' => 'Gagal menugaskan guru pengganti.'], 500);
+        }else{
+            return response()->json(['message' => 'Guru pengganti berhasil ditugaskan.']);
+        }
+    }
 }

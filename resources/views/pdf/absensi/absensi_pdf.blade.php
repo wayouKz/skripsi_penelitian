@@ -188,38 +188,40 @@
                     @endforeach
             </tbody>
         </table>
+
+        <div class="pdf-footer">
+            <table class="footer-table">
+                <tr>
+                    <td style="width: 40%;">
+                        <b>Keterangan:</b><br>
+                        <span>H = Hadir</span> |
+                        <span>S = Sakit</span> |
+                        <span>I = Izin</span> |
+                        <span>A = Alfa</span>
+                    </td>
+                    <td style="width: 30%; text-align: center;">
+                        Mengetahui,<br>
+                        Kepala Madrasah<br><br><br><br>
+                        <b><u>{{ $instansi->kepalaSekolah->nama_guru ?? '........................................' }}</u></b><br>
+                        NIP. {{ $instansi->kepalaSekolah->nip ?? '........................................' }}
+                    </td>
+                    <td style="width: 30%; text-align: center;">
+                        Gorontalo, {{ date('d F Y') }}<br>
+                        Guru Mata Pelajaran<br><br><br><br>
+                        <b><u>{{ $dataMapel['nama_guru'] ?? '........................................' }}</u></b><br>
+                        NIP. {{ $dataMapel['nip'] ?? '........................................' }}
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
+    @empty
+    @include('pdf.format.kop_surat')
+    <div class="pdf-header">
+        <h3 class="pdf-title">DAFTAR PRESENSI PESERTA DIDIK</h3>
+    </div>
+    <p style="text-align: center;">Tidak ada data absensi yang tersedia.</p>
+    @endforelse
 </div>
-@empty
-@include('pdf.format.kop_surat')
-<div class="pdf-header">
-    <h3 class="pdf-title">DAFTAR PRESENSI PESERTA DIDIK</h3>
-</div>
-<p style="text-align: center;">Tidak ada data absensi yang tersedia.</p>
-@endforelse
-<div class="pdf-footer">
-    <table class="footer-table">
-        <tr>
-            <td style="width: 40%;">
-                <b>Keterangan:</b><br>
-                <span>H = Hadir</span> |
-                <span>S = Sakit</span> |
-                <span>I = Izin</span> |
-                <span>A = Alfa</span>
-            </td>
-            <td style="width: 30%; text-align: center;">
-                Mengetahui,<br>
-                Kepala Madrasah<br><br><br><br>
-                <b><u>{{ $instansi->kepalaSekolah->nama_guru ?? '........................................' }}</u></b><br>
-                NIP. {{ $instansi->kepalaSekolah->nip ?? '........................................' }}
-            </td>
-            <td style="width: 30%; text-align: center;">
-                Gorontalo, {{ date('d F Y') }}<br>
-                Guru Mata Pelajaran<br><br><br><br>
-                <b><u>{{ $dataMapel['nama_guru'] ?? '........................................' }}</u></b><br>
-                NIP. {{ $dataMapel['nip'] ?? '........................................' }}
-            </td>
-        </tr>
-    </table>
-</div>
+
 @endsection

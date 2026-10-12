@@ -1,6 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { useState, useEffect, useRef } from "react";
+import Select from "react-select";
 import {
     Settings,
     Cpu,
@@ -150,7 +151,22 @@ export default function GenerateJadwal() {
         setActiveTab("konfigurasi");
         setOpenView(true);
     };
+    const filteredTahunAjaranOptions = [
+        // 1. Tambahkan opsi default di indeks pertama (paling atas)
+        {
+            value: "",
+            label: "[Pilih Tahun Ajaran]",
+        },
+        // 2. Masukkan sisa data yang sudah di-filter
+        ...tahunAjaranList.filter(
+            (ta) => String(ta.value).toLowerCase() !== "all",
+        ),
+    ];
 
+    const selectedTahunAjaranOption =
+        filteredTahunAjaranOptions.find(
+            (opt) => String(opt.value) === String(selectedTahunAjaran),
+        ) || null;
     const showMinimizedWidget = isGenerating && activeTab !== "proses";
     console.log(isGenerating, activeTab);
     return (
@@ -158,15 +174,15 @@ export default function GenerateJadwal() {
             <Head title="Generate Jadwal" />
 
             <div className="">
-                <div className="flex gap-2">
-                    <div className="m-2">
-                        <Menu
-                            menus={menu}
-                            setMenu={setActiveTab}
-                            menu={activeTab}
-                        />
-                    </div>
-                    {/* {selectedTahunAjaran && (
+                {/* <div className="flex gap-2"> */}
+                {/* <div className="m-2">
+                    <Menu
+                        menus={menu}
+                        setMenu={setActiveTab}
+                        menu={activeTab}
+                    />
+                </div> */}
+                {/* {selectedTahunAjaran && (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-3xl shadow-sm p-4 sm:p-8 flex flex-col sm:flex-row items-start gap-4">
                         <div className="flex-shrink-0 bg-yellow-100 p-2 rounded-full">
                             <svg
@@ -197,88 +213,189 @@ export default function GenerateJadwal() {
                     </div>
                 )} */}
 
-                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-8 min-h-[500px] w-full">
-                        {activeTab === "konfigurasi" && (
-                            <Configurasi
-                                tahunAjaranList={tahunAjaranList}
-                                selectedTahunAjaran={selectedTahunAjaran}
-                                selectedNamaTahunAjaran={
-                                    selectedNamaTahunAjaran
-                                }
-                                setSelectedTahunAjaran={setSelectedTahunAjaran}
-                                setSelectedNamaTahunAjaran={
-                                    setSelectedNamaTahunAjaran
-                                }
-                                selectedPrioritas={selectedPrioritas}
-                                setSelectedPrioritas={setSelectedPrioritas}
-                                searchQuery={searchQuery}
-                                setSearchQuery={setSearchQuery}
-                                listMapelGuru={listMapelGuru}
-                                setListMapelGuru={setListMapelGuru}
-                                historyJadwal={historyJadwal}
-                                progress={progress}
-                                setProgress={setProgress}
-                                setIsGenerating={setIsGenerating}
-                                isGenerating={isGenerating}
-                                setActiveTab={setActiveTab}
-                                activeTab={activeTab}
-                                setGeneration={setGeneration}
-                                setFitness={setFitness}
-                                setLogs={setLogs}
-                                fetchDataAwal={fetchDataAwal}
-                                openView={openView}
-                                setOpenView={setOpenView}
-                                setNewKromosom={setNewKromosom}
-                                newKromosom={newKromosom}
-                            />
-                        )}
-
-                        {activeTab === "proses" && (
-                            <Proses
-                                progress={progress}
-                                setProgress={setProgress}
-                                resetButton={resetButton}
-                                generation={generation}
-                                fitness={fitness}
-                                logs={logs}
-                                isGenerating={isGenerating}
-                                activeTab={activeTab}
-                                setActiveTab={setActiveTab}
-                                openView={openView}
-                                setOpenView={setOpenView}
-                            />
-                        )}
-                        {activeTab === "hasil" && (
-                            <div className="space-y-6 text-center py-20 animate-in zoom-in-95 duration-500">
-                                <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
-                                    <CheckCircle2
-                                        className="text-emerald-500"
-                                        size={56}
-                                        strokeWidth={2.5}
-                                    />
-                                </div>
-                                <h3 className="text-3xl font-black text-gray-800 mb-2">
-                                    Yeay! Jadwal Berhasil Dikunci
+                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-8 min-h-[500px] w-full">
+                    <div className="relative mb-2 overflow-hidden bg-gradient-to-br from-green-50 to-white border border-green-100 p-4 rounded-xl shadow-sm">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
+                        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between relative z-10">
+                            <div>
+                                <h3 className="text-xs font-bold text-gray-900 mb-0.5">
+                                    Tahun Ajaran & Semester
                                 </h3>
-                                <p className="text-gray-500 font-medium max-w-md mx-auto">
-                                    Algoritma Genetika telah menemukan kombinasi
-                                    terbaik. Silakan cek tab History untuk
-                                    melihat detailnya.
+                                <p className="text-[11px] text-gray-500">
+                                    Tentukan periode aktif untuk jadwal yang
+                                    akan digenerate.
                                 </p>
                             </div>
-                        )}
-                        {activeTab === "history" && (
-                            <HistoryJadwal
-                                selectedTahunAjaran={selectedTahunAjaran}
-                                historyJadwal={historyJadwal}
-                                selectedNamaTahunAjaran={
-                                    selectedNamaTahunAjaran
-                                }
-                                listMapelGuru={listMapelGuru}
-                            />
-                        )}
+                            <div className="w-full md:w-72 flex gap-2 items-center">
+                                <Select
+                                    value={selectedTahunAjaranOption}
+                                    onChange={(option) => {
+                                        setSelectedTahunAjaran(
+                                            option ? option.value : "",
+                                        );
+                                        setSelectedNamaTahunAjaran(
+                                            option ? option.label : "",
+                                        );
+                                    }}
+                                    options={filteredTahunAjaranOptions}
+                                    placeholder="-- Pilih Tahun Ajaran --"
+                                    isSearchable={true}
+                                    menuPortalTarget={document.body}
+                                    className="w-full text-xs"
+                                    classNamePrefix="react-select"
+                                    styles={{
+                                        control: (base, state) => ({
+                                            ...base,
+                                            backgroundColor: "#FFFFFF",
+                                            borderColor: !selectedTahunAjaran
+                                                ? state.isFocused
+                                                    ? "#16A34A"
+                                                    : "#FCD34D"
+                                                : state.isFocused
+                                                  ? "#16A34A"
+                                                  : "#BBF7D0",
+                                            borderRadius: "0.5rem",
+                                            padding: "0.05rem 0.1rem",
+                                            minHeight: "32px",
+                                            boxShadow: state.isFocused
+                                                ? "0 0 0 3px rgba(34, 197, 94, 0.15)"
+                                                : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                                            cursor: "pointer",
+                                            "&:hover": {
+                                                borderColor: "#16A34A",
+                                            },
+                                        }),
+                                        valueContainer: (base) => ({
+                                            ...base,
+                                            padding: "0px 6px",
+                                        }),
+                                        placeholder: (base) => ({
+                                            ...base,
+                                            color: "#6B7280",
+                                            fontSize: "11px",
+                                        }),
+                                        singleValue: (base) => ({
+                                            ...base,
+                                            color: !selectedTahunAjaran
+                                                ? "#92400E"
+                                                : "#14532D",
+                                            fontWeight: "bold",
+                                            fontSize: "11px",
+                                        }),
+                                        option: (base, state) => ({
+                                            ...base,
+                                            backgroundColor: state.isSelected
+                                                ? "#16A34A"
+                                                : state.isFocused
+                                                  ? "#F0FDF4"
+                                                  : "white",
+                                            color: state.isSelected
+                                                ? "white"
+                                                : "#1F2937",
+                                            fontWeight: "600",
+                                            fontSize: "11px",
+                                            cursor: "pointer",
+                                        }),
+                                        menuPortal: (base) => ({
+                                            ...base,
+                                            zIndex: 9999,
+                                        }),
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={setActiveTab.bind(null, "history")}
+                                    className={
+                                        "py-2 px-2 bg-green-500 text-xs text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 " +
+                                        (activeTab === "history"
+                                            ? "hidden"
+                                            : "")
+                                    }
+                                >
+                                    <i className="fa fa-history"></i> Jadwal
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
+                    {activeTab === "konfigurasi" && (
+                        <Configurasi
+                            tahunAjaranList={tahunAjaranList}
+                            selectedTahunAjaran={selectedTahunAjaran}
+                            selectedNamaTahunAjaran={selectedNamaTahunAjaran}
+                            setSelectedTahunAjaran={setSelectedTahunAjaran}
+                            setSelectedNamaTahunAjaran={
+                                setSelectedNamaTahunAjaran
+                            }
+                            selectedPrioritas={selectedPrioritas}
+                            setSelectedPrioritas={setSelectedPrioritas}
+                            searchQuery={searchQuery}
+                            setSearchQuery={setSearchQuery}
+                            listMapelGuru={listMapelGuru}
+                            setListMapelGuru={setListMapelGuru}
+                            historyJadwal={historyJadwal}
+                            progress={progress}
+                            setProgress={setProgress}
+                            setIsGenerating={setIsGenerating}
+                            isGenerating={isGenerating}
+                            setActiveTab={setActiveTab}
+                            activeTab={activeTab}
+                            setGeneration={setGeneration}
+                            setFitness={setFitness}
+                            setLogs={setLogs}
+                            fetchDataAwal={fetchDataAwal}
+                            openView={openView}
+                            setOpenView={setOpenView}
+                            setNewKromosom={setNewKromosom}
+                            newKromosom={newKromosom}
+                        />
+                    )}
+
+                    {activeTab === "proses" && (
+                        <Proses
+                            progress={progress}
+                            setProgress={setProgress}
+                            resetButton={resetButton}
+                            generation={generation}
+                            fitness={fitness}
+                            logs={logs}
+                            isGenerating={isGenerating}
+                            activeTab={activeTab}
+                            setActiveTab={setActiveTab}
+                            openView={openView}
+                            setOpenView={setOpenView}
+                        />
+                    )}
+                    {activeTab === "hasil" && (
+                        <div className="space-y-6 text-center py-20 animate-in zoom-in-95 duration-500">
+                            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
+                                <CheckCircle2
+                                    className="text-emerald-500"
+                                    size={56}
+                                    strokeWidth={2.5}
+                                />
+                            </div>
+                            <h3 className="text-3xl font-black text-gray-800 mb-2">
+                                Yeay! Jadwal Berhasil Dikunci
+                            </h3>
+                            <p className="text-gray-500 font-medium max-w-md mx-auto">
+                                Algoritma Genetika telah menemukan kombinasi
+                                terbaik. Silakan cek tab History untuk melihat
+                                detailnya.
+                            </p>
+                        </div>
+                    )}
+                    {activeTab === "history" && (
+                        <HistoryJadwal
+                            selectedTahunAjaran={selectedTahunAjaran}
+                            historyJadwal={historyJadwal}
+                            selectedNamaTahunAjaran={selectedNamaTahunAjaran}
+                            listMapelGuru={listMapelGuru}
+                            setActiveTab={setActiveTab}
+                        />
+                    )}
                 </div>
+                {/* </div> */}
             </div>
             {showMinimizedWidget && (
                 <div className="fixed bottom-4 right-4 z-50 ">

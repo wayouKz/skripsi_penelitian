@@ -6,6 +6,7 @@ export default function HistoryJadwal({
     historyJadwal,
     selectedNamaTahunAjaran,
     listMapelGuru,
+    setActiveTab,
 }) {
     const mapelList = listMapelGuru.filter(
         (mapel) => mapel.guru && mapel.guru.length > 0,
@@ -24,8 +25,17 @@ export default function HistoryJadwal({
 
     return (
         <div className="space-y-4 animate-in fade-in duration-500">
-            <div className="border-b border-gray-100 pb-3">
-                <h3 className="text-sm font-extrabold text-gray-800 flex items-center gap-2">
+            <div
+                className="border-b border-gray-100 pb-3 flex justify-between items-center gap-2
+            "
+            >
+                <button
+                    className="text-sm font-semibold text-white bg-green-600 rounded-lg py-1 px-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                    onClick={() => setActiveTab("konfigurasi")}
+                >
+                    <i className="fa fa-arrow-left mr-2"></i> Kembali
+                </button>
+                <h3 className="text-sm font-extrabold text-gray-800 flex items-center gap-1">
                     <History className="text-green-600" size={18} /> Riwayat
                     Jadwal Aktif
                 </h3>
@@ -54,6 +64,7 @@ export default function HistoryJadwal({
                     selectedNamaTahunAjaran={selectedNamaTahunAjaran}
                     dataMapel={dataMapel}
                     listMapelGuru={listMapelGuru}
+                    setActiveTab={setActiveTab}
                 />
             )}
         </div>

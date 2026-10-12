@@ -80,9 +80,9 @@ export default function Add({
             if (checkIsDashboard(item)) {
                 dashboardMenus[item.id] = {
                     can_view: true,
-                    can_create: false,
-                    can_update: false,
-                    can_delete: false,
+                    can_create: true,
+                    can_update: true,
+                    can_delete: true,
                 };
             }
         });
@@ -264,20 +264,21 @@ export default function Add({
                                                 Read-Only
                                             </span>
                                         ) : (
-                                            <Switch
-                                                checked={isActive}
-                                                onChange={(value) => {
-                                                    setData("activeMenu", {
-                                                        ...data.activeMenu,
-                                                        [item.id]: {
-                                                            can_view: value,
-                                                            can_create: value,
-                                                            can_update: value,
-                                                            can_delete: value,
-                                                        },
-                                                    });
-                                                }}
-                                            />
+                                            <></>
+                                            // <Switch
+                                            //     checked={isActive}
+                                            //     onChange={(value) => {
+                                            //         setData("activeMenu", {
+                                            //             ...data.activeMenu,
+                                            //             [item.id]: {
+                                            //                 can_view: value,
+                                            //                 can_create: value,
+                                            //                 can_update: value,
+                                            //                 can_delete: value,
+                                            //             },
+                                            //         });
+                                            //     }}
+                                            // />
                                         )}
                                     </div>
                                 </div>
@@ -345,7 +346,7 @@ export default function Add({
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                <Switch
+                                                                {/* <Switch
                                                                     checked={
                                                                         !!data
                                                                             .activeMenu?.[
@@ -375,7 +376,7 @@ export default function Add({
                                                                             },
                                                                         );
                                                                     }}
-                                                                />
+                                                                /> */}
                                                             </div>
                                                         );
                                                     })}

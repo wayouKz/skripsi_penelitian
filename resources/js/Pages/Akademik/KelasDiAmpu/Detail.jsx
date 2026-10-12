@@ -78,8 +78,8 @@ export default function Detail({ dataKelas }) {
 
     return (
         <AuthenticatedLayout header={`Kelas ${dataKelas?.nama_kelas || ""}`}>
-            <div className="py-6 min-h-screen bg-gray-50/50 text-xs">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="py-0 min-h-screen bg-gray-50/50 text-xs">
+                <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-0">
                     {/* Header & Tombol Kembali */}
                     <div className="mb-4 flex items-center gap-3">
                         <Link

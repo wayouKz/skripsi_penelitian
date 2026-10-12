@@ -145,12 +145,16 @@ const customSelectStyles = {
 // ==========================================
 // 2. KOMPONEN UTAMA
 // ==========================================
+
+// ... (bagian konstanta DAFTAR_HARI, COLOR_PALETTE, dan customSelectStyles tetap sama)
+
 export default function DaftarJadwal({
     historyJadwal,
     selectedTahunAjaran,
     selectedNamaTahunAjaran,
     dataMapel,
     listMapelGuru,
+    setActiveTab,
 }) {
     // --- States ---
     const [selectedKelas, setSelectedKelas] = useState(null);
@@ -158,7 +162,7 @@ export default function DaftarJadwal({
     const [selectedGuru, setSelectedGuru] = useState(null);
     const [openPdfModal, setOpenPdfModal] = useState(false);
 
-    // --- Pemrosesan Data ---
+    // ... (bagian useMemo dan handler functions tetap sama seperti sebelumnya)
     const groupedByKelas = useMemo(() => {
         if (!historyJadwal) return {};
         return historyJadwal.reduce(function (acc, curr) {
@@ -298,12 +302,12 @@ export default function DaftarJadwal({
 
     // --- Render Component ---
     return (
-        <div>
+        <div className="w-full max-w-full overflow-x-hidden">
             {/* 1. BAGIAN FILTER & CETAK */}
-            <div className="max-w-full pb-3">
-                <div className="flex justify-between items-center gap-2">
-                    <div className="flex gap-2 flex-wrap">
-                        <div className="min-w-[200px]">
+            <div className="w-full pb-3">
+                <div className="flex justify-between items-center gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap flex-1 min-w-[280px]">
+                        <div className="min-w-[180px] flex-1">
                             <Select
                                 options={filteredKelasList}
                                 value={
@@ -327,7 +331,7 @@ export default function DaftarJadwal({
                             />
                         </div>
 
-                        <div className="min-w-[200px]">
+                        <div className="min-w-[180px] flex-1">
                             <Select
                                 options={dataMapel || []}
                                 value={
@@ -348,7 +352,7 @@ export default function DaftarJadwal({
                             />
                         </div>
 
-                        <div className="min-w-[200px]">
+                        <div className="min-w-[180px] flex-1">
                             <Select
                                 options={dataGuruOptions}
                                 value={
@@ -372,7 +376,7 @@ export default function DaftarJadwal({
 
                     <button
                         type="button"
-                        className="mt-2 px-3 py-2 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors cursor-pointer"
+                        className="px-3 py-2 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors cursor-pointer shrink-0"
                         onClick={function () {
                             setOpenPdfModal(true);
                         }}
@@ -384,7 +388,7 @@ export default function DaftarJadwal({
 
                 {/* LEGEND WARNA MATA PELAJARAN */}
                 {mapelList.length > 0 && (
-                    <div className="flex items-center gap-2 overflow-x-auto py-2.5 mt-2 bg-white px-3 rounded-xl border border-gray-200">
+                    <div className="flex items-center gap-2 overflow-x-auto py-2.5 mt-2 bg-white px-3 rounded-xl border border-gray-200 w-full">
                         <span className="text-[11px] font-bold text-gray-500 shrink-0">
                             Legend Mapel:
                         </span>
@@ -418,13 +422,14 @@ export default function DaftarJadwal({
             </div>
 
             {/* 2. BAGIAN TABEL MATRIKS JADWAL */}
-            <div className="space-y-6 h-[75vh] overflow-y-auto">
-                <div className="min-h-[300px] overflow-y-auto space-y-4">
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-6 w-full max-w-full overflow-hidden">
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto w-full">
                     {filteredKelasList.map(function (itemKelas) {
                         const namaKelas = itemKelas.value;
+                        if (!namaKelas) return null; // Lewati opsi "Semua Kelas" kosong di perulangan matriks jika ada
+
                         const dataKelas = groupedByKelas[namaKelas] || [];
 
-                        // Buat mapping scheduleMap[hari][jam_mulai_sub] = item
                         const scheduleMap = {};
                         DAFTAR_HARI.forEach(function (h) {
                             scheduleMap[h] = {};
@@ -459,7 +464,7 @@ export default function DaftarJadwal({
                         return (
                             <div
                                 key={namaKelas}
-                                className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+                                className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full"
                             >
                                 {/* Header Kelas */}
                                 <div className="bg-green-600 px-4 py-2.5">
@@ -468,9 +473,9 @@ export default function DaftarJadwal({
                                     </h3>
                                 </div>
 
-                                {/* Tabel Matriks */}
-                                <div className="p-4 overflow-x-auto bg-gray-50/30">
-                                    <div className="min-w-[1100px] bg-white rounded-xl border border-gray-200 overflow-auto shadow-xs">
+                                {/* Tabel Matriks dengan Scroll Horizontal Khusus Tabel */}
+                                <div className="p-2 w-full overflow-x-auto bg-gray-50/30">
+                                    <div className="min-w-[950px] bg-white rounded-xl border border-gray-200 shadow-xs">
                                         <table className="w-full border-collapse text-xs text-center">
                                             <thead>
                                                 <tr className="bg-gray-100 text-gray-700 font-bold border-b border-gray-200">

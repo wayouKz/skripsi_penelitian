@@ -1,6 +1,6 @@
 import { useAlert } from "@/Components/AlertContext";
 import DangerButton from "@/Components/DangerButton";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 
 // ─── Semua nilai status yang dianggap bermasalah ───────────────────────────
@@ -9,11 +9,58 @@ const STATUS_BERMASALAH = ["Belum Absen", "Belum Absen / Kosong", "Kosong"];
 const isStatusBermasalah = (status) =>
     STATUS_BERMASALAH.some((s) => status?.includes(s));
 
+const daftarHariKerja = [
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+    "Minggu",
+];
+
+// ─── Helper untuk mendapatkan nama hari ini dalam bahasa Indonesia ──────────
+const getHariIni = () => {
+    const daftarHari = [
+        "Minggu",
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+    ];
+    return daftarHari[new Date().getDay()];
+};
+
+// ─── Helper untuk mencari tanggal (YYYY-MM-DD) berdasarkan nama hari dalam minggu berjalan ───
+const getTanggalByHariInThisWeek = (namaHariTarget) => {
+    const curr = new Date();
+    const dayIndex = curr.getDay(); // 0 (Minggu) sampai 6 (Sabtu)
+
+    // Sesuaikan hitungan agar Senin dihitung sebagai awal minggu (index 1)
+    // Jika Minggu (0), kita anggap sebagai hari ke-7 dalam siklus Senin-Minggu
+    const currentDayNumber = dayIndex === 0 ? 7 : dayIndex;
+
+    const targetDayNumber = daftarHariKerja.indexOf(namaHariTarget) + 1; // Senin = 1, Minggu = 7
+
+    // Hitung selisih hari dari hari ini ke target hari dalam minggu yang sama
+    const diff = targetDayNumber - currentDayNumber;
+
+    const targetDate = new Date(curr);
+    targetDate.setDate(curr.getDate() + diff);
+
+    const year = targetDate.getFullYear();
+    const month = String(targetDate.getMonth() + 1).padStart(2, "0");
+    const day = String(targetDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
+
 // ─── Helper untuk cek apakah jam sesi saat ini sudah masuk / lewat ──────────
 const isJamAktif = (jamSesi) => {
-    if (!jamSesi) return true; // Jika tidak ada info jam, anggap periksa langsung
+    if (!jamSesi) return true;
 
-    // Format jamSesi umumnya "07:30 - 08:15"
     const parts = jamSesi.split("-");
     if (parts.length < 2) return true;
 
@@ -24,18 +71,38 @@ const isJamAktif = (jamSesi) => {
 
     const jamMulai = parts[0].trim();
 
-    // Anomali aktif hanya jika waktu sekarang sudah melewati atau sama dengan jam mulai pelajaran
     return currentTimeStr >= jamMulai;
 };
+
+// ─── Sub-Komponen: Kartu Kandidat Guru AI ──────────────────────────────────
+const KandidatCard = ({ guru, onAssign }) => (
+    <div className="bg-white border border-indigo-100 rounded-xl p-3 shadow-sm relative overflow-hidden group hover:border-indigo-300 hover:shadow-md transition-all duration-200">
+        <div className="absolute top-0 right-0 bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-xl">
+            Match: {guru.matchScore}
+        </div>
+        <h5 className="font-bold text-slate-800 text-xs pr-14">{guru.nama}</h5>
+        <p className="text-[10px] text-slate-600 mt-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-start gap-1.5">
+            <i className="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+            <span>{guru.alasan}</span>
+        </p>
+        <button
+            onClick={() => onAssign?.(guru)}
+            className="w-full mt-2.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[10px] font-bold py-1.5 rounded-md transition-all duration-200 flex items-center justify-center gap-1.5 shadow-xs"
+        >
+            <i className="fa-solid fa-paper-plane text-[9px]"></i>
+            Tugaskan
+        </button>
+    </div>
+);
 
 // ─── Skeleton card untuk loading state AI (Kanan) ─────────────────────────
 function SkeletonCard() {
     return (
-        <div className="bg-white border border-indigo-100 rounded-lg p-3 animate-pulse">
-            <div className="h-2 bg-slate-200 rounded w-3/4 mb-2"></div>
-            <div className="h-1.5 bg-slate-100 rounded w-full mb-1"></div>
-            <div className="h-1.5 bg-slate-100 rounded w-4/5 mb-2"></div>
-            <div className="h-6 bg-indigo-50 rounded-md w-full"></div>
+        <div className="bg-white border border-indigo-100 rounded-lg p-3 animate-pulse shadow-xs">
+            <div className="h-2.5 bg-slate-200 rounded w-3/4 mb-2"></div>
+            <div className="h-2 bg-slate-100 rounded w-full mb-1"></div>
+            <div className="h-2 bg-slate-100 rounded w-4/5 mb-2.5"></div>
+            <div className="h-7 bg-indigo-50 rounded-md w-full"></div>
         </div>
     );
 }
@@ -43,10 +110,8 @@ function SkeletonCard() {
 // ─── Skeleton card untuk loading state Daftar Kelas (Kiri) ────────────────
 function SkeletonKelasCard() {
     return (
-        <div className="bg-white border border-slate-200 rounded-lg p-3 animate-pulse shadow-sm">
-            {/* Header Kelas */}
-            <div className="h-3 bg-slate-200 rounded w-1/2 mb-3"></div>
-            {/* Manifes Item Jadwal */}
+        <div className="bg-white border border-slate-200 rounded-lg p-3.5 animate-pulse shadow-sm">
+            <div className="h-3.5 bg-slate-200 rounded w-1/2 mb-3"></div>
             <div className="border border-slate-100 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between items-center">
                     <div className="h-3 bg-slate-200 rounded w-1/3"></div>
@@ -60,37 +125,63 @@ function SkeletonKelasCard() {
 }
 
 export default function MonitoringKBM({ title, onClose, open }) {
-    const { showAlert } = useAlert();
+    const { showAlert, showQuestion } = useAlert();
 
     const [kelasAktif, setKelasAktif] = useState({});
+    const [selectedHari, setSelectedHari] = useState(getHariIni());
+    // Tanggal langsung diset mengikuti tanggal hari ini secara default
+    const [selectedTanggal, setSelectedTanggal] = useState(
+        getTanggalByHariInThisWeek(getHariIni()),
+    );
     const [anomaliList, setAnomaliList] = useState([]);
     const [selectedAnomali, setSelectedAnomali] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [rekomendasiAI, setRekomendasiAI] = useState(null);
 
-    // ── Polling: ambil data kelas aktif setiap 5 detik ──────────────────────
+    // ── Polling: ambil data kelas aktif setiap 5 detik ──
     useEffect(() => {
         if (open) {
             setIsLoading(true);
-            getKelasAktif();
-            const timer = setInterval(getKelasAktif, 5000);
+            getKelasAktif(selectedHari, selectedTanggal);
+            const timer = setInterval(
+                () => getKelasAktif(selectedHari, selectedTanggal),
+                5000,
+            );
             return () => clearInterval(timer);
         }
-    }, [open]);
+    }, [open, selectedHari, selectedTanggal]);
 
-    // ── Deteksi anomali berdasarkan status bermasalah & jam aktif ───────────
+    // ── Deteksi anomali khusus untuk hari yang dipilih (selectedHari) ─────────
     useEffect(() => {
         const anomali = [];
-        Object.entries(kelasAktif).forEach(([, jadwalArray]) => {
-            jadwalArray.forEach((kls) => {
+        Object.entries(kelasAktif).forEach(([namaKelas, hariObj]) => {
+            if (typeof hariObj === "object" && hariObj !== null) {
                 if (
-                    isStatusBermasalah(kls.status_kbm) &&
-                    isJamAktif(kls.jam_sesi)
+                    hariObj[selectedHari] &&
+                    Array.isArray(hariObj[selectedHari])
                 ) {
-                    anomali.push(kls);
+                    hariObj[selectedHari].forEach((kls) => {
+                        const dataAnomali = {
+                            ...kls,
+                            nama_kelas: namaKelas,
+                            hari: selectedHari,
+                        };
+
+                        const isHariIni = selectedHari === getHariIni();
+                        const cekJam = isHariIni
+                            ? isJamAktif(dataAnomali.jam_sesi)
+                            : true;
+
+                        if (
+                            isStatusBermasalah(dataAnomali.status_kbm) &&
+                            cekJam
+                        ) {
+                            anomali.push(dataAnomali);
+                        }
+                    });
                 }
-            });
+            }
         });
 
         setAnomaliList(anomali);
@@ -99,6 +190,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
             const masihBermasalah = anomali.some(
                 (a) =>
                     a.nama_kelas === selectedAnomali.nama_kelas &&
+                    a.hari === selectedAnomali.hari &&
                     a.nama_mapel === selectedAnomali.nama_mapel,
             );
 
@@ -108,12 +200,35 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 setIsAnalyzing(false);
             }
         }
-    }, [kelasAktif]);
+    }, [kelasAktif, selectedHari]);
 
-    // ── Ambil data kelas aktif dari backend ─────────────────────────────────
-    const getKelasAktif = async () => {
+    const handleAssignGuru = async (guru) => {
+        showQuestion(
+            `Apakah anda yakin ingin menugaskan guru ${guru.nama} untuk mengajar ${selectedAnomali.nama_mapel} di kelas ${selectedAnomali.nama_kelas}?`,
+            async () => {
+                try {
+                    const response = await axios.post(
+                        route("dashboard.monitoring-kbm.assign-guru-pengganti"),
+                        guru,
+                    );
+                } catch (error) {
+                    console.error("Gagal mengambil data mapel", error);
+                }
+            },
+        );
+    };
+    // ── Ambil data kelas aktif dari backend dengan mengirim parameter hari & tanggal ──
+    const getKelasAktif = async (
+        hari = selectedHari,
+        tanggal = selectedTanggal,
+    ) => {
         try {
-            const response = await axios.get(route("getData.get-kelas-aktif"));
+            const response = await axios.get(route("getData.get-kelas-aktif"), {
+                params: {
+                    hari: hari,
+                    tanggal: tanggal,
+                },
+            });
             setKelasAktif(response.data.data || {});
         } catch (error) {
             const msg =
@@ -125,7 +240,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
         }
     };
 
-    // ── Kirim data anomali ke backend → backend panggil Gemini/Anthropic ───
+    // ── Kirim data anomali ke backend ────────────────────────────────────────
     const analyzeWithAI = async (anomali, semuaAnomali = []) => {
         setIsAnalyzing(true);
         setRekomendasiAI(null);
@@ -136,6 +251,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 {
                     fokus: anomali,
                     semua_kosong: semuaAnomali,
+                    tanggal: selectedTanggal,
                 },
             );
 
@@ -154,12 +270,13 @@ export default function MonitoringKBM({ title, onClose, open }) {
     const handleSelectAnomali = (anomali) => {
         if (
             anomali.nama_kelas === selectedAnomali?.nama_kelas &&
+            anomali.hari === selectedAnomali?.hari &&
             anomali.nama_mapel === selectedAnomali?.nama_mapel &&
             rekomendasiAI
         ) {
             return;
         }
-
+        console.log(anomali);
         setSelectedAnomali(anomali);
         analyzeWithAI(anomali, anomaliList);
     };
@@ -187,31 +304,68 @@ export default function MonitoringKBM({ title, onClose, open }) {
             {/* ── Konten utama ── */}
             <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
                 {/* ════════════════════════════════════════════
-                    KIRI — Status Kelas KBM
+                    KIRI — Status Kelas & Filter Hari
                 ════════════════════════════════════════════ */}
-                <div className="flex-1 overflow-y-auto p-4 bg-slate-50 custom-scrollbar">
-                    <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                            Status Ruangan Saat Ini
-                        </h3>
-                        {!isLoading && !isKelasEmpty && (
-                            <div className="flex items-center gap-1.5">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <div className="flex-1 overflow-y-auto p-4 bg-slate-50 custom-scrollbar flex flex-col">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                Filter Hari:
+                            </h3>
+                            {selectedHari === getHariIni() && (
+                                <span className="flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Hari Ini ({selectedTanggal})
                                 </span>
-                                <span className="text-[9px] font-semibold text-slate-500 uppercase">
-                                    Live
-                                </span>
-                            </div>
-                        )}
+                            )}
+                        </div>
+
+                        {/* Select / Tab Pilihan Hari & Kalkulasi Otomatis Tanggal Mingguan */}
+                        <div className="flex flex-wrap gap-1">
+                            {daftarHariKerja.map((hari) => {
+                                // Hitung tanggal spesifik untuk hari tersebut di minggu ini
+                                const tanggalHariIniPekan =
+                                    getTanggalByHariInThisWeek(hari);
+                                const isSelected = selectedHari === hari;
+
+                                return (
+                                    <button
+                                        key={hari}
+                                        onClick={() => {
+                                            setSelectedHari(hari);
+                                            setSelectedTanggal(
+                                                tanggalHariIniPekan,
+                                            ); // Otomatis set tanggal mingguan
+                                            setSelectedAnomali(null);
+                                            setRekomendasiAI(null);
+                                            setIsLoading(true);
+                                            getKelasAktif(
+                                                hari,
+                                                tanggalHariIniPekan,
+                                            );
+                                        }}
+                                        className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all flex flex-col items-center ${
+                                            isSelected
+                                                ? "bg-emerald-600 text-white shadow-sm"
+                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                        }`}
+                                    >
+                                        <span>{hari}</span>
+                                        <span
+                                            className={`text-[8px] font-normal ${isSelected ? "text-emerald-100" : "text-slate-400"}`}
+                                        >
+                                            {tanggalHariIniPekan.slice(5)}{" "}
+                                            {/* Menampilkan format MM-DD agar rapi di tombol */}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {isLoading ? (
                             <>
-                                <SkeletonKelasCard />
-                                <SkeletonKelasCard />
                                 <SkeletonKelasCard />
                                 <SkeletonKelasCard />
                             </>
@@ -225,102 +379,137 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                 </h4>
                                 <p className="text-xs text-slate-500 max-w-sm mt-1 leading-relaxed">
                                     Saat ini tidak ada jadwal kegiatan belajar
-                                    mengajar yang terdeteksi.
+                                    mengajar yang terdeteksi untuk hari{" "}
+                                    {selectedHari} ({selectedTanggal}).
                                 </p>
                             </div>
                         ) : (
                             Object.entries(kelasAktif).map(
-                                ([namaKelas, jadwalArray]) => (
-                                    <div
-                                        key={namaKelas}
-                                        className="mb-1 bg-white border border-slate-200 p-3 rounded-lg shadow-sm"
-                                    >
-                                        {/* Label kelas */}
-                                        <h4 className="text-xs font-extrabold text-slate-800 mb-2 border-b border-slate-100 pb-1.5 flex items-center gap-1.5">
-                                            <i className="fa-solid fa-door-open text-emerald-600"></i>
-                                            Ruang Kelas {namaKelas}
-                                        </h4>
+                                ([namaKelas, hariObj]) => {
+                                    const jadwalHariIni =
+                                        hariObj?.[selectedHari] || [];
 
-                                        <div className="space-y-2">
-                                            {jadwalArray.map((kls, index) => {
-                                                const bermasalah =
-                                                    isStatusBermasalah(
-                                                        kls.status_kbm,
-                                                    ) &&
-                                                    isJamAktif(kls.jam_sesi);
-                                                const isSelected =
-                                                    selectedAnomali?.nama_kelas ===
-                                                        kls.nama_kelas &&
-                                                    selectedAnomali?.nama_mapel ===
-                                                        kls.nama_mapel;
+                                    if (jadwalHariIni.length === 0) return null;
 
-                                                return (
-                                                    <div
-                                                        key={`${kls.kode_jadwal ?? namaKelas}-${index}`}
-                                                        role="button"
-                                                        disabled={isAnalyzing}
-                                                        onClick={() =>
-                                                            bermasalah &&
-                                                            handleSelectAnomali(
-                                                                kls,
-                                                            )
-                                                        }
-                                                        className={[
-                                                            "p-2.5 rounded-lg border transition-all duration-200",
-                                                            bermasalah
-                                                                ? "bg-red-50 border-red-200 shadow-sm ring-1 ring-red-100 cursor-pointer hover:ring-indigo-300"
-                                                                : "bg-white border-slate-200 hover:border-emerald-300",
-                                                            isSelected
-                                                                ? "ring-1 ring-indigo-400 border-indigo-300"
-                                                                : "",
-                                                        ].join(" ")}
-                                                    >
-                                                        <div className="flex justify-between items-start mb-1.5">
-                                                            <span className="font-bold text-slate-800 text-xs">
-                                                                {kls.nama_mapel}
-                                                            </span>
-                                                            <span
-                                                                className={`text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded ${kls.warna_badge}`}
+                                    return (
+                                        <div
+                                            key={namaKelas}
+                                            className="mb-1 bg-white border border-slate-200 p-3 rounded-lg shadow-sm flex flex-col"
+                                        >
+                                            <h4 className="text-xs font-extrabold text-slate-800 mb-2 border-b border-slate-100 pb-1.5 flex items-center justify-between">
+                                                <span className="flex items-center gap-1.5">
+                                                    <i className="fa-solid fa-door-open text-emerald-600"></i>
+                                                    Ruang Kelas {namaKelas}
+                                                </span>
+                                                <span className="text-[9px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                                                    {selectedHari} (
+                                                    {selectedTanggal})
+                                                </span>
+                                            </h4>
+
+                                            <div className="space-y-2 flex-1">
+                                                {jadwalHariIni.map(
+                                                    (kls, index) => {
+                                                        const isHariIni =
+                                                            selectedHari ===
+                                                            getHariIni();
+                                                        const cekJam = isHariIni
+                                                            ? isJamAktif(
+                                                                  kls.jam_sesi,
+                                                              )
+                                                            : true;
+                                                        const bermasalah =
+                                                            isStatusBermasalah(
+                                                                kls.status_kbm,
+                                                            ) && cekJam;
+
+                                                        const isSelected =
+                                                            selectedAnomali?.nama_kelas ===
+                                                                namaKelas &&
+                                                            selectedAnomali?.hari ===
+                                                                selectedHari &&
+                                                            selectedAnomali?.nama_mapel ===
+                                                                kls.nama_mapel;
+
+                                                        return (
+                                                            <div
+                                                                key={`${kls.kode_jadwal ?? namaKelas}-${index}`}
+                                                                role="button"
+                                                                onClick={() =>
+                                                                    bermasalah &&
+                                                                    handleSelectAnomali(
+                                                                        {
+                                                                            ...kls,
+                                                                            nama_kelas:
+                                                                                namaKelas,
+                                                                            hari: selectedHari,
+                                                                        },
+                                                                    )
+                                                                }
+                                                                className={[
+                                                                    "p-2.5 rounded-lg border transition-all duration-200",
+                                                                    bermasalah
+                                                                        ? "bg-red-50 border-red-200 shadow-sm ring-1 ring-red-100 cursor-pointer hover:ring-indigo-300"
+                                                                        : "bg-white border-slate-200 hover:border-emerald-300",
+                                                                    isSelected
+                                                                        ? "ring-1 ring-indigo-400 border-indigo-300"
+                                                                        : "",
+                                                                ].join(" ")}
                                                             >
-                                                                {kls.status_kbm}
-                                                            </span>
-                                                        </div>
+                                                                <div className="flex justify-between items-start mb-1.5">
+                                                                    <span className="font-bold text-slate-800 text-xs">
+                                                                        {
+                                                                            kls.nama_mapel
+                                                                        }
+                                                                    </span>
+                                                                    <span
+                                                                        className={`text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded ${kls.warna_badge}`}
+                                                                    >
+                                                                        {
+                                                                            kls.status_kbm
+                                                                        }
+                                                                    </span>
+                                                                </div>
 
-                                                        <div className="text-[10px] text-slate-600 space-y-0.5">
-                                                            <p
-                                                                className={`flex items-start gap-1.5 ${bermasalah ? "text-red-600 font-semibold" : ""}`}
-                                                            >
-                                                                <i className="fa-solid fa-user-tie mt-0.5 text-slate-400 shrink-0"></i>
-                                                                <span>
-                                                                    {
-                                                                        kls.nama_guru
-                                                                    }
-                                                                </span>
-                                                            </p>
+                                                                <div className="text-[10px] text-slate-600 space-y-0.5">
+                                                                    <p
+                                                                        className={`flex items-start gap-1.5 ${bermasalah ? "text-red-600 font-semibold" : ""}`}
+                                                                    >
+                                                                        <i className="fa-solid fa-user-tie mt-0.5 text-slate-400 shrink-0"></i>
+                                                                        <span>
+                                                                            {
+                                                                                kls.nama_guru
+                                                                            }
+                                                                        </span>
+                                                                    </p>
 
-                                                            {kls.jam_sesi && (
-                                                                <p className="flex items-center gap-1.5 text-slate-400">
-                                                                    <i className="fa-solid fa-clock shrink-0"></i>
-                                                                    {
-                                                                        kls.jam_sesi
-                                                                    }
-                                                                </p>
-                                                            )}
+                                                                    {kls.jam_sesi && (
+                                                                        <p className="flex items-center gap-1.5 text-slate-400">
+                                                                            <i className="fa-solid fa-clock shrink-0"></i>
+                                                                            {
+                                                                                kls.jam_sesi
+                                                                            }
+                                                                        </p>
+                                                                    )}
 
-                                                            {bermasalah && (
-                                                                <p className="text-[9px] text-indigo-500 font-medium mt-1 flex items-center gap-1">
-                                                                    Klik untuk
-                                                                    analisis AI{" "}
-                                                                    <i className="fa-solid fa-arrow-right animate-pulse"></i>
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                                    {bermasalah && (
+                                                                        <p className="text-[9px] text-indigo-500 font-medium mt-1 flex items-center gap-1">
+                                                                            Klik
+                                                                            untuk
+                                                                            analisis
+                                                                            AI{" "}
+                                                                            <i className="fa-solid fa-arrow-right animate-pulse"></i>
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    },
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ),
+                                    );
+                                },
                             )
                         )}
                     </div>
@@ -329,8 +518,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 {/* ════════════════════════════════════════════
                     KANAN — AI Agent Panel
                 ════════════════════════════════════════════ */}
-                <div className="w-full lg:w-72 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                    {/* AI Header */}
+                <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
                     <div className="p-3 bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-inner">
                         <div className="flex items-center gap-2 mb-1">
                             <i
@@ -343,13 +531,11 @@ export default function MonitoringKBM({ title, onClose, open }) {
                         <p className="text-[10px] text-indigo-200">
                             {isAnalyzing
                                 ? "Menganalisis jadwal & ketersediaan guru..."
-                                : "Memantau kondisi KBM real-time..."}
+                                : `Memantau anomali (${selectedHari} - ${selectedTanggal})...`}
                         </p>
                     </div>
 
-                    {/* AI Body */}
                     <div className="p-3 flex-1 overflow-y-auto bg-slate-50/50 space-y-3">
-                        {/* Semua kelas normal */}
                         {anomaliList.length === 0 &&
                             !isAnalyzing &&
                             !isLoading && (
@@ -357,52 +543,90 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                     <i className="fa-solid fa-circle-check text-emerald-500 text-base shrink-0"></i>
                                     <div>
                                         <h4 className="text-xs font-bold text-emerald-800">
-                                            Semua Kelas Normal
+                                            Tidak Ada Anomali
                                         </h4>
                                         <p className="text-[10px] text-emerald-700 mt-0.5">
-                                            Tidak ada anomali yang terdeteksi
-                                            saat ini.
+                                            Semua kelas pada hari {selectedHari}{" "}
+                                            ({selectedTanggal}) terpantau
+                                            normal.
                                         </p>
                                     </div>
                                 </div>
                             )}
 
-                        {/* Tab anomali */}
                         {anomaliList.length > 0 && !isLoading && (
-                            <div>
-                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                    ⚠️ Anomali Terdeteksi ({anomaliList.length})
+                            <div className="bg-white border border-red-100 rounded-xl p-3 shadow-2xs space-y-3">
+                                <h4 className="text-[10px] font-bold text-red-600 uppercase tracking-wider flex items-center justify-between border-b border-red-50 pb-1.5">
+                                    <span>
+                                        ⚠️ Anomali per Kelas (
+                                        {anomaliList.length})
+                                    </span>
                                 </h4>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {anomaliList.map((a, i) => {
-                                        const active =
-                                            selectedAnomali?.nama_kelas ===
-                                                a.nama_kelas &&
-                                            selectedAnomali?.nama_mapel ===
-                                                a.nama_mapel;
-                                        return (
-                                            <button
-                                                key={i}
-                                                onClick={() =>
-                                                    handleSelectAnomali(a)
-                                                }
-                                                className={`text-[10px] px-2 py-1 rounded-md border font-semibold transition-all ${
-                                                    active
-                                                        ? "bg-red-500 text-white border-red-500 shadow"
-                                                        : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
-                                                }`}
-                                            >
-                                                {a.nama_kelas} · {a.nama_mapel}
-                                            </button>
-                                        );
-                                    })}
+
+                                {/* Container list yang dikelompokkan berdasarkan kelas */}
+                                <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                    {Object.entries(
+                                        anomaliList.reduce((acc, curr) => {
+                                            if (!acc[curr.nama_kelas]) {
+                                                acc[curr.nama_kelas] = [];
+                                            }
+                                            acc[curr.nama_kelas].push(curr);
+                                            return acc;
+                                        }, {}),
+                                    ).map(([namaKelas, itemsMapel]) => (
+                                        <div
+                                            key={namaKelas}
+                                            className="bg-slate-50 border border-slate-200/80 rounded-lg p-2.5"
+                                        >
+                                            {/* Header Nama Kelas */}
+                                            <div className="text-[10px] font-extrabold text-slate-700 mb-1.5 flex items-center justify-between">
+                                                <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">
+                                                    Kelas {namaKelas}
+                                                </span>
+                                                <span className="text-[9px] text-slate-500 font-normal">
+                                                    {itemsMapel.length} Mapel
+                                                    Kosong
+                                                </span>
+                                            </div>
+
+                                            {/* Badge Mata Pelajaran di dalam Kelas Tersebut */}
+                                            <div className="flex flex-wrap gap-1">
+                                                {itemsMapel.map((a, i) => {
+                                                    const active =
+                                                        selectedAnomali?.nama_kelas ===
+                                                            a.nama_kelas &&
+                                                        selectedAnomali?.hari ===
+                                                            a.hari &&
+                                                        selectedAnomali?.nama_mapel ===
+                                                            a.nama_mapel;
+
+                                                    return (
+                                                        <button
+                                                            key={i}
+                                                            onClick={() =>
+                                                                handleSelectAnomali(
+                                                                    a,
+                                                                )
+                                                            }
+                                                            className={`text-[9px] px-2 py-1 rounded-md border font-semibold transition-all ${
+                                                                active
+                                                                    ? "bg-red-600 text-white border-red-600 shadow-2xs"
+                                                                    : "bg-white text-red-700 border-red-200 hover:bg-red-50"
+                                                            }`}
+                                                        >
+                                                            {a.nama_mapel}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Alert detail anomali terpilih */}
                         {selectedAnomali && (
-                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 shadow-sm">
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 shadow-xs">
                                 <div className="flex gap-2">
                                     <i className="fa-solid fa-triangle-exclamation text-orange-500 mt-0.5 text-sm shrink-0"></i>
                                     <div>
@@ -414,7 +638,8 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                             <strong>
                                                 {selectedAnomali.nama_kelas}
                                             </strong>{" "}
-                                            —{" "}
+                                            ({selectedAnomali.hari} -{" "}
+                                            {selectedTanggal}) —{" "}
                                             <strong>
                                                 {selectedAnomali.nama_mapel}
                                             </strong>
@@ -442,72 +667,55 @@ export default function MonitoringKBM({ title, onClose, open }) {
                             </div>
                         )}
 
-                        {/* Skeleton loading AI */}
-                        {isAnalyzing && (
-                            <div className="space-y-2">
-                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                    ✨ Rekomendasi Pengganti{" "}
-                                    <i className="fa-solid fa-spinner animate-spin"></i>
-                                </h4>
-                                <SkeletonCard />
-                                <SkeletonCard />
-                            </div>
-                        )}
-
-                        {/* Rekomendasi AI */}
-                        {!isAnalyzing &&
-                            rekomendasiAI?.kandidat?.length > 0 && (
-                                <div>
-                                    <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                        ✨ Rekomendasi Guru Pengganti
+                        {/* ── Kotak Rekomendasi AI ── */}
+                        <div className="mt-4 pt-3 border-t border-slate-200">
+                            {isAnalyzing && (
+                                <div className="space-y-2.5">
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                        <span>✨ Rekomendasi Pengganti</span>
+                                        <i className="fa-solid fa-spinner animate-spin text-indigo-500"></i>
                                     </h4>
-                                    <div className="space-y-2.5">
-                                        {rekomendasiAI.kandidat.map(
-                                            (guru, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="bg-white border border-indigo-100 rounded-lg p-3 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition-colors"
-                                                >
-                                                    <div className="absolute top-0 right-0 bg-indigo-100 text-indigo-700 text-[9px] font-bold px-1.5 py-0.5 rounded-bl-lg">
-                                                        Match: {guru.matchScore}
-                                                    </div>
-                                                    <h5 className="font-bold text-slate-800 text-xs pr-12">
-                                                        {guru.nama}
-                                                    </h5>
-                                                    <p className="text-[10px] text-slate-500 mt-1 bg-slate-50 p-1.5 rounded border border-slate-100">
-                                                        <i className="fa-solid fa-circle-check text-emerald-500 mr-1"></i>
-                                                        {guru.alasan}
-                                                    </p>
-                                                    <button
-                                                        className="w-full mt-2 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 text-[10px] font-bold py-1.5 rounded-md transition-all duration-300 flex items-center justify-center gap-1.5"
-                                                        onClick={() => {
-                                                            handleAssignGuru(
-                                                                guru,
-                                                            );
-                                                        }}
-                                                    >
-                                                        <i className="fa-solid fa-paper-plane"></i>
-                                                        Tugaskan
-                                                    </button>
-                                                </div>
-                                            ),
-                                        )}
-                                    </div>
+                                    <SkeletonCard />
+                                    <SkeletonCard />
                                 </div>
                             )}
 
-                        {/* Tidak ada kandidat AI */}
-                        {!isAnalyzing &&
-                            rekomendasiAI &&
-                            rekomendasiAI.kandidat?.length === 0 && (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-[10px] text-yellow-800 flex items-center gap-2">
-                                    <i className="fa-solid fa-face-sad-tear text-yellow-500 text-sm shrink-0"></i>
-                                    <span>
-                                        Tidak ada guru pengganti yang tersedia
-                                        untuk sesi ini.
-                                    </span>
-                                </div>
-                            )}
+                            {!isAnalyzing &&
+                                rekomendasiAI?.kandidat?.length > 0 && (
+                                    <div>
+                                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                                            <span>
+                                                ✨ Rekomendasi Guru Pengganti
+                                            </span>
+                                        </h4>
+                                        <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                                            {rekomendasiAI.kandidat.map(
+                                                (guru, idx) => (
+                                                    <KandidatCard
+                                                        key={guru.id || idx}
+                                                        guru={guru}
+                                                        onAssign={
+                                                            handleAssignGuru
+                                                        }
+                                                    />
+                                                ),
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                            {!isAnalyzing &&
+                                rekomendasiAI &&
+                                rekomendasiAI.kandidat?.length === 0 && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 flex items-center gap-2.5 shadow-xs">
+                                        <i className="fa-solid fa-face-sad-tear text-amber-500 text-base shrink-0"></i>
+                                        <span className="font-medium">
+                                            Tidak ada guru pengganti yang
+                                            tersedia untuk sesi ini.
+                                        </span>
+                                    </div>
+                                )}
+                        </div>
                     </div>
                 </div>
             </div>

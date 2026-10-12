@@ -39,9 +39,6 @@ export default function InformasiKelasDiAmpu({ dataKelas, activeTab }) {
         },
         { header: "Nisn", accessor: "nisn" },
         { header: "Nama Siswa", accessor: "nama_siswa" },
-        { header: "Jenis Kelamin", accessor: "jenis_kelamin" },
-        { header: "Tempat Lahir", accessor: "tempat_lahir" },
-        { header: "Tanggal Lahir", accessor: "tanggal_lahir" },
     ];
     const getSiswa = () => {
         setLoading(true);

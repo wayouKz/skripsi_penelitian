@@ -69,7 +69,7 @@ export default function Configurasi({
             setSelectedPrioritas([...selectedPrioritas, key]);
         }
     };
-
+    console.log("selectedPrioritas", selectedPrioritas);
     const handlePilihMapel = (mapelId) => {
         if (selectedMapelFilter === mapelId) {
             setSelectedMapelFilter(null);
@@ -318,22 +318,7 @@ export default function Configurasi({
             setIsGenerating(false);
         }
     };
-    const filteredTahunAjaranOptions = [
-        // 1. Tambahkan opsi default di indeks pertama (paling atas)
-        {
-            value: "",
-            label: "[Pilih Tahun Ajaran]",
-        },
-        // 2. Masukkan sisa data yang sudah di-filter
-        ...tahunAjaranList.filter(
-            (ta) => String(ta.value).toLowerCase() !== "all",
-        ),
-    ];
-    console.log("filteredTahunAjaranOptions", filteredTahunAjaranOptions);
-    const selectedTahunAjaranOption =
-        filteredTahunAjaranOptions.find(
-            (opt) => String(opt.value) === String(selectedTahunAjaran),
-        ) || null;
+
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
@@ -388,97 +373,6 @@ export default function Configurasi({
         <>
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {/* Header / Pemilihan Tahun Ajaran */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-white border border-green-100 p-4 rounded-xl shadow-sm">
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between relative z-10">
-                        <div>
-                            <h3 className="text-xs font-bold text-gray-900 mb-0.5">
-                                Tahun Ajaran & Semester
-                            </h3>
-                            <p className="text-[11px] text-gray-500">
-                                Tentukan periode aktif untuk jadwal yang akan
-                                digenerate.
-                            </p>
-                        </div>
-                        <div className="w-full md:w-72">
-                            <Select
-                                value={selectedTahunAjaranOption}
-                                onChange={(option) => {
-                                    setSelectedTahunAjaran(
-                                        option ? option.value : "",
-                                    );
-                                    setSelectedNamaTahunAjaran(
-                                        option ? option.label : "",
-                                    );
-                                }}
-                                options={filteredTahunAjaranOptions}
-                                placeholder="-- Pilih Tahun Ajaran --"
-                                isSearchable={true}
-                                menuPortalTarget={document.body}
-                                className="w-full text-xs"
-                                classNamePrefix="react-select"
-                                styles={{
-                                    control: (base, state) => ({
-                                        ...base,
-                                        backgroundColor: "#FFFFFF",
-                                        borderColor: !selectedTahunAjaran
-                                            ? state.isFocused
-                                                ? "#16A34A"
-                                                : "#FCD34D"
-                                            : state.isFocused
-                                              ? "#16A34A"
-                                              : "#BBF7D0",
-                                        borderRadius: "0.5rem",
-                                        padding: "0.05rem 0.1rem",
-                                        minHeight: "32px",
-                                        boxShadow: state.isFocused
-                                            ? "0 0 0 3px rgba(34, 197, 94, 0.15)"
-                                            : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-                                        cursor: "pointer",
-                                        "&:hover": {
-                                            borderColor: "#16A34A",
-                                        },
-                                    }),
-                                    valueContainer: (base) => ({
-                                        ...base,
-                                        padding: "0px 6px",
-                                    }),
-                                    placeholder: (base) => ({
-                                        ...base,
-                                        color: "#6B7280",
-                                        fontSize: "11px",
-                                    }),
-                                    singleValue: (base) => ({
-                                        ...base,
-                                        color: !selectedTahunAjaran
-                                            ? "#92400E"
-                                            : "#14532D",
-                                        fontWeight: "bold",
-                                        fontSize: "11px",
-                                    }),
-                                    option: (base, state) => ({
-                                        ...base,
-                                        backgroundColor: state.isSelected
-                                            ? "#16A34A"
-                                            : state.isFocused
-                                              ? "#F0FDF4"
-                                              : "white",
-                                        color: state.isSelected
-                                            ? "white"
-                                            : "#1F2937",
-                                        fontWeight: "600",
-                                        fontSize: "11px",
-                                        cursor: "pointer",
-                                    }),
-                                    menuPortal: (base) => ({
-                                        ...base,
-                                        zIndex: 9999,
-                                    }),
-                                }}
-                            />
-                        </div>
-                    </div>
-                </div>
 
                 {selectedTahunAjaran && historyJadwal?.length > 0 && (
                     <div className="flex items-center gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-xl shadow-sm">
@@ -637,14 +531,8 @@ export default function Configurasi({
                                                         {guru.detail_kelas.map(
                                                             (kelas) => {
                                                                 const mapelIdentifier =
-                                                                    mapelObj.mapel_id ||
-                                                                    mapelObj.mapel;
+                                                                    mapelObj.id;
                                                                 const keyPrioritas = `${mapelIdentifier}_${guru.nip}_${guru.guru_id}_${kelas.kelas_id}`;
-                                                                console.log(
-                                                                    mapelIdentifier +
-                                                                        "mapelIdentifier",
-                                                                    keyPrioritas,
-                                                                );
 
                                                                 const isChecked =
                                                                     selectedPrioritas?.includes(
@@ -671,8 +559,7 @@ export default function Configurasi({
                                                                             }
                                                                             onChange={() =>
                                                                                 togglePrioritasKelas(
-                                                                                    mapelObj.mapel_id ||
-                                                                                        mapelObj.mapel,
+                                                                                    mapelObj.id,
                                                                                     guru.nip,
                                                                                     guru.guru_id,
                                                                                     kelas.kelas_id,

@@ -36,9 +36,9 @@ export default function Proses({
     return (
         <>
             {/* Tampilan Utama Komponen Proses */}
-            <div className="max-w-md mx-auto h-full flex flex-col justify-center space-y-4 p-4 animate-in fade-in duration-300">
+            <div className="max-w-full justify-center mx-auto h-full flex flex-col  space-y-4 p-4 animate-in fade-in duration-300">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-10">
                     <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
                             {isComplete ? (

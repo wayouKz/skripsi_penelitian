@@ -16,11 +16,9 @@ return new class extends Migration
             $table->string('kode_jadwal')->index();
             $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals')->onDelete('cascade');
 
-            $table->string('nip')->index();
-            $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade');
+            $table->foreignId('guru_id')->references('id')->on('m_gurus')->onDelete('cascade');
 
-            $table->string('nip_pengganti')->index();
-            $table->foreign('nip_pengganti')->references('nip')->on('m_gurus')->onDelete('cascade');
+            $table->foreignId('guru_id_pengganti')->references('id')->on('m_gurus')->onDelete('cascade');
 
             $table->date('tanggal_pergantian');
 

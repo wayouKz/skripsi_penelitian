@@ -61,7 +61,7 @@ public function generate(Request $request)
             }
             return $item;
         });
-        dd($guruMapels);
+        // dd($guruMapels);
         $kelas = DB::table('m_kelas')->get();
 
         return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {

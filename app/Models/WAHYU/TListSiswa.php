@@ -14,7 +14,7 @@ class TListSiswa extends Model
         ->where('t_list_siswas.kelas_id', $kelasId)
         ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran)
         ->select(
-            't_list_siswas.nisn',
+            'm_siswas.nisn',
             'm_siswas.nama_siswa',
             'm_siswas.id as siswa_id',
             'm_siswas.jenis_kelamin',

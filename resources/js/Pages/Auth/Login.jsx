@@ -114,6 +114,7 @@ export default function Login({ status, canResetPassword, config }) {
                                     value={data.username}
                                     placeholder="Ketik Nama Pengguna"
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    icon="email"
                                     autoComplete="username"
                                     onChange={(e) =>
                                         setData("username", e.target.value)
@@ -132,7 +133,7 @@ export default function Login({ status, canResetPassword, config }) {
                                     type={showPassword ? "text" : "password"}
                                     name="password"
                                     value={data.password}
-                                    placeholder="password"
+                                    placeholder="Ketik Password"
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors pr-10"
                                     autoComplete="current-password"
                                     onChange={(e) =>

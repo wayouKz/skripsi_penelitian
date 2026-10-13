@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('kode_jadwal')->index();
             $table->string('nip')->index();
             $table->foreign('kode_absen')->references('kode_absen')->on('t_absen_siswas')->onDelete('cascade');
+            $table->foreignId('guru_id')->constrained('m_gurus')->onDelete('cascade');
             $table->foreign('kode_jadwal')->references('kode_jadwal')->on('t_jadwals')->onDelete('cascade');
             $table->foreign('nip')->references('nip')->on('m_gurus')->onDelete('cascade');
             $table->dateTime('waktu_absen');

@@ -1,6 +1,7 @@
 import "../css/app.css";
 import "./bootstrap";
 import { AlertProvider } from "./Components/AlertContext";
+import GlobalLoader from "./Layouts/GlobalLoader"; // Import loader
 
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
@@ -20,11 +21,16 @@ createInertiaApp({
 
         root.render(
             <AlertProvider>
+                <GlobalLoader />
+                {/* Pasang GlobalLoader di sini agar tampil di atas semua halaman */}
                 <App {...props} />
             </AlertProvider>,
         );
     },
     progress: {
-        color: "#4B5563",
+        color: "#10B981",
+        includeCSS: true,
+        showSpinner: true,
+        delay: 600,
     },
 });

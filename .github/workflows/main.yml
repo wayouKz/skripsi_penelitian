@@ -1,31 +1,27 @@
-name: CI/CD Auto Build
+name: Home Server Auto-Deploy
 
-# Menentukan kapan workflow ini akan berjalan
 on:
   push:
-    branches: ["main", "master"] # Berjalan saat ada push ke branch main atau master
-  pull_request:
     branches: ["main", "master"]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest # Menggunakan server virtual Ubuntu terbaru
+  deploy:
+    runs-on: self-hosted # Menggunakan home server Anda
 
     steps:
-      # 1. Mengambil kode dari repository Anda
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Setup environment (Contoh: Node.js)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # Sesuaikan dengan versi Node.js proyek Anda
+          node-version: "20"
 
-      # 3. Installdependencies
-      - name: Install Dependencies
-        run: npm install
+      - name: Install Dependencies and Build
+        run: |
+          npm install
+          npm run build
 
-      # 4. Jalankan proses Build atau Test
-      - name: Run Build
-        run: sudo npm run build # Sesuaikan dengan perintah build di package.json Anda
+      - name: Restart App with PM2
+        run: |
+          pm2 restart your-app-name

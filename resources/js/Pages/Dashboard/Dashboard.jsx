@@ -7,6 +7,8 @@ import SuperAdmin from "./Page/SuperAdmin";
 export default function Dashboard() {
     const role = usePage().props.auth.user.role.nama_roles;
     const user = usePage().props.auth.user;
+    const guruPengganti = usePage().props.GuruPergantian;
+    console.log(guruPengganti);
     const now = new Date();
     const total = usePage().props.total;
     const tglStr = new Intl.DateTimeFormat("id-ID", {
@@ -21,7 +23,11 @@ export default function Dashboard() {
                 {role === "Super Admin" || role === "Developer" ? (
                     <SuperAdmin user={user} tglStr={tglStr} total={total} />
                 ) : (
-                    <GuruDashboard user={user} tglStr={tglStr} />
+                    <GuruDashboard
+                        user={user}
+                        tglStr={tglStr}
+                        guruPengganti={guruPengganti}
+                    />
                 )}
             </div>
         </AuthenticatedLayout>

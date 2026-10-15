@@ -338,6 +338,7 @@ export default function Siswa() {
                             show={show}
                             setShow={setShow}
                             isEdit={isEdit}
+                            setIsEdit={setIsEdit}
                             selectedSiswa={selectedSiswa}
                             getSiswa={getSiswa}
                             handleTambah={handleTambah}

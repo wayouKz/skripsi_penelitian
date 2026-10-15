@@ -16,191 +16,187 @@ class JadwalController extends Controller
         return Inertia::render('Admin/Master/GenerateJadwal/GenerateJadwal');
     }
 
-public function generate(Request $request)
-    {
-        ini_set('max_execution_time', 0);
-        set_time_limit(0);
-        ini_set('memory_limit', '1024M');
+    public function generate(Request $request)
+        {
+            ini_set('max_execution_time', 0);
+            set_time_limit(0);
+            ini_set('memory_limit', '1024M');
 
-        $params = $request->all();
-        $slotWaktu = $request->input('slot_waktu', []);
-        $prioritasPagi = $request->input('prioritas_pagi', []);
+            $params = $request->all();
+            $slotWaktu = $request->input('slot_waktu', []);
+            $prioritasPagi = $request->input('prioritas_pagi', []);
 
-        $guruMapels = DB::table('t_list_guru_mapels')
-            ->leftJoin('t_list_gurus', function ($join) use ($params) {
-                $join->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-                     ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id']);
-            })
-            ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-            ->leftJoin('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
-            ->select(
-                't_list_gurus.guru_id',
-                't_list_guru_mapels.id',
-                't_list_guru_mapels.nip',
-                't_list_guru_mapels.mapel_id',
-                't_list_guru_mapels.beban_jam',
-                't_list_gurus.id as t_list_guru_id',
-                't_list_gurus.kelas_id',
-                'm_mapels.nama_mapel',
-                'm_gurus.nama_guru'
-            )
-            ->whereNotNull('t_list_gurus.kelas_id')
-            ->distinct()
-            ->get();
+            $guruMapels = DB::table('t_list_guru_mapels')
+                ->leftJoin('t_list_gurus', function ($join) use ($params) {
+                    $join->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+                        ->where('t_list_gurus.tahun_ajaran_id', $params['tahun_ajaran_id']);
+                })
+                ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
+                ->leftJoin('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
+                ->select(
+                    't_list_gurus.guru_id',
+                    't_list_guru_mapels.id',
+                    't_list_guru_mapels.nip',
+                    't_list_guru_mapels.mapel_id',
+                    't_list_guru_mapels.beban_jam',
+                    't_list_gurus.id as t_list_guru_id',
+                    't_list_gurus.kelas_id',
+                    'm_mapels.nama_mapel',
+                    'm_gurus.nama_guru'
+                )
+                ->whereNotNull('t_list_gurus.kelas_id')
+                ->distinct()
+                ->get();
 
-        $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
-            $item->is_prioritas_pagi = false;
-            $item->nama_guru = $item->nama_guru ?? 'None';
-            $item->nama_mapel = $item->nama_mapel ?? 'Unknown Mapel';
+            $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
+                $item->is_prioritas_pagi = false;
+                $item->nama_guru = $item->nama_guru ?? 'None';
+                $item->nama_mapel = $item->nama_mapel ?? 'Unknown Mapel';
 
-            foreach ($prioritasPagi as $p) {
-                if ($item->nip === $p['nip'] && $item->kelas_id === (int)$p['kelas_id']) {
-                    $item->is_prioritas_pagi = true;
-                    break;
+                foreach ($prioritasPagi as $p) {
+                    if ($item->nip === $p['nip'] && $item->kelas_id === (int)$p['kelas_id']) {
+                        $item->is_prioritas_pagi = true;
+                        break;
+                    }
                 }
-            }
-            return $item;
-        });
-        // dd($guruMapels);
-        $kelas = DB::table('m_kelas')->get();
+                return $item;
+            });
+            $kelas = DB::table('m_kelas')->get();
 
-        return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
-            ini_set('zlib.output_compression', 'Off');
-            if (function_exists('apache_setenv')) {
-                apache_setenv('no-gzip', '1');
-            }
+            return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
+                ini_set('zlib.output_compression', 'Off');
+                if (function_exists('apache_setenv')) {
+                    apache_setenv('no-gzip', '1');
+                }
 
-            while (ob_get_level() > 0) {
-                ob_end_flush();
-            }
+                while (ob_get_level() > 0) {
+                    ob_end_flush();
+                }
 
-            // echo str_repeat(" ", 4096) . "\n\n";
-            flush();
-
-            try {
-                Log::info('Mulai proses Generate Jadwal (GA).', [
-                    'tahun_ajaran_id' => $params['tahun_ajaran_id'] ?? null
-                ]);
-
-                echo "data: " . json_encode([
-                    'type' => 'progress',
-                    'generation' => 0,
-                    'fitness' => 0,
-                    'message' => 'Memulai inisialisasi populasi awal...'
-                ]) . "\n\n";
                 flush();
 
-                $waktuMulai = microtime(true);
-                $gaEngine = new GeneticAlgorithmService($params, $guruMapels, $kelas, $prioritasPagi);
+                try {
+                    Log::info('Mulai proses Generate Jadwal (GA).', [
+                        'tahun_ajaran_id' => $params['tahun_ajaran_id'] ?? null
+                    ]);
 
-                // Callback untuk progress biasa (generasi & fitness)
-                $gaEngine->onGenerationComplete = function($generasi, $fitness) {
                     echo "data: " . json_encode([
                         'type' => 'progress',
-                        'generation' => $generasi,
-                        'fitness' => $fitness
-                    ]) . "\n\n";
-                    flush();
-                };
-
-                // Callback BARU: Streaming struktur kromosom setiap kali ditemukan best kromosom baru
-                $gaEngine->onNewBest = function($generasi, $fitness, $kromosom) {
-                    echo "data: " . json_encode([
-                        'type' => 'new_best',
-                        'generation' => $generasi,
-                        'fitness' => $fitness,
-                        'kromosom' => $kromosom
-
-                    ]) . "\n\n";
-                    flush();
-                };
-
-                $gaEngine->onLog = function($logData) {
-                    echo "data: " . json_encode([
-                        'type' => 'log_update',
-                        'log'  => $logData
-                    ]) . "\n\n";
-                    flush();
-                };
-                $hasil = $gaEngine->generate();
-                $durasi = round(microtime(true) - $waktuMulai, 2);
-
-                if (!empty($hasil['jadwal'])) {
-                    echo "data: " . json_encode([
-                        'type' => 'progress',
-                        'message' => 'Proses algoritma selesai, menyimpan jadwal ke database...'
+                        'generation' => 0,
+                        'fitness' => 0,
+                        'message' => 'Memulai inisialisasi populasi awal...'
                     ]) . "\n\n";
                     flush();
 
-                    DB::beginTransaction();
-                    DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
+                    $waktuMulai = microtime(true);
+                    $gaEngine = new GeneticAlgorithmService($params, $guruMapels, $kelas, $prioritasPagi);
 
-                    $insert = [];
-                    $now = now();
-                    $kodeJadwalPerBlock = [];
+                    $gaEngine->onGenerationComplete = function($generasi, $fitness) {
+                        echo "data: " . json_encode([
+                            'type' => 'progress',
+                            'generation' => $generasi,
+                            'fitness' => $fitness
+                        ]) . "\n\n";
+                        flush();
+                    };
 
-                    foreach ($hasil['jadwal'] as $jadwal) {
-                        $blockKey = $jadwal['t_list_guru_mapel_id'] . '-' . $jadwal['kelas_id'] . '-' . $jadwal['mapel_id'];
+                    $gaEngine->onNewBest = function($generasi, $fitness, $kromosom) {
+                        echo "data: " . json_encode([
+                            'type' => 'new_best',
+                            'generation' => $generasi,
+                            'fitness' => $fitness,
+                            'kromosom' => $kromosom
 
-                        if (!isset($kodeJadwalPerBlock[$blockKey])) {
-                            $kodeJadwalPerBlock[$blockKey] = 'JDWL-' . strtoupper(Str::random(10));
+                        ]) . "\n\n";
+                        flush();
+                    };
+
+                    $gaEngine->onLog = function($logData) {
+                        echo "data: " . json_encode([
+                            'type' => 'log_update',
+                            'log'  => $logData
+                        ]) . "\n\n";
+                        flush();
+                    };
+                    $hasil = $gaEngine->generate();
+                    $durasi = round(microtime(true) - $waktuMulai, 2);
+
+                    if (!empty($hasil['jadwal'])) {
+                        echo "data: " . json_encode([
+                            'type' => 'progress',
+                            'message' => 'Proses algoritma selesai, menyimpan jadwal ke database...'
+                        ]) . "\n\n";
+                        flush();
+
+                        DB::beginTransaction();
+                        DB::table('t_jadwals')->where('tahun_ajaran_id', $params['tahun_ajaran_id'])->delete();
+
+                        $insert = [];
+                        $now = now();
+                        $kodeJadwalPerBlock = [];
+
+                        foreach ($hasil['jadwal'] as $jadwal) {
+                            $blockKey = $jadwal['t_list_guru_mapel_id'] . '-' . $jadwal['kelas_id'] . '-' . $jadwal['mapel_id'];
+
+                            if (!isset($kodeJadwalPerBlock[$blockKey])) {
+                                $kodeJadwalPerBlock[$blockKey] = 'JDWL-' . strtoupper(Str::random(10));
+                            }
+
+                            $insert[] = [
+                                'kode_jadwal'          => $kodeJadwalPerBlock[$blockKey],
+                                'tahun_ajaran_id'      => $params['tahun_ajaran_id'],
+                                'hari'                 => $jadwal['hari'],
+                                'jam_mulai'            => $jadwal['jam_mulai'],
+                                'jam_selesai'          => $jadwal['jam_selesai'],
+                                'kelas_id'             => $jadwal['kelas_id'],
+                                'mapel_id'             => $jadwal['mapel_id'],
+                                't_list_guru_mapel_id' => $jadwal['t_list_guru_mapel_id'],
+                                'created_at'           => $now,
+                                'updated_at'           => $now,
+                            ];
                         }
 
-                        $insert[] = [
-                            'kode_jadwal'          => $kodeJadwalPerBlock[$blockKey],
-                            'tahun_ajaran_id'      => $params['tahun_ajaran_id'],
-                            'hari'                 => $jadwal['hari'],
-                            'jam_mulai'            => $jadwal['jam_mulai'],
-                            'jam_selesai'          => $jadwal['jam_selesai'],
-                            'kelas_id'             => $jadwal['kelas_id'],
-                            'mapel_id'             => $jadwal['mapel_id'],
-                            't_list_guru_mapel_id' => $jadwal['t_list_guru_mapel_id'],
-                            'created_at'           => $now,
-                            'updated_at'           => $now,
-                        ];
+                        $chunks = array_chunk($insert, 500);
+                        foreach ($chunks as $chunk) {
+                            DB::table('t_jadwals')->insert($chunk);
+                        }
+
+                        DB::commit();
+
+                        echo "data: " . json_encode([
+                            'type' => 'done',
+                            'message' => "Berhasil! Waktu eksekusi: $durasi detik.",
+                            'best_kromosom' => $hasil['best_kromosom'] ?? []
+                        ]) . "\n\n";
+                        flush();
+
+                    } else {
+                        Log::warning('Jadwal gagal dibuat (array jadwal kosong).');
+                        echo "data: " . json_encode([
+                            'type' => 'error',
+                            'message' => 'Algoritma selesai tetapi gagal menghasilkan jadwal.'
+                        ]) . "\n\n";
+                        flush();
                     }
 
-                    $chunks = array_chunk($insert, 500);
-                    foreach ($chunks as $chunk) {
-                        DB::table('t_jadwals')->insert($chunk);
+                } catch (\Exception $e) {
+                    if (DB::transactionLevel() > 0) {
+                        DB::rollBack();
                     }
 
-                    DB::commit();
+                    $detailError = $e->getMessage() . ' di baris ' . $e->getLine() . ' pada ' . basename($e->getFile());
+                    Log::error('Critical Error Generate Jadwal: ' . $e->getMessage());
 
-                    echo "data: " . json_encode([
-                        'type' => 'done',
-                        'message' => "Berhasil! Waktu eksekusi: $durasi detik.",
-                        'best_kromosom' => $hasil['best_kromosom'] ?? []
-                    ]) . "\n\n";
-                    flush();
-
-                } else {
-                    Log::warning('Jadwal gagal dibuat (array jadwal kosong).');
-                    echo "data: " . json_encode([
-                        'type' => 'error',
-                        'message' => 'Algoritma selesai tetapi gagal menghasilkan jadwal.'
-                    ]) . "\n\n";
+                    echo "data: " . json_encode(['type' => 'error', 'message' => "Terjadi Kesalahan: $detailError"]) . "\n\n";
                     flush();
                 }
 
-            } catch (\Exception $e) {
-                if (DB::transactionLevel() > 0) {
-                    DB::rollBack();
-                }
-
-                $detailError = $e->getMessage() . ' di baris ' . $e->getLine() . ' pada ' . basename($e->getFile());
-                Log::error('Critical Error Generate Jadwal: ' . $e->getMessage());
-
-                echo "data: " . json_encode(['type' => 'error', 'message' => "Terjadi Kesalahan: $detailError"]) . "\n\n";
-                flush();
-            }
-
-        }, 200, [
-            'Content-Type' => 'text/event-stream',
-            'Cache-Control' => 'no-cache, must-revalidate',
-            'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no',
-        ]);
+            }, 200, [
+                'Content-Type' => 'text/event-stream',
+                'Cache-Control' => 'no-cache, must-revalidate',
+                'Connection' => 'keep-alive',
+                'X-Accel-Buffering' => 'no',
+            ]);
     }
 //     public function generate(Request $request)
 // {

@@ -30,12 +30,13 @@
 
         <!-- 2. Kolom Teks Tengah (Lebar 70% - Presisi di Tengah Halaman) -->
         <td width="70%" style="text-align: center; vertical-align: middle;">
-            <h1> {{ strtoupper($instansi->nama_instansi) ??  "Nama Instansi" }}
+            <h1> {{ (isset($instansi->nama_instansi)) ? $instansi->nama_instansi : strtoupper($instansi->nama_instansi) ??  "Nama Instansi" }}
             </h1>
             <p>{{ !empty($instansi->alamat_instansi) ? $instansi->alamat_instansi : "Alamat Instansi" }}</p>
             <p>Telepon: {{ !empty($instansi->telepon_instansi) ? $instansi->telepon_instansi : "(+62) 000-0000-0000" }}
                 | Website:
-                <i>{{ !empty($instansi->website_instansi) ? $instansi->website_instansi : "website.com" }}</i></p>
+                <i>{{ !empty($instansi->website_instansi) ? $instansi->website_instansi : "website.com" }}</i>
+            </p>
         </td>
 
         <!-- 3. Kolom Penyeimbang Kanan (Lebar 15% Kosong agar Teks Tidak Tergeser) -->

@@ -5,13 +5,14 @@ import axios from "axios";
 export default function JadwalMengajar({ dataKelas }) {
     const [mapel, setMapel] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadingJadwal, setLoadingJadwal] = useState(false);
     const [selectedMapel, setSelectedMapel] = useState("");
     const [jadwal, setJadwal] = useState([]);
 
     const hariKerja = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat"];
 
     const getJadwal = async () => {
-        setLoading(true);
+        setLoadingJadwal(true);
         try {
             const res = await axios.get(
                 route("getData.get-jadwal-guru-kelas", {
@@ -27,8 +28,9 @@ export default function JadwalMengajar({ dataKelas }) {
             }
         } catch (error) {
             console.error("Gagal mengambil data jadwal", error);
+            setJadwal([]);
         }
-        setLoading(false);
+        setLoadingJadwal(false);
     };
 
     const getMapel = async () => {
@@ -47,6 +49,7 @@ export default function JadwalMengajar({ dataKelas }) {
             }
         } catch (error) {
             console.error("Gagal mengambil data mapel", error);
+            setMapel([]);
         }
         setLoading(false);
     };
@@ -60,6 +63,7 @@ export default function JadwalMengajar({ dataKelas }) {
     }, [selectedMapel]);
 
     // Filter jadwal berdasarkan dropdown yang dipilih
+    // (Jika di response jadwal belum ada kode_mapel, kita cocokan lewat mapel_id atau pastikan backend melampirkan kode/nama mapel)
     const filteredJadwal = selectedMapel
         ? jadwal.filter((j) => j.kode_mapel === selectedMapel)
         : jadwal;
@@ -81,15 +85,23 @@ export default function JadwalMengajar({ dataKelas }) {
         a.jam_mulai.localeCompare(b.jam_mulai),
     );
 
+    // Cari nama mapel berdasarkan mapel_id jika tidak ada di item jadwal
+    const getNamaMapel = (mapelId) => {
+        const found = mapel.find(
+            (m) => m.mapel_id == mapelId || m.id == mapelId,
+        );
+        return found ? found.nama_mapel || found.mapel : "Mata Pelajaran";
+    };
+
     // --- STYLES REACT-SELECT ---
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
             backgroundColor: state.isDisabled ? "#F3F4F6" : "#FFFFFF",
             borderColor: state.isFocused ? "#10B981" : "#E5E7EB",
-            borderRadius: "0.375rem",
-            padding: "0",
-            minHeight: "28px",
+            borderRadius: "0.5rem",
+            padding: "2px",
+            minHeight: "36px",
             boxShadow: state.isFocused
                 ? "0 0 0 2px rgba(16, 185, 129, 0.15)"
                 : "none",
@@ -100,18 +112,18 @@ export default function JadwalMengajar({ dataKelas }) {
         }),
         valueContainer: (base) => ({
             ...base,
-            padding: "0px 6px",
+            padding: "0px 8px",
         }),
         placeholder: (base) => ({
             ...base,
             color: "#9CA3AF",
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: "normal",
         }),
         singleValue: (base) => ({
             ...base,
             color: "#1F2937",
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: "600",
         }),
         option: (base, state) => ({
@@ -122,10 +134,10 @@ export default function JadwalMengajar({ dataKelas }) {
                   ? "#ECFDF5"
                   : "white",
             color: state.isSelected ? "white" : "#1F2937",
-            fontSize: "10px",
+            fontSize: "11px",
             fontWeight: "500",
             cursor: "pointer",
-            padding: "4px 8px",
+            padding: "8px 12px",
         }),
         menuPortal: (base) => ({
             ...base,
@@ -133,39 +145,41 @@ export default function JadwalMengajar({ dataKelas }) {
         }),
         dropdownIndicator: (base) => ({
             ...base,
-            padding: "2px",
+            padding: "4px",
+            color: "#6B7280",
         }),
         clearIndicator: (base) => ({
             ...base,
-            padding: "2px",
+            padding: "4px",
+            color: "#6B7280",
         }),
     };
 
     const mapels = mapel.map((item) => ({
-        value: item.kode_mapel,
+        value: item.kode_mapel || item.mapel_id,
         label: item.mapel || item.nama_mapel,
     }));
 
     return (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             {/* Header & Filter Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-6 border-b border-gray-100 bg-white">
-                <div className="flex items-center gap-2.5">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center shadow-sm">
-                        <i className="fa fa-calendar text-white text-sm"></i>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 border-b border-gray-100 bg-white">
+                <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shadow-xs border border-green-100">
+                        <i className="fa fa-calendar-alt text-base"></i>
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-slate-800 leading-tight m-0">
                             Jadwal Mengajar
                         </h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
-                            Jadwal mengajar dan kelas
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            Kelola dan pantau jadwal mengajar kelas
                         </p>
                     </div>
                 </div>
 
-                <div className="relative w-full md:w-[180px]">
-                    <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mb-0.5 block">
+                <div className="w-full md:w-[220px]">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">
                         Mata Pelajaran
                     </label>
                     <Select
@@ -183,14 +197,29 @@ export default function JadwalMengajar({ dataKelas }) {
                         isClearable={true}
                         styles={customSelectStyles}
                         placeholder="Pilih Mapel..."
+                        isLoading={loading}
                     />
                 </div>
             </div>
 
             {/* Content Section */}
-            {loading ? (
+            {loadingJadwal ? (
                 <div className="flex justify-center items-center py-16">
                     <i className="fa fa-spinner fa-spin text-2xl text-green-500"></i>
+                </div>
+            ) : daftarJam.length === 0 || filteredJadwal.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50/50 my-4 mx-6 rounded-2xl border border-dashed border-gray-200">
+                    <div className="w-14 h-14 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-3 text-xl shadow-inner">
+                        <i className="fa fa-calendar-times"></i>
+                    </div>
+                    <h4 className="text-gray-800 font-bold text-sm mb-1">
+                        Jadwal Belum Tersedia
+                    </h4>
+                    <p className="text-gray-400 text-xs text-center max-w-sm">
+                        Belum ada data jadwal pelajaran yang dapat ditampilkan
+                        untuk saat ini. Silahkan ubah filter atau pilih mata
+                        pelajaran lain.
+                    </p>
                 </div>
             ) : (
                 <div className="p-6 overflow-x-auto bg-gray-50/50">
@@ -200,22 +229,16 @@ export default function JadwalMengajar({ dataKelas }) {
                                 <th className="p-3 font-extrabold text-gray-700 text-xs uppercase tracking-wide border-r border-gray-200 w-32 sticky left-0 bg-gray-100 z-10">
                                     Hari / Jam
                                 </th>
-                                {daftarJam.length > 0 ? (
-                                    daftarJam.map((jam, index) => (
-                                        <th
-                                            key={index}
-                                            className="p-3 border-r border-gray-200 min-w-[140px]"
-                                        >
-                                            <div className="font-extrabold text-gray-800 text-xs">
-                                                {jam.jam_mulai}
-                                            </div>
-                                        </th>
-                                    ))
-                                ) : (
-                                    <th className="p-3 text-gray-400 text-xs font-normal">
-                                        Tidak ada jam tersedia
+                                {daftarJam.map((jam, index) => (
+                                    <th
+                                        key={index}
+                                        className="p-3 border-r border-gray-200 min-w-[140px]"
+                                    >
+                                        <div className="font-extrabold text-gray-800 text-xs">
+                                            {jam.jam_mulai}
+                                        </div>
                                     </th>
-                                )}
+                                ))}
                             </tr>
                         </thead>
                         <tbody>
@@ -269,9 +292,10 @@ export default function JadwalMengajar({ dataKelas }) {
                                                                 )}
                                                             </div>
                                                             <div className="font-bold text-gray-900 text-xs line-clamp-2">
-                                                                {
-                                                                    matchItem.nama_mapel
-                                                                }
+                                                                {matchItem.nama_mapel ||
+                                                                    getNamaMapel(
+                                                                        matchItem.mapel_id,
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     ) : (

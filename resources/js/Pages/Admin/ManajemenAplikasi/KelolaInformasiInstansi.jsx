@@ -130,10 +130,10 @@ export default function KelolaInformasiInstansi() {
     const customSelectStyles = {
         control: (base, state) => ({
             ...base,
-            backgroundColor: !data.kepala_sekolah.value ? "#FFFF" : "#F9FAFB",
+            backgroundColor: !data?.kepala_sekolah?.value ? "#FFFF" : "#F9FAFB",
             borderColor: state.isFocused
                 ? "#10B981"
-                : !data.kepala_sekolah.value
+                : !data?.kepala_sekolah?.value
                   ? "#FCD34D"
                   : "#D1D5DB",
             borderRadius: "0.5rem",
@@ -248,7 +248,7 @@ export default function KelolaInformasiInstansi() {
                                 <Select
                                     className="block w-full text-xs rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
                                     options={dataGuru}
-                                    value={data.kepala_sekolah} // BERIKAN OBJECT PENUH (bukan .value)
+                                    value={data?.kepala_sekolah} // BERIKAN OBJECT PENUH (bukan .value)
                                     onChange={
                                         (e) => setData("kepala_sekolah", e) // SIMPAN OBJECT PENUH
                                     }

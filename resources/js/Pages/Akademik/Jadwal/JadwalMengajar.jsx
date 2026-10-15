@@ -30,8 +30,6 @@ export default function JadwalMengajarAnda({
             showAlert("Gagal mengambil data jadwal per guru.", "error");
         }
     };
-
-    console.log(jadwal);
     useEffect(() => {
         getJadwalPerGuru();
     }, [selectedTahunAjaran]);

@@ -11,6 +11,7 @@ use App\Models\TListFeatureByRole;
 use App\Models\User;
 use App\Models\WAHYU\MGuru;
 use App\Models\WAHYU\MKelas;
+use App\Models\WAHYU\MMapel;
 use App\Models\WAHYU\MSiswa;
 use App\Models\WAHYU\MTahunAjaran;
 use App\Models\WAHYU\TAbsenGuru;
@@ -59,13 +60,8 @@ class GetDataController extends Controller
 
     public function getKelas(Request $request)
     {
-        $query = MKelas::select('m_kelas.*', 'm_jurusans.nama_jurusan')
-        ->where('status', 'active')->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id');
-
-        // if($request->tahun_ajaran != null){
-        //     $query->where('m_kelas.tahun_ajaran_id', $request->tahun_ajaran);
-        // }
-        $data = $query->get();
+        $query = MKelas::getKelas();
+        $data = $query;
 
         $data = $data->sortBy('tingkat', SORT_NATURAL)->values();
 
@@ -100,7 +96,7 @@ class GetDataController extends Controller
     }
 
     public function cekSiswaTahunAjaran(){
-        $data = MSiswa::where('status', 'active')->get();
+        $data = MSiswa::getSiswa();
         // if($data->isEmpty()){
             // $json = [ "success" => false ,"message" => "Sistem tidak dapat menemukan data siswa"];
         // }else{
@@ -112,113 +108,16 @@ class GetDataController extends Controller
  public function getMapelGuru(Request $request)
     {
         $tahunAjaranId = $request->query('tahun_ajaran_id');
-       $tableName = 'm_mapels';
 
-$data = $this->builder($tableName)
-    ->leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
-    ->leftJoin('t_list_gurus', function ($join) use ($tahunAjaranId) {
-        // PERBAIKAN 1: Join berdasarkan NIP DAN KELAS ID agar tidak cross-join (ganda)
-        $join->on('t_list_guru_mapels.guru_id', '=', 't_list_gurus.guru_id');
 
-        if (!empty($tahunAjaranId) && $tahunAjaranId != null) {
-            $join->where('t_list_gurus.tahun_ajaran_id', $tahunAjaranId);
-        } else {
-            $join->whereRaw('1 = 0');
-        }
-    })
-    ->leftJoin('m_gurus as guru', function ($join) {
-        $join->on('t_list_gurus.guru_id', '=', 'guru.id');
-        $join->where('guru.status', 'active');
-    })
-    ->leftJoin('m_kelas','m_kelas.id' , '=', 't_list_gurus.kelas_id')
-    ->select(
-        'm_mapels.id as id',
-        'm_mapels.nama_mapel',
-        'm_mapels.kode_mapel',
-        'guru.id as guru_id',
-        'guru.nama_guru',
-        'guru.nip',
-        't_list_guru_mapels.beban_jam',
-        't_list_guru_mapels.id as unique_id',
-        't_list_gurus.kelas_id',
-        't_list_gurus.tahun_ajaran_id',
-        'm_kelas.nama_kelas',
-        'm_kelas.tingkat'
-    )
-    ->get()
-    ->groupBy('id')
-    ->map(function ($items) {
-        return [
-            'id'              => $items->first()->id,
-            'mapel'           => $items->first()->nama_mapel,
-            'kode_mapel'      => $items->first()->kode_mapel,
-            'tahun_ajaran_id' => $items->first()->tahun_ajaran_id,
-            'guru'            => $items->filter(function ($item) {
-                                    return !empty($item->nama_guru);
-                                })
-                                // PERBAIKAN 2: Pastikan tidak ada duplikasi NIP di kelas yang sama
-                                ->unique(function ($item) {
-                                    return $item->guru_id . '-' . $item->kelas_id;
-                                })
-                                // 🌟 PERBAIKAN 3: Order by Nama Guru kemudian Nama Kelas
-                              ->sortBy(function ($item) {
-                                    return $item->nama_guru . '-' . $item->nama_kelas;
-                                }, SORT_NATURAL)
-                                ->map(function ($item) {
-                                    return [
-                                        'id'         => $item->unique_id,
-                                        'nama'       => $item->nama_guru,
-                                        'guru_id'    => $item->guru_id,
-                                        'nip'        => $item->nip,
-                                        'beban_jam'  => $item->beban_jam ?? 0,
-                                        'kelas_id'   => $item->kelas_id ?? '',
-                                        'nama_kelas' => $item->nama_kelas,
-                                        'tingkat'    => $item->tingkat
-                                    ];
-                                })
-                                ->values()
-                                ->toArray(),
-        ];
-    })
-    ->values();
-
+    $data = MMapel::mapGuruMapel($tahunAjaranId);
         return response()->json([
             'data'    => $data,
             'success' => true
         ]);
     }
     public function getListGuru(){
-       $data = MGuru::select(
-        'm_gurus.id',
-        'm_gurus.nama_guru',
-        'm_gurus.nip',
-        'm_mapels.id as mapel_id', // Beri alias agar tidak bentrok dengan id guru
-        'm_mapels.nama_mapel',
-        'm_mapels.kode_mapel'
-    )
-    ->where('m_gurus.status', 'active')
-    ->leftJoin('t_list_guru_mapels', 'm_gurus.id', '=', 't_list_guru_mapels.guru_id')
-    ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
-
-    ->get()
-    ->groupBy('id')
-    ->map(function ($items) {
-        $first = $items->first();
-        return [
-            'id' => $first->id,
-            'nip' => $first->nip,
-            'nama_guru' => $first->nama_guru,
-            'mapel' => $items->filter(function ($item) {
-                return !is_null($item->mapel_id);
-            })->map(function ($item) {
-                return [
-                    'id' => $item->mapel_id,
-                    'nama_mapel' => $item->nama_mapel,
-                    'kode_mapel' => $item->kode_mapel
-                ];
-            })->values()->all()
-        ];
-    })->values();
+       $data = MGuru::listGuru();
         if($data->isEmpty()){
             $json = [ "success" => false ,"msg" => "Tidak dapat menemukan data guru"];
         }else{
@@ -230,52 +129,7 @@ $data = $this->builder($tableName)
    public function getKelasSiswa(Request $request) {
     $tahunAjaran = $request->tahun_ajaran;
 
-    $data = MKelas::select(
-        'm_kelas.id',
-        'm_kelas.nama_kelas',
-        'm_kelas.tingkat',
-        'm_siswas.nisn',
-        'm_siswas.id as siswa_id',
-        'm_siswas.nama_siswa',
-        'm_siswas.jenis_kelamin',
-        'm_gurus.nama_guru',
-        'm_jurusans.nama_jurusan'
-    )
-    // 1. UBAH LEFT JOIN INI UNTUK MEMFILTER TAHUN AJARAN
-    ->leftJoin('t_list_siswas', function($join) use ($tahunAjaran) {
-        $join->on('m_kelas.id', '=', 't_list_siswas.kelas_id');
-
-        // Jika ada filter tahun ajaran yang dikirim dari React
-        if ($tahunAjaran) {
-            // Sesuaikan 'tahun_ajaran_id' dengan nama kolom asli di tabel t_list_siswas Anda
-            $join->where('t_list_siswas.tahun_ajaran_id', '=', $tahunAjaran);
-        }
-    })
-    ->leftJoin('m_siswas', 't_list_siswas.siswa_id', '=', 'm_siswas.id')
-    ->leftJoin('m_gurus', 'm_kelas.id_wali_kelas', '=', 'm_gurus.id')
-    ->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id')
-    // ->where('m_kelas.tahun_ajaran_id', $tahunAjaran)
-    ->get()
-    ->groupBy('id')
-    ->map(function ($items) {
-        $first = $items->first();
-
-        return [
-            'id' => $first->id,
-            'nama_kelas' => $first->nama_kelas . ' ' .strtoupper($first->nama_jurusan) ,
-            'nama_wali_kelas' => $first->nama_guru,
-            'tingkat' => $first->tingkat,
-            'siswa' => $items->filter(function ($item) {
-                return !is_null($item->siswa_id);
-            })->map(function ($item) {
-                return [
-                    'value' => $item->nisn,
-                    'label' => $item->nama_siswa,
-                    'jenis_kelamin' => $item->jenis_kelamin
-                ];
-            })->values()->all()
-        ];
-    })->values();
+    $data = MKelas::getSiswaKelas($tahunAjaran);
 
     if($data->isEmpty()){
         $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -502,6 +356,7 @@ public function getSiswaInKelas(Request $request){
     public function getGuruPengampuKelas(Request $request){
         $tahunAjaranId = $request->tahun_ajaran;
         $data = TListGuru::getGuruPengampu($tahunAjaranId);
+        // dd($data);
         if(!empty($data) && count($data) > 0){
             $json = [
                 'data' => $data,
@@ -586,8 +441,8 @@ public function getSiswaInKelas(Request $request){
     public function getJadwalGuruKelas(Request $request){
         $kelasID = $request->kelas_id;
         $tahunAjaran = $request->tahun_ajaran_id;
-
-        $data = TJadwal::jadwalKelas($kelasID, $tahunAjaran);
+        $mapel = $request->mapel_id;
+        $data = TJadwal::jadwalKelas($kelasID, $tahunAjaran, $mapel);
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -600,7 +455,8 @@ public function getSiswaInKelas(Request $request){
 
     public function getHistoryAbsensi(Request $request)
     {
-        $data = TAbsenGuru::historyAbsen();
+        $kode_jadwal = $request->input('kode_jadwal');
+        $data = TAbsenGuru::historyAbsen($kode_jadwal);
 
         if($data->isEmpty()){
             $json = [ "success" => false, "msg" => "Tidak dapat menemukan data kelas"];
@@ -620,62 +476,62 @@ public function getKelasAktif(Request $request)
         $tanggalFilter = $request->input('tanggal');
         $hariFilter = $request->input('hari'); // Opsional: jika ingin membatasi hari tertentu
 
-        $jadwalMentah = MKelas::select(
-                'm_kelas.id as kelas_id',
-                'm_kelas.nama_kelas',
-                't_jadwals.kode_jadwal',
-                't_jadwals.hari',
-                't_jadwals.jam_mulai',
-                't_jadwals.jam_selesai',
-                'm_gurus.nama_guru',
-                't_absen_gurus.kode_absen',
-                'm_mapels.nama_mapel',
-                'm_gurus.id as guru_id'
-            )
-        ->join('t_jadwals', function($join) {
-                $join->on('m_kelas.id', '=', 't_jadwals.kelas_id');
-            })
-        ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-        // 2. Hubungkan tabel absensi berdasarkan kode jadwal dan TANGGAL YANG DIPILIH user
-        ->leftJoin('t_absen_gurus', function($join) use ($tanggalFilter) {
-                $join->on('t_jadwals.kode_jadwal', '=', 't_absen_gurus.kode_jadwal')
-                     ->whereDate('t_absen_gurus.waktu_absen', '=', $tanggalFilter);
-            })
-        ->leftJoin('m_tahun_ajarans', 't_jadwals.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
-        ->where('m_tahun_ajarans.status', '=', 'active')
-        ->leftJoin('m_gurus', 't_list_guru_mapels.guru_id', '=', 'm_gurus.id')
-        ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
-        // (Opsional) Jika Anda ingin memfilter langsung berdasarkan hari di database:
-        // ->when($hariFilter, function ($query, $hariFilter) {
-        //     return $query->where('t_jadwals.hari', $hariFilter);
-        // })
-        ->orderBy('t_jadwals.jam_mulai', 'asc')
-        ->get();
+      $jadwalMentah = MKelas::kelasAktif($tanggalFilter);
+// 3. Kelompokkan berdasarkan nama_kelas
+$data = $jadwalMentah->groupBy('nama_kelas')->map(function ($itemsKelas) {
 
-        // 3. Kelompokkan terlebih dahulu berdasarkan nama_kelas
-        $data = $jadwalMentah->groupBy('nama_kelas')->map(function ($itemsKelas) {
+    // 4. Kelompokkan lagi berdasarkan hari
+    return $itemsKelas->groupBy('hari')->map(function ($itemsHari) {
 
-            // 4. Di dalam kelas, kelompokkan lagi berdasarkan hari (Senin, Selasa, dll)
-            return $itemsKelas->groupBy('hari')->map(function ($itemsHari) {
+        // 5. Petakan detail jadwal per sesi/kode_jadwal
+        return $itemsHari->groupBy('kode_jadwal')->map(function ($itemsJadwal) {
+            $first = $itemsJadwal->first();
+            $belumAbsen = is_null($first->kode_absen);
 
-                // 5. Petakan detail jadwal per sesi/kode_jadwal di hari tersebut
-                return $itemsHari->groupBy('kode_jadwal')->map(function ($itemsJadwal) {
-                    $first = $itemsJadwal->first();
-                    $belumAbsen = is_null($first->kode_absen);
+            // Cek apakah ada data pengajuan pergantian
+            $isAdaPengajuan = !is_null($first->ada_pergantian);
+            $statusPergantian = $first->status_pergantian; // contoh: 'diterima', 'ditolak', 'pending'
 
-                    return [
-                        'guru_id'    => $first->guru_id,
-                        'kode_jadwal' => $first->kode_jadwal,
-                        'nama_mapel'  => $first->nama_mapel,
-                        'nama_guru'   => $first->nama_guru,
-                        'status_kbm'  => $belumAbsen ? 'Belum Absen' : 'Hadir',
-                        'warna_badge' => $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                        'jam_sesi'    => $first->jam_mulai . ' - ' . $first->jam_selesai,
-                    ];
-                })->values();
+            // Tentukan apakah pergantian sah aktif (misal: hanya jika statusnya 'diterima')
+            $isDisetujui = $isAdaPengajuan && $statusPergantian === 'diterima';
 
-            });
-        });
+            // Tentukan guru aktif (Jika disetujui pakai guru pengganti, jika ditolak/pending/tidak ada kembali ke guru asli)
+            $namaGuruAktif = $isDisetujui ? $first->nama_guru_pengganti : $first->nama_guru_asli;
+            $guruIdAktif   = $isDisetujui ? $first->guru_pengganti_id : $first->guru_id_asli;
+
+            // Tentukan status KBM dan badge berdasarkan kondisi
+            if ($isDisetujui) {
+                $statusKbm  = $belumAbsen ? 'Digantikan (Belum Absen)' : 'Digantikan (Hadir)';
+                $warnaBadge = $belumAbsen ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700';
+            } elseif ($isAdaPengajuan && $statusPergantian === 'ditolak') {
+                $statusKbm  = 'Pergantian Ditolak';
+                $warnaBadge = 'bg-rose-100 text-rose-700';
+            } elseif ($isAdaPengajuan && $statusPergantian === 'pending') {
+                $statusKbm  = 'Menunggu Konfirmasi';
+                $warnaBadge = 'bg-yellow-100 text-yellow-700';
+            } else {
+                $statusKbm  = $belumAbsen ? 'Belum Absen' : 'Hadir';
+                $warnaBadge = $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700';
+            }
+
+            return [
+                'guru_id'             => $guruIdAktif,
+                'guru_asli_id'        => $first->guru_id_asli,
+                'kode_jadwal'         => $first->kode_jadwal,
+                'nama_mapel'          => $first->nama_mapel,
+                'nama_guru'           => $namaGuruAktif,
+                'nama_guru_asli'      => $first->nama_guru_asli,
+                'nama_guru_pengganti' => $first->nama_guru_pengganti,
+                'status_pergantian'   => $statusPergantian,
+                'is_digantikan'       => $isDisetujui,
+                'status_kbm'          => $statusKbm,
+                'warna_badge'         => $warnaBadge,
+                'jam_sesi'            => $first->jam_mulai . ' - ' . $first->jam_selesai,
+            ];
+        })->values();
+
+    });
+});
 
         return response()->json([
             "data" => $data,

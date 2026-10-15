@@ -211,6 +211,12 @@ export default function MonitoringKBM({ title, onClose, open }) {
                         route("dashboard.monitoring-kbm.assign-guru-pengganti"),
                         guru,
                     );
+
+                    if (response.data.success === true) {
+                        showAlert(response.data.message, "success");
+                    } else if (response.data.success === false) {
+                        showAlert(response.data.message, "error");
+                    }
                 } catch (error) {
                     console.error("Gagal mengambil data mapel", error);
                 }
@@ -418,6 +424,8 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                   kls.jam_sesi,
                                                               )
                                                             : true;
+
+                                                        // Dianggap anomali jika belum absen DAN jamnya sudah aktif/lewat
                                                         const bermasalah =
                                                             isStatusBermasalah(
                                                                 kls.status_kbm,
@@ -471,17 +479,49 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     </span>
                                                                 </div>
 
-                                                                <div className="text-[10px] text-slate-600 space-y-0.5">
-                                                                    <p
-                                                                        className={`flex items-start gap-1.5 ${bermasalah ? "text-red-600 font-semibold" : ""}`}
-                                                                    >
+                                                                <div className="text-[10px] text-slate-600 space-y-1">
+                                                                    {/* Info Nama Guru & Label Pengganti */}
+                                                                    <div className="flex items-start gap-1.5">
                                                                         <i className="fa-solid fa-user-tie mt-0.5 text-slate-400 shrink-0"></i>
-                                                                        <span>
-                                                                            {
-                                                                                kls.nama_guru
-                                                                            }
-                                                                        </span>
-                                                                    </p>
+                                                                        <div className="flex flex-col">
+                                                                            <span
+                                                                                className={
+                                                                                    bermasalah
+                                                                                        ? "text-red-600 font-semibold"
+                                                                                        : ""
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    kls.nama_guru
+                                                                                }
+                                                                            </span>
+
+                                                                            {/* Tampilkan info tambahan jika ada pengajuan guru pengganti */}
+                                                                            {kls.nama_guru_pengganti && (
+                                                                                <span className="text-[9px] text-amber-600 font-medium">
+                                                                                    Pengganti:{" "}
+                                                                                    {
+                                                                                        kls.nama_guru_pengganti
+                                                                                    }
+                                                                                    <span className="italic text-slate-400">
+                                                                                        {" "}
+                                                                                        (
+                                                                                        {
+                                                                                            kls.status_pergantian
+                                                                                        }
+
+                                                                                        )
+                                                                                    </span>
+                                                                                    {kls.status_pergantian ===
+                                                                                    "selesai" ? (
+                                                                                        <i className="fa-solid fa-check ml-1 text-green-600"></i>
+                                                                                    ) : (
+                                                                                        <i className="fa-solid fa-clock-rotate-left ml-1 animate-spin"></i>
+                                                                                    )}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
 
                                                                     {kls.jam_sesi && (
                                                                         <p className="flex items-center gap-1.5 text-slate-400">
@@ -493,7 +533,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     )}
 
                                                                     {bermasalah && (
-                                                                        <p className="text-[9px] text-indigo-500 font-medium mt-1 flex items-center gap-1">
+                                                                        <p className="text-[9px] text-green-500 font-medium mt-1 flex items-center gap-1">
                                                                             Klik
                                                                             untuk
                                                                             analisis
@@ -519,7 +559,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                     KANAN — AI Agent Panel
                 ════════════════════════════════════════════ */}
                 <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
-                    <div className="p-3 bg-gradient-to-br from-indigo-900 to-slate-900 text-white shadow-inner">
+                    <div className="p-3 bg-gradient-to-br from-green-900 to-green-700 text-white shadow-inner">
                         <div className="flex items-center gap-2 mb-1">
                             <i
                                 className={`fa-solid fa-robot text-lg text-indigo-300 ${isAnalyzing ? "fa-spin" : "animate-pulse"}`}

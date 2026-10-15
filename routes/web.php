@@ -222,7 +222,10 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::controller(DashboardController::class)->prefix('/dashboard')->name('dashboard.')->group(function () {
+        Route::get('get-info-wali-kelas', 'getInfoPerwalian')->name('get-info-wali-kelas');
+        Route::get('get-rekap-kehadiran-siswa', 'getRekapKehadiranSiswa')->name('get-rekap-kehadiran-siswa');
         Route::post('/assign-guru-pengganti',  'assignGuruPengganti')->name('monitoring-kbm.assign-guru-pengganti');
+        Route::post('/terima-permohonan-pergantian',  'terimaPermohonanPergantian')->name('terima-permohonan-pergantian');
     });
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -11,7 +11,8 @@ export default function MasterSiswa({
     loading,
     show,
     setShow,
-    isEdit,
+    isEdit = false,
+    setIsEdit,
     selectedSiswa,
     getSiswa,
     handleTambah,
@@ -38,7 +39,10 @@ export default function MasterSiswa({
                         <div className="">
                             <PrimaryButton
                                 className="text-xs px-3 py-1.5 rounded-xl shadow-sm"
-                                onClick={() => setShow(true)}
+                                onClick={() => {
+                                    setShow(true);
+                                    setIsEdit(false);
+                                }}
                             >
                                 + Tambah Siswa
                             </PrimaryButton>

@@ -25,6 +25,7 @@ export default function Add({
         foto: "",
         status: "active",
     });
+
     const { showAlert } = useAlert();
     const flash = usePage().props.flash;
 
@@ -84,9 +85,20 @@ export default function Add({
                 status: Siswa?.status,
             });
         } else {
-            reset();
+            setData({
+                nisn: "",
+                nama_siswa: "",
+                jenis_kelamin: "",
+                tempat_lahir: "",
+                tanggal_lahir: "",
+                alamat: "",
+                no_telp: "",
+                no_telp_orang_tua: "",
+                foto: "",
+                status: "active",
+            });
         }
-    }, [isEdit, Siswa]);
+    }, [isEdit]);
 
     const previewImage =
         data.foto instanceof File

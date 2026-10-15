@@ -8,6 +8,7 @@ import Dropdown from "@/Components/Dropdown";
 import ModalPdf from "@/Components/ModalPdf";
 
 export default function Detail({ dataKelas }) {
+    console.log(dataKelas);
     const menus = [
         {
             nama_menu: "Informasi Siswa",

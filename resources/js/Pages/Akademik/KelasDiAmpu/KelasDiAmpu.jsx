@@ -118,9 +118,17 @@ export default function KelasDiAmpu({
                                     {/* Card Header */}
                                     <div className="p-4 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
                                         <div>
-                                            <p className="text-[10px] font-semibold text-green-600 tracking-wider uppercase mb-0.5">
-                                                Ruang Kelas
-                                            </p>
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <p className="text-[10px] font-semibold text-green-600 tracking-wider uppercase">
+                                                    Ruang Kelas
+                                                </p>
+                                                {item.gurupengganti && (
+                                                    <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-amber-200">
+                                                        <i className="fa fa-user-clock text-[9px]"></i>
+                                                        Guru Pengganti
+                                                    </span>
+                                                )}
+                                            </div>
                                             <h3 className="text-sm font-bold text-gray-800 group-hover:text-green-600 transition-colors">
                                                 {item.nama_kelas}
                                             </h3>
@@ -173,7 +181,7 @@ export default function KelasDiAmpu({
                                                                     index
                                                                 }
                                                             >
-                                                                <i className="fa fa-book mr-1 text-[10]"></i>
+                                                                <i className="fa fa-book mr-1 text-[10px]"></i>
                                                                 {
                                                                     mapel.nama_mapel
                                                                 }
@@ -234,7 +242,7 @@ export default function KelasDiAmpu({
                                                 "akademik.kelas-diampu.detail",
                                                 item.kelas_id,
                                             )}
-                                            className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-3 py-1 text-xs rounded-lg hover:bg-green-600 hover:text-white transition-all font-semibold  group-hover:shadow-xs"
+                                            className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-3 py-1 text-xs rounded-lg hover:bg-green-600 hover:text-white transition-all font-semibold group-hover:shadow-xs"
                                         >
                                             Lihat Detail
                                             <svg

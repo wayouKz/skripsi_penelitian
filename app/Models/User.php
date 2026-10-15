@@ -62,7 +62,7 @@ public function role()
 
 public function guru()
 {
-    return $this->hasOne(MGuru::class, 'nip', 'nip');
+    return $this->hasOne(MGuru::class, 'id', 'guru_id');
 }
 
 }

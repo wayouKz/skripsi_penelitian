@@ -41,17 +41,32 @@ class TJadwal extends Model
         return $data;
     }
 
-    public static function jadwalKelas($kelasID, $tahunAjaran){
-        $data = TJadwal::leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
-        ->leftJoin('m_gurus', 't_list_guru_mapels.nip', '=', 'm_gurus.nip')
-        ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
-        ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-        ->where('t_list_gurus.kelas_id', $kelasID)
-        ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaran)
-        ->where('t_list_guru_mapels.nip', Auth::user()->nip)
-        ->get();
-        return $data;
-    }
+public static function jadwalKelas($kelasID, $tahunAjaran, $mapel)
+{
+    $guruId = Auth::user()->guru->id;
+
+    $data = TJadwal::select('t_jadwals.*','m_mapels.kode_mapel')
+    ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
+    ->leftJoin('m_gurus', 't_list_guru_mapels.nip', '=', 'm_gurus.nip')
+    ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
+    ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
+    ->leftJoin('t_guru_penggantis', function($join) use ($guruId) {
+        $join->on('t_jadwals.kode_jadwal', '=', 't_guru_penggantis.kode_jadwal')
+             ->where('t_guru_penggantis.guru_id_pengganti', $guruId)
+             ->where('t_guru_penggantis.status', 'diterima');
+    })
+    ->where('t_list_gurus.kelas_id', $kelasID)
+    ->where('m_mapels.kode_mapel', $mapel)
+    ->where('t_list_gurus.tahun_ajaran_id', $tahunAjaran)
+    ->where(function($query) use ($guruId) {
+        // Bisa diakses jika dia guru pengampu asli ATAU guru pengganti yang disetujui
+        $query->where('t_list_gurus.guru_id', $guruId)
+              ->orWhere('t_guru_penggantis.guru_id_pengganti', $guruId);
+    })
+    ->get();
+
+    return $data;
+}
 
 
     public static function getJadwalByGuru($guruId, $tahunAjaran){

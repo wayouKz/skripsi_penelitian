@@ -9,10 +9,7 @@ export default function Login({ status, canResetPassword, config }) {
     const [captchaKey, setCaptchaKey] = useState(Date.now());
     const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
     const [showPassword, setShowPassword] = useState(false); // State untuk Toggle Password
-    useEffect(() => {
-        // Set isCaptchaLoading ke false setelah gambar captcha selesai dimuat
-        alert("Berhasil Pulling Data");
-    }, []);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         username: "",
         password: "",

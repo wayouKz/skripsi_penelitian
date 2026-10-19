@@ -16,8 +16,8 @@ class MKelas extends Model
         return $this->hasMany(TListSiswa::class,'kelas_id','id');
     }
 
-    public function kelasAktif($tanggalFilter){
-        return $this->select(
+    public static function kelasAktif($tanggalFilter){
+        $data =  MKelas::select(
         'm_kelas.id as kelas_id',
         'm_kelas.nama_kelas',
         't_jadwals.kode_jadwal',
@@ -57,21 +57,22 @@ class MKelas extends Model
     ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
     ->orderBy('t_jadwals.jam_mulai', 'asc')
     ->get();
+    return $data;
 
     }
 
-    public function getKelas(){
-        $this->select('m_kelas.*', 'm_jurusans.nama_jurusan')
+    public static function getKelas(){
+       $data = MKelas::select('m_kelas.*', 'm_jurusans.nama_jurusan')
         ->where('status', 'active')->leftJoin('m_jurusans', 'm_kelas.jurusan_id', '=', 'm_jurusans.id');
 
         // if($request->tahun_ajaran != null){
         //     $query->where('m_kelas.tahun_ajaran_id', $request->tahun_ajaran);
         // }
-        return $this->get();
+        return $data->get();
     }
 
-    public function getSiswaKelas($tahunAjaran){
-       $data = $this->select(
+    public static function getSiswaKelas($tahunAjaran){
+       $data = MKelas::select(
         'm_kelas.id',
         'm_kelas.nama_kelas',
         'm_kelas.tingkat',

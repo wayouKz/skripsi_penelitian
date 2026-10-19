@@ -21,11 +21,9 @@ class JadwalController extends Controller
             ini_set('max_execution_time', 0);
             set_time_limit(0);
             ini_set('memory_limit', '1024M');
-
             $params = $request->all();
             $slotWaktu = $request->input('slot_waktu', []);
             $prioritasPagi = $request->input('prioritas_pagi', []);
-
             $guruMapels = DB::table('t_list_guru_mapels')
                 ->leftJoin('t_list_gurus', function ($join) use ($params) {
                     $join->on('t_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
@@ -47,7 +45,6 @@ class JadwalController extends Controller
                 ->whereNotNull('t_list_gurus.kelas_id')
                 ->distinct()
                 ->get();
-
             $guruMapels = $guruMapels->map(function ($item) use ($prioritasPagi) {
                 $item->is_prioritas_pagi = false;
                 $item->nama_guru = $item->nama_guru ?? 'None';
@@ -62,19 +59,15 @@ class JadwalController extends Controller
                 return $item;
             });
             $kelas = DB::table('m_kelas')->get();
-
             return response()->stream(function () use ($params, $guruMapels, $kelas, $prioritasPagi) {
                 ini_set('zlib.output_compression', 'Off');
                 if (function_exists('apache_setenv')) {
                     apache_setenv('no-gzip', '1');
                 }
-
                 while (ob_get_level() > 0) {
                     ob_end_flush();
                 }
-
                 flush();
-
                 try {
                     Log::info('Mulai proses Generate Jadwal (GA).', [
                         'tahun_ajaran_id' => $params['tahun_ajaran_id'] ?? null
@@ -99,7 +92,6 @@ class JadwalController extends Controller
                         ]) . "\n\n";
                         flush();
                     };
-
                     $gaEngine->onNewBest = function($generasi, $fitness, $kromosom) {
                         echo "data: " . json_encode([
                             'type' => 'new_best',
@@ -160,9 +152,7 @@ class JadwalController extends Controller
                         foreach ($chunks as $chunk) {
                             DB::table('t_jadwals')->insert($chunk);
                         }
-
                         DB::commit();
-
                         echo "data: " . json_encode([
                             'type' => 'done',
                             'message' => "Berhasil! Waktu eksekusi: $durasi detik.",
@@ -178,19 +168,16 @@ class JadwalController extends Controller
                         ]) . "\n\n";
                         flush();
                     }
-
                 } catch (\Exception $e) {
                     if (DB::transactionLevel() > 0) {
                         DB::rollBack();
                     }
-
                     $detailError = $e->getMessage() . ' di baris ' . $e->getLine() . ' pada ' . basename($e->getFile());
                     Log::error('Critical Error Generate Jadwal: ' . $e->getMessage());
 
                     echo "data: " . json_encode(['type' => 'error', 'message' => "Terjadi Kesalahan: $detailError"]) . "\n\n";
                     flush();
                 }
-
             }, 200, [
                 'Content-Type' => 'text/event-stream',
                 'Cache-Control' => 'no-cache, must-revalidate',

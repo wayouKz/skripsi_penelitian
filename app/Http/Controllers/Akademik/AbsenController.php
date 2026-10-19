@@ -90,23 +90,11 @@ class AbsenController extends Controller
             'waktu_absen'   => $tanggal,
             'waktu'             => $jam,
         ];
-
-        $cekGuruPengganti = TGuruPengganti::where('kode_jadwal', $kode_jadwal)
-        ->where('tanggal_pergantian', $tanggal)
-        ->where('guru_id_pengganti', Auth::user()->guru->id)
-        ->where('status','diterima')
-        ->first();
-
         TAbsenSiswa::insert($dataToInsert);
 
         // 4. Lakukan Bulk Insert menggunakan Model secara langsung
         TAbsenGuru::insert($dataInserGuru);
-        if($cekGuruPengganti){
-
-            $cekGuruPengganti->update([
-                'status' => 'selesai'
-                ]);
-    }
+    //
         // 5. Kembalikan Response ke Axios (React) agar alert sukses muncul
         return response()->json([
             'success' => true,

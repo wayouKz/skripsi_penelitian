@@ -443,21 +443,21 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                             <div
                                                                 key={`${kls.kode_jadwal ?? namaKelas}-${index}`}
                                                                 role="button"
-                                                                onClick={() =>
-                                                                    bermasalah &&
-                                                                    handleSelectAnomali(
-                                                                        {
-                                                                            ...kls,
-                                                                            nama_kelas:
-                                                                                namaKelas,
-                                                                            hari: selectedHari,
-                                                                        },
-                                                                    )
-                                                                }
+                                                                // onClick={() =>
+                                                                //     bermasalah &&
+                                                                //     handleSelectAnomali(
+                                                                //         {
+                                                                //             ...kls,
+                                                                //             nama_kelas:
+                                                                //                 namaKelas,
+                                                                //             hari: selectedHari,
+                                                                //         },
+                                                                //     )
+                                                                // }
                                                                 className={[
                                                                     "p-2.5 rounded-lg border transition-all duration-200",
                                                                     bermasalah
-                                                                        ? "bg-red-50 border-red-200 shadow-sm ring-1 ring-red-100 cursor-pointer hover:ring-indigo-300"
+                                                                        ? "bg-red-50 border-red-200 shadow-sm ring-1 ring-red-100  hover:ring-indigo-300"
                                                                         : "bg-white border-slate-200 hover:border-emerald-300",
                                                                     isSelected
                                                                         ? "ring-1 ring-indigo-400 border-indigo-300"
@@ -533,7 +533,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     )}
 
                                                                     {bermasalah && (
-                                                                        <p className="text-[9px] text-green-500 font-medium mt-1 flex items-center gap-1">
+                                                                        <p className="text-[9px] text-green-500 font-medium mt-1 flex items-center gap-1 hidden">
                                                                             Klik
                                                                             untuk
                                                                             analisis
@@ -558,7 +558,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 {/* ════════════════════════════════════════════
                     KANAN — AI Agent Panel
                 ════════════════════════════════════════════ */}
-                <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0">
+                <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 hidden">
                     <div className="p-3 bg-gradient-to-br from-green-900 to-green-700 text-white shadow-inner">
                         <div className="flex items-center gap-2 mb-1">
                             <i

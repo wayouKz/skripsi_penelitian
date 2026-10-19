@@ -477,8 +477,8 @@ public function getKelasAktif(Request $request)
         $hariFilter = $request->input('hari'); // Opsional: jika ingin membatasi hari tertentu
 
       $jadwalMentah = MKelas::kelasAktif($tanggalFilter);
-// 3. Kelompokkan berdasarkan nama_kelas
-$data = $jadwalMentah->groupBy('nama_kelas')->map(function ($itemsKelas) {
+    // 3. Kelompokkan berdasarkan nama_kelas
+    $data = $jadwalMentah->groupBy('nama_kelas')->map(function ($itemsKelas) {
 
     // 4. Kelompokkan lagi berdasarkan hari
     return $itemsKelas->groupBy('hari')->map(function ($itemsHari) {

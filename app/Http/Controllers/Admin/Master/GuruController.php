@@ -227,98 +227,98 @@ public function update(Request $request)
             return response()->json($json);
         }
     }
-public function mappingGuruMapel(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            $payload = $request->payload;
-            $tahunAjaran = $request->tahun_ajaran_id;
+    public function mappingGuruMapel(Request $request)
+        {
+            DB::beginTransaction();
+            try {
+                $payload = $request->payload;
+                $tahunAjaran = $request->tahun_ajaran_id;
 
-            foreach ($payload as $value) {
-                $mapel_id = $value['mapel_id'];
-                $guru_input = $value['gurus'];
+                foreach ($payload as $value) {
+                    $mapel_id = $value['mapel_id'];
+                    $guru_input = $value['gurus'];
 
-                // Array untuk menampung ID dari t_list_guru_mapels yang ada di UI
-                $pivot_dipertahankan = [];
+                    // Array untuk menampung ID dari t_list_guru_mapels yang ada di UI
+                    $pivot_dipertahankan = [];
 
-                foreach ($guru_input as $g) {
-                    $nip       = $g['guru_id'];
-                    $kelas_id  = $g['kelas_id'];
-                    $beban_jam = $g['beban_jam'];
+                    foreach ($guru_input as $g) {
+                        $nip       = $g['guru_id'];
+                        $kelas_id  = $g['kelas_id'];
+                        $beban_jam = $g['beban_jam'];
 
-                    // 1. Cari atau Buat Data Induk Penempatan Guru (t_list_gurus)
-                    $listGuru = TListGuru::firstOrCreate(
-                        [
-                            'nip'      => $nip,
-                            'kelas_id' => $kelas_id
-                        ],
-                        [
-                            'tahun_ajaran_id' => $tahunAjaran
-                        ]
-                    );
+                        // 1. Cari atau Buat Data Induk Penempatan Guru (t_list_gurus)
+                        $listGuru = TListGuru::firstOrCreate(
+                            [
+                                'nip'      => $nip,
+                                'kelas_id' => $kelas_id
+                            ],
+                            [
+                                'tahun_ajaran_id' => $tahunAjaran
+                            ]
+                        );
 
-                    // 2. Cek apakah mapping guru-mapel-kelas ini sudah ada (t_list_guru_mapels)
-                    $cekTable = TListGuruMapel::where('t_list_guru_id', $listGuru->id)
-                                ->where('mapel_id', $mapel_id)
-                                ->first();
+                        // 2. Cek apakah mapping guru-mapel-kelas ini sudah ada (t_list_guru_mapels)
+                        $cekTable = TListGuruMapel::where('t_list_guru_id', $listGuru->id)
+                                    ->where('mapel_id', $mapel_id)
+                                    ->first();
 
-                    if ($cekTable) {
-                        // Update beban jam jika sudah ada
-                        $cekTable->update([
-                            'beban_jam' => $beban_jam
-                        ]);
-                        // Catat ID pivot ini agar tidak ikut terhapus
-                        $pivot_dipertahankan[] = $cekTable->id;
-                    } else {
-                        // Simpan baru jika belum ada
-                        $baru = TListGuruMapel::create([
-                            'nip'            => $nip,
-                            't_list_guru_id' => $listGuru->id,
-                            'mapel_id'       => $mapel_id,
-                            'beban_jam'      => $beban_jam
-                        ]);
-                        $pivot_dipertahankan[] = $baru->id;
+                        if ($cekTable) {
+                            // Update beban jam jika sudah ada
+                            $cekTable->update([
+                                'beban_jam' => $beban_jam
+                            ]);
+                            // Catat ID pivot ini agar tidak ikut terhapus
+                            $pivot_dipertahankan[] = $cekTable->id;
+                        } else {
+                            // Simpan baru jika belum ada
+                            $baru = TListGuruMapel::create([
+                                'nip'            => $nip,
+                                't_list_guru_id' => $listGuru->id,
+                                'mapel_id'       => $mapel_id,
+                                'beban_jam'      => $beban_jam
+                            ]);
+                            $pivot_dipertahankan[] = $baru->id;
+                        }
+                    }
+
+                    // --- 🌟 PERBAIKAN: PROSES PENGHAPUSAN (DELETE) 🌟 ---
+
+                    // 3a. Kumpulkan ID dari t_list_guru_mapels yang AKAN DIHAPUS
+                    $queryHapus = TListGuruMapel::where('mapel_id', $mapel_id);
+
+                    if (!empty($pivot_dipertahankan)) {
+                        $queryHapus->whereNotIn('id', $pivot_dipertahankan);
+                    }
+
+                    // Ambil daftar ID-nya dalam bentuk array
+                    $idsYangAkanDihapus = $queryHapus->pluck('id');
+
+                    if ($idsYangAkanDihapus->isNotEmpty()) {
+                        // 3b. HAPUS ANAKNYA DULU DI TABEL JADWAL
+                        // Menggunakan DB::table untuk menghindari error jika model TJadwal belum di-import
+                        DB::table('t_jadwals')->whereIn('t_list_guru_mapel_id', $idsYangAkanDihapus)->delete();
+
+                        // 3c. SETELAH JADWAL AMAN, BARU HAPUS INDUKNYA
+                        TListGuruMapel::whereIn('id', $idsYangAkanDihapus)->delete();
                     }
                 }
 
-                // --- 🌟 PERBAIKAN: PROSES PENGHAPUSAN (DELETE) 🌟 ---
+                DB::commit();
 
-                // 3a. Kumpulkan ID dari t_list_guru_mapels yang AKAN DIHAPUS
-                $queryHapus = TListGuruMapel::where('mapel_id', $mapel_id);
+                return response()->json([
+                    'msg'     => 'Data mapping berhasil disinkronisasi',
+                    'success' => true
+                ]);
 
-                if (!empty($pivot_dipertahankan)) {
-                    $queryHapus->whereNotIn('id', $pivot_dipertahankan);
-                }
+            } catch (\Exception $e) {
+                DB::rollBack();
 
-                // Ambil daftar ID-nya dalam bentuk array
-                $idsYangAkanDihapus = $queryHapus->pluck('id');
-
-                if ($idsYangAkanDihapus->isNotEmpty()) {
-                    // 3b. HAPUS ANAKNYA DULU DI TABEL JADWAL
-                    // Menggunakan DB::table untuk menghindari error jika model TJadwal belum di-import
-                    DB::table('t_jadwals')->whereIn('t_list_guru_mapel_id', $idsYangAkanDihapus)->delete();
-
-                    // 3c. SETELAH JADWAL AMAN, BARU HAPUS INDUKNYA
-                    TListGuruMapel::whereIn('id', $idsYangAkanDihapus)->delete();
-                }
+                return response()->json([
+                    'msg'     => 'Gagal menyimpan data: ' . $e->getMessage(),
+                    'success' => false
+                ], 500);
             }
-
-            DB::commit();
-
-            return response()->json([
-                'msg'     => 'Data mapping berhasil disinkronisasi',
-                'success' => true
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'msg'     => 'Gagal menyimpan data: ' . $e->getMessage(),
-                'success' => false
-            ], 500);
         }
-    }
 
 public function DataGuruMapel(Request $request)
     {

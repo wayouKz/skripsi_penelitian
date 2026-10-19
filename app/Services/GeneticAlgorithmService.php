@@ -37,10 +37,10 @@ class GeneticAlgorithmService
     private $evolutionLogs = [];
     public function __construct($params, $guruMapels, $kelas, $prioritasPagi = [])
     {
-        $this->populasi = $params['populasi'] ?? 100;
-        $this->maxGenerasi = $params['generasi'] ?? 500;
-        $this->crossoverRate = $params['crossover_rate'] ?? 0.85; // Naikkan agar kombinasi gen lebih aktif
-        $this->mutationRate  = $params['mutation_rate']  ?? 0.20; //
+        $this->populasi =  100;
+        $this->maxGenerasi =  500;
+        $this->crossoverRate =  0.85; // Naikkan agar kombinasi gen lebih aktif
+        $this->mutationRate  =  0.20; //
 
         $this->prioritasPagiGuruId = $params['prioritas_pagi_guru_id'] ?? [];
         $this->prioritasPagi = $prioritasPagi;
@@ -834,10 +834,9 @@ class GeneticAlgorithmService
         // === PENYESUAIAN FORMULA AGAR FITNESS MELONJAK ===
     if ($totalPenaltiKeras > 0) {
         $fitness = round(0.50 / (1.0 + ($totalPenaltiKeras / 200.0)), 6);
-        // Log::info("KERAS BOS : " . $totalPenaltiKeras . ", TAPI ADA YANG LEMBEK BOS : " . $totalPenaltiLunak);
+
         } else {
-            // Log::info("LEMBEK BOS : " . $totalPenaltiLunak . ", TAPI ADA YANG KERAS BOS : " . $totalPenaltiKeras);
-            // Ubah pembagi dari 100.0 menjadi 400.0 agar penalti lunak tidak terlalu menjatuhkan nilai
+
             $fitness = round(0.70 + (0.30 / (1.0 + ($totalPenaltiLunak / 200.0))), 6);
         }
         return $fitness;
@@ -1213,144 +1212,144 @@ private function crossover($parent1, $parent2)
     // Ganti dengan repairKromosom agar validasi guru global ikut bekerja
     return $this->repairKromosom($child);
 }
- private function mutasi($kromosom)
-    {
-        $globalMatrixGuru = [];
-        $globalMatrixKelas = [];
-        $bentrokList = [];
+    private function mutasi($kromosom)
+        {
+            $globalMatrixGuru = [];
+            $globalMatrixKelas = [];
+            $bentrokList = [];
 
-        foreach ($kromosom as $kId => $gens) {
-            foreach ($gens as $cId => $gen) {
-                $h = $gen['hari'] ?? null;
-                $jm = $gen['jam_mulai'] ?? null;
-                $dur = $gen['durasi'] ?? 1;
-                $gId = $gen['g_id'] ?? 'none';
-                $isPenjaskes = $gen['is_penjaskes'] ?? false;
+            foreach ($kromosom as $kId => $gens) {
+                foreach ($gens as $cId => $gen) {
+                    $h = $gen['hari'] ?? null;
+                    $jm = $gen['jam_mulai'] ?? null;
+                    $dur = $gen['durasi'] ?? 1;
+                    $gId = $gen['g_id'] ?? 'none';
+                    $isPenjaskes = $gen['is_penjaskes'] ?? false;
 
-                if (!$h || !$jm) continue;
+                    if (!$h || !$jm) continue;
 
-                for ($d = 0; $d < $dur; $d++) {
-                    $jam = $jm + $d;
+                    for ($d = 0; $d < $dur; $d++) {
+                        $jam = $jm + $d;
 
-                    if (isset($globalMatrixKelas[$kId][$h][$jam])) {
-                        $bentrokList[] = ['kelas_id' => $kId, 'chunk_id' => $cId];
-                    }
-                    $globalMatrixKelas[$kId][$h][$jam] = true;
-
-                    if (!$isPenjaskes && $gId !== 'none') {
-                        if (isset($globalMatrixGuru[$gId][$h][$jam])) {
+                        if (isset($globalMatrixKelas[$kId][$h][$jam])) {
                             $bentrokList[] = ['kelas_id' => $kId, 'chunk_id' => $cId];
                         }
-                        $globalMatrixGuru[$gId][$h][$jam] = true;
-                    }
-                }
-            }
-        }
+                        $globalMatrixKelas[$kId][$h][$jam] = true;
 
-        $effectiveMutationRate = !empty($bentrokList) ? max($this->mutationRate, 0.5) : $this->mutationRate;
-
-        if ((mt_rand() / mt_getrandmax()) > $effectiveMutationRate) {
-            return $kromosom;
-        }
-
-        foreach ($kromosom as $kId => &$gens) {
-            foreach ($gens as $cId => &$gen) {
-                $isBentrok = false;
-                foreach ($bentrokList as $b) {
-                    if ($b['kelas_id'] == $kId && $b['chunk_id'] == $cId) {
-                        $isBentrok = true;
-                        break;
-                    }
-                }
-
-                if (!$isBentrok && (mt_rand() / mt_getrandmax()) > 0.05) {
-                    continue;
-                }
-
-                $dur = $gen['durasi'] ?? 1;
-                $guruId = $gen['g_id'] ?? 'none';
-                $isPenjaskes = $gen['is_penjaskes'] ?? false;
-                $hariLama = $gen['hari'] ?? null;
-                $jamLama = $gen['jam_mulai'] ?? null;
-
-                // --- CEK APAKAH GEN INI MASUK PRIORITAS PAGI ---
-                $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false);
-
-                if ($hariLama && $jamLama) {
-                    for ($d = 0; $d < $dur; $d++) {
-                        $jCek = $jamLama + $d;
-                        unset($globalMatrixKelas[$kId][$hariLama][$jCek]);
-                        if (!$isPenjaskes && $guruId !== 'none') {
-                            unset($globalMatrixGuru[$guruId][$hariLama][$jCek]);
+                        if (!$isPenjaskes && $gId !== 'none') {
+                            if (isset($globalMatrixGuru[$gId][$h][$jam])) {
+                                $bentrokList[] = ['kelas_id' => $kId, 'chunk_id' => $cId];
+                            }
+                            $globalMatrixGuru[$gId][$h][$jam] = true;
                         }
                     }
                 }
+            }
 
-                // --- TENTUKAN URUTAN HARI (JANGAN DI-ACAK JIKA PRIORITAS PAGI) ---
-                $hariList = $this->hari;
-                if (!$isPrioritasPagi) {
-                    shuffle($hariList);
-                }
+            $effectiveMutationRate = !empty($bentrokList) ? max($this->mutationRate, 0.5) : $this->mutationRate;
 
-                $slotFound = false;
-                foreach ($hariList as $hCoba) {
-                    $maxH = $this->getMaxJamInternal($hCoba);
-                    $batasMulai = $isPenjaskes ? min(3, $maxH - $dur + 1) : ($maxH - $dur + 1);
+            if ((mt_rand() / mt_getrandmax()) > $effectiveMutationRate) {
+                return $kromosom;
+            }
 
-                    for ($jCoba = 1; $jCoba <= $batasMulai; $jCoba++) {
-                        $steril = true;
+            foreach ($kromosom as $kId => &$gens) {
+                foreach ($gens as $cId => &$gen) {
+                    $isBentrok = false;
+                    foreach ($bentrokList as $b) {
+                        if ($b['kelas_id'] == $kId && $b['chunk_id'] == $cId) {
+                            $isBentrok = true;
+                            break;
+                        }
+                    }
 
+                    if (!$isBentrok && (mt_rand() / mt_getrandmax()) > 0.05) {
+                        continue;
+                    }
+
+                    $dur = $gen['durasi'] ?? 1;
+                    $guruId = $gen['g_id'] ?? 'none';
+                    $isPenjaskes = $gen['is_penjaskes'] ?? false;
+                    $hariLama = $gen['hari'] ?? null;
+                    $jamLama = $gen['jam_mulai'] ?? null;
+
+                    // --- CEK APAKAH GEN INI MASUK PRIORITAS PAGI ---
+                    $isPrioritasPagi = ($gen['prioritas_pagi'] ?? false);
+
+                    if ($hariLama && $jamLama) {
                         for ($d = 0; $d < $dur; $d++) {
-                            $jamCek = $jCoba + $d;
-
-                            if (!empty($globalMatrixKelas[$kId][$hCoba][$jamCek]) ||
-                                (!$isPenjaskes && $guruId !== 'none' && !empty($globalMatrixGuru[$guruId][$hCoba][$jamCek]))) {
-                                $steril = false;
-                                break;
+                            $jCek = $jamLama + $d;
+                            unset($globalMatrixKelas[$kId][$hariLama][$jCek]);
+                            if (!$isPenjaskes && $guruId !== 'none') {
+                                unset($globalMatrixGuru[$guruId][$hariLama][$jCek]);
                             }
                         }
+                    }
 
-                        if ($steril) {
-                            $gen['hari'] = $hCoba;
-                            $gen['jam_mulai'] = $jCoba;
-                            $slotFound = true;
-                            break 2;
+                    // --- TENTUKAN URUTAN HARI (JANGAN DI-ACAK JIKA PRIORITAS PAGI) ---
+                    $hariList = $this->hari;
+                    if (!$isPrioritasPagi) {
+                        shuffle($hariList);
+                    }
+
+                    $slotFound = false;
+                    foreach ($hariList as $hCoba) {
+                        $maxH = $this->getMaxJamInternal($hCoba);
+                        $batasMulai = $isPenjaskes ? min(3, $maxH - $dur + 1) : ($maxH - $dur + 1);
+
+                        for ($jCoba = 1; $jCoba <= $batasMulai; $jCoba++) {
+                            $steril = true;
+
+                            for ($d = 0; $d < $dur; $d++) {
+                                $jamCek = $jCoba + $d;
+
+                                if (!empty($globalMatrixKelas[$kId][$hCoba][$jamCek]) ||
+                                    (!$isPenjaskes && $guruId !== 'none' && !empty($globalMatrixGuru[$guruId][$hCoba][$jamCek]))) {
+                                    $steril = false;
+                                    break;
+                                }
+                            }
+
+                            if ($steril) {
+                                $gen['hari'] = $hCoba;
+                                $gen['jam_mulai'] = $jCoba;
+                                $slotFound = true;
+                                break 2;
+                            }
+                        }
+                    }
+
+                    if (!$slotFound) {
+                        // Jika tidak ditemukan slot steril secara natural, fallback
+                        if ($isPrioritasPagi) {
+                            // Untuk prioritas pagi, paksa ambil hari pertama dan jam paling pagi yang tersedia
+                            $hAcak = $this->hari[0] ?? $this->hari[array_rand($this->hari)];
+                            $maxH = $this->getMaxJamInternal($hAcak);
+                            $jAcak = 1; // Mulai dari jam pertama (pagi)
+                        } else {
+                            $hAcak = $this->hari[array_rand($this->hari)];
+                            $maxH = $this->getMaxJamInternal($hAcak);
+                            $jAcak = mt_rand(1, max(1, $maxH - $dur + 1));
+                        }
+
+                        $gen['hari'] = $hAcak;
+                        $gen['jam_mulai'] = $jAcak;
+                    }
+
+                    for ($d = 0; $d < $dur; $d++) {
+                        $jCek = $gen['jam_mulai'] + $d;
+                        $globalMatrixKelas[$kId][$gen['hari']][$jCek] = true;
+                        if (!$isPenjaskes && $guruId !== 'none') {
+                            $globalMatrixGuru[$guruId][$gen['hari']][$jCek] = true;
                         }
                     }
                 }
-
-                if (!$slotFound) {
-                    // Jika tidak ditemukan slot steril secara natural, fallback
-                    if ($isPrioritasPagi) {
-                        // Untuk prioritas pagi, paksa ambil hari pertama dan jam paling pagi yang tersedia
-                        $hAcak = $this->hari[0] ?? $this->hari[array_rand($this->hari)];
-                        $maxH = $this->getMaxJamInternal($hAcak);
-                        $jAcak = 1; // Mulai dari jam pertama (pagi)
-                    } else {
-                        $hAcak = $this->hari[array_rand($this->hari)];
-                        $maxH = $this->getMaxJamInternal($hAcak);
-                        $jAcak = mt_rand(1, max(1, $maxH - $dur + 1));
-                    }
-
-                    $gen['hari'] = $hAcak;
-                    $gen['jam_mulai'] = $jAcak;
-                }
-
-                for ($d = 0; $d < $dur; $d++) {
-                    $jCek = $gen['jam_mulai'] + $d;
-                    $globalMatrixKelas[$kId][$gen['hari']][$jCek] = true;
-                    if (!$isPenjaskes && $guruId !== 'none') {
-                        $globalMatrixGuru[$guruId][$gen['hari']][$jCek] = true;
-                    }
-                }
             }
-        }
-        unset($gen, $gens);
+            unset($gen, $gens);
 
-        // PADATKAN KELAS SETELAH MUTASI AGAR TIDAK ADA OVERLAP
-        $kromosom = $this->padatkanJadwalHarian($kromosom);
+            // PADATKAN KELAS SETELAH MUTASI AGAR TIDAK ADA OVERLAP
+            $kromosom = $this->padatkanJadwalHarian($kromosom);
 
-        return $this->fixInternalClassOverlaps($kromosom);
+            return $this->fixInternalClassOverlaps($kromosom);
     }
   private function smartMergeMapelKepecah($kromosom)
     {

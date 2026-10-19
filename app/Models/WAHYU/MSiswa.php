@@ -8,8 +8,9 @@ class MSiswa extends Model
 {
     protected $guarded = ['id'];
 
-    public function getSiswa(){
-        $this->where('status', 'active');
-        return $this->get();
+    public static function getSiswa(){
+        $builder = MSiswa::where('status', 'active');
+        $data = $builder->get();
+        return $data;
     }
 }

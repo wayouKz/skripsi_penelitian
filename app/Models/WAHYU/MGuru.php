@@ -23,8 +23,8 @@ class MGuru extends Model
         return $this->hasOne(MKelas::class, 'id_wali_kelas', 'id');
     }
 
-    public function listGuru(){
-     $data =  $this->select(
+    public static function listGuru(){
+     $data =  MGuru::select(
         'm_gurus.id',
         'm_gurus.nama_guru',
         'm_gurus.nip',

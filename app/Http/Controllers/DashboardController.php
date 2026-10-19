@@ -27,7 +27,7 @@ class DashboardController extends Controller
         $Kelas = MKelas::where('status','active')->count();
         $Mapel = MMapel::where('status','active')->count();
 
-        $GuruPergantian = $this->getGuruPengganti(request());
+        $GuruPergantian = $this->getGuruPengganti();
         $total = [
             'Guru' => $Guru,
             'Siswa' => $Siswa,
@@ -123,7 +123,7 @@ $guruPengganti = DB::table('t_guru_penggantis')
     ->leftJoin('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
     ->leftJoin('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
     ->where('t_guru_penggantis.guru_id_pengganti', Auth::user()->guru->id ?? null)
-    ->whereDate('t_guru_penggantis.tanggal_pergantian', $tanggal)
+    ->whereDate('t_guru_penggantis.tanggal_pergantian', $tanggal )
     // Hapus kolom jam dari groupBy agar data teragregasi menjadi 1 baris per jadwal
     ->groupBy(
         't_guru_penggantis.id',

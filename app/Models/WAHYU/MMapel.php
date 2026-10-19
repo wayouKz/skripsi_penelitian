@@ -13,8 +13,8 @@ class MMapel extends Model
         return $this->hasMany(TListGuruMapel::class, 'mapel_id', 'id');
     }
 
-    public  function mapGuruMapel($tahunAjaranId){
-       $data =  $this->leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
+    public static function mapGuruMapel($tahunAjaranId){
+       $data = MMapel::leftJoin('t_list_guru_mapels', 'm_mapels.id', '=', 't_list_guru_mapels.mapel_id')
     ->leftJoin('t_list_gurus', function ($join) use ($tahunAjaranId) {
         // PERBAIKAN 1: Join berdasarkan NIP DAN KELAS ID agar tidak cross-join (ganda)
         $join->on('t_list_guru_mapels.guru_id', '=', 't_list_gurus.guru_id');

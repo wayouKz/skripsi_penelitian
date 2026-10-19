@@ -92,6 +92,7 @@ class Pdf extends Controller
         $kelas_id = $request->input('kelas_id');
         $tahunAjaran_id = $request->input('tahun_ajaran_id');
         $namaTahunAjaran = DB::table('m_tahun_ajarans')->where('id', $request->tahun_ajaran_id)->first();
+        // dd(Auth::user()->nip);
 $daftarAbsenSiswa = DB::table('t_list_siswas')
     ->where('t_list_siswas.kelas_id', $kelas_id)
     ->where('t_list_siswas.tahun_ajaran_id', $tahunAjaran_id)
@@ -103,11 +104,11 @@ $daftarAbsenSiswa = DB::table('t_list_siswas')
     ->leftJoin('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
     ->leftJoin('m_mapels', 't_list_guru_mapels.mapel_id', '=', 'm_mapels.id')
     ->leftJoin('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
-    ->leftJoin('m_gurus', 't_list_gurus.nip', '=', 'm_gurus.nip')
+    ->leftJoin('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
     ->leftJoin('m_kelas', 't_list_siswas.kelas_id', '=', 'm_kelas.id')
     ->leftJoin('m_siswas', 't_list_siswas.siswa_id', '=', 'm_siswas.id')
     ->leftJoin('m_tahun_ajarans', 't_list_siswas.tahun_ajaran_id', '=', 'm_tahun_ajarans.id')
-    ->where('t_list_guru_mapels.nip', Auth::user()->nip)
+    ->where('t_list_guru_mapels.guru_id', Auth::user()->guru->id)
     ->select(
         't_list_siswas.siswa_id',
         'm_siswas.nisn',

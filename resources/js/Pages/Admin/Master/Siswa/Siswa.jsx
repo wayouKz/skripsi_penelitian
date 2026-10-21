@@ -74,7 +74,7 @@ export default function Siswa() {
             header: "Jenis Kelamin",
             render: (row) =>
                 row.jenis_kelamin && row.jenis_kelamin === "Laki-laki" ? (
-                    <span className="inline-flex items-center p-1 justify-center bg-gradient-to-br from-green-400 to-green-600 rounded-full text-xs font-semibold text-white shadow-sm">
+                    <span className="inline-flex items-center p-1 justify-center bg-gradient-to-br from-primary-400 to-primary-600 rounded-full text-xs font-semibold text-white shadow-sm">
                         {row.jenis_kelamin}
                     </span>
                 ) : (
@@ -156,7 +156,7 @@ export default function Siswa() {
             header: "Nisn",
             render: (row) => (
                 <p
-                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-green-400 to-green-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
+                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-primary-400 to-primary-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
                 >
                     {row.nisn || "Kosong"}
                 </p>
@@ -292,7 +292,7 @@ export default function Siswa() {
             header: "Nisn",
             render: (row) => (
                 <p
-                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-green-400 to-green-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
+                    className={`inline-flex items-center p-1 justify-center bg-gradient-to-br ${row.nisn ? "from-primary-400 to-primary-600" : "from-red-400 to-red-600"} rounded-full text-xs font-semibold text-white shadow-sm`}
                 >
                     {row.nisn || "Belum Ada"}
                 </p>

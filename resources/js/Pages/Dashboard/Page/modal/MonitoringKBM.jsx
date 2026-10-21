@@ -319,8 +319,8 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                 Filter Hari:
                             </h3>
                             {selectedHari === getHariIni() && (
-                                <span className="flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span className="flex items-center gap-1 bg-primary-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
                                     Hari Ini ({selectedTanggal})
                                 </span>
                             )}
@@ -352,7 +352,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                         }}
                                         className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all flex flex-col items-center ${
                                             isSelected
-                                                ? "bg-emerald-600 text-white shadow-sm"
+                                                ? "bg-primary-600 text-white shadow-sm"
                                                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                                         }`}
                                     >
@@ -514,7 +514,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                                     </span>
                                                                                     {kls.status_pergantian ===
                                                                                     "selesai" ? (
-                                                                                        <i className="fa-solid fa-check ml-1 text-green-600"></i>
+                                                                                        <i className="fa-solid fa-check ml-1 text-primary-600"></i>
                                                                                     ) : (
                                                                                         <i className="fa-solid fa-clock-rotate-left ml-1 animate-spin"></i>
                                                                                     )}
@@ -533,7 +533,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     )}
 
                                                                     {bermasalah && (
-                                                                        <p className="text-[9px] text-green-500 font-medium mt-1 flex items-center gap-1 hidden">
+                                                                        <p className="text-[9px] text-primary-500 font-medium mt-1 flex items-center gap-1 hidden">
                                                                             Klik
                                                                             untuk
                                                                             analisis
@@ -559,7 +559,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                     KANAN — AI Agent Panel
                 ════════════════════════════════════════════ */}
                 <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 hidden">
-                    <div className="p-3 bg-gradient-to-br from-green-900 to-green-700 text-white shadow-inner">
+                    <div className="p-3 bg-gradient-to-br from-primary-900 to-primary-700 text-white shadow-inner">
                         <div className="flex items-center gap-2 mb-1">
                             <i
                                 className={`fa-solid fa-robot text-lg text-indigo-300 ${isAnalyzing ? "fa-spin" : "animate-pulse"}`}
@@ -579,7 +579,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                         {anomaliList.length === 0 &&
                             !isAnalyzing &&
                             !isLoading && (
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
+                                <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 flex items-center gap-2">
                                     <i className="fa-solid fa-circle-check text-emerald-500 text-base shrink-0"></i>
                                     <div>
                                         <h4 className="text-xs font-bold text-emerald-800">

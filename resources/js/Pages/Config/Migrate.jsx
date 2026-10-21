@@ -97,7 +97,7 @@ export default function Migrate() {
                 {loading ? (
                     <div className="flex justify-center mb-5">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-emerald-100 rounded-full animate-ping opacity-75"></div>
+                            <div className="absolute inset-0 bg-primary-100 rounded-full animate-ping opacity-75"></div>
                             <RefreshCw
                                 size={50}
                                 className="text-emerald-600 animate-spin relative z-10"
@@ -173,7 +173,7 @@ export default function Migrate() {
                 {before && !loading && (
                     <button
                         onClick={runMigration}
-                        className="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-xl shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all focus:ring-4 focus:ring-emerald-500/30 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all focus:ring-4 focus:ring-emerald-500/30 flex items-center justify-center gap-2"
                     >
                         <Terminal size={18} />
                         Jalankan Instalasi
@@ -184,7 +184,7 @@ export default function Migrate() {
                 {loading && (
                     <div className="flex flex-col gap-2">
                         <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden border border-gray-200">
-                            <div className="h-full bg-emerald-600 animate-pulse w-full rounded-full transition-all"></div>
+                            <div className="h-full bg-primary-600 animate-pulse w-full rounded-full transition-all"></div>
                         </div>
                         <span className="text-right text-[10px] text-gray-400 font-medium animate-pulse">
                             Memproses data...

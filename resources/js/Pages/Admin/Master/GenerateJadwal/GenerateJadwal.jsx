@@ -214,8 +214,8 @@ export default function GenerateJadwal() {
                 )} */}
 
                 <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-8 min-h-[500px] w-full">
-                    <div className="relative mb-2 overflow-hidden bg-gradient-to-br from-green-50 to-white border border-green-100 p-4 rounded-xl shadow-sm">
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-100 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
+                    <div className="relative mb-2 overflow-hidden bg-gradient-to-br from-primary-50 to-white border border-primary-100 p-4 rounded-xl shadow-sm">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-100 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between relative z-10">
                             <div>
                                 <h3 className="text-xs font-bold text-gray-900 mb-0.5">
@@ -306,7 +306,7 @@ export default function GenerateJadwal() {
                                     type="button"
                                     onClick={setActiveTab.bind(null, "history")}
                                     className={
-                                        "py-2 px-2 bg-green-500 text-xs text-white rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 " +
+                                        "py-2 px-2 bg-primary-500 text-xs text-white rounded-lg hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-300 " +
                                         (activeTab === "history"
                                             ? "hidden"
                                             : "")
@@ -368,7 +368,7 @@ export default function GenerateJadwal() {
                     )}
                     {activeTab === "hasil" && (
                         <div className="space-y-6 text-center py-20 animate-in zoom-in-95 duration-500">
-                            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
+                            <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
                                 <CheckCircle2
                                     className="text-emerald-500"
                                     size={56}
@@ -404,7 +404,7 @@ export default function GenerateJadwal() {
                         type="button"
                         className="flex items-center gap-2.5 bg-white  text-black px-4 py-2.5 rounded-2xl shadow-lg border shadow-xl border-secondary-300 text-xs font-medium transition-all cursor-pointer"
                     >
-                        <i className="fa fa-spinner fa-spin text-green-400 text-[12px]"></i>
+                        <i className="fa fa-spinner fa-spin text-primary-400 text-[12px]"></i>
                         <div className="flex flex-col text-left">
                             <span className="font-bold">
                                 Memproses Penjadwalan...

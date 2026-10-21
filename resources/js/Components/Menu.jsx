@@ -20,7 +20,7 @@ export default function Menu({ menu, setMenu, menus }) {
                                     type="button"
                                     className={`w-full text-center md:text-left flex items-center justify-between px-3 py-2 rounded-lg transition-all duration-200 ease-in-out whitespace-nowrap ${
                                         isActive
-                                            ? "bg-green-50 text-green-700 font-semibold shadow-xs ring-1 ring-green-500/20"
+                                            ? "bg-primary-50 text-primary-700 font-semibold shadow-xs ring-1 ring-primary-500/20"
                                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                                     }`}
                                 >
@@ -30,7 +30,7 @@ export default function Menu({ menu, setMenu, menus }) {
 
                                     {/* Indikator titik kecil di desktop saat menu aktif */}
                                     {isActive && (
-                                        <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-green-600 shadow-xs"></span>
+                                        <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-primary-600 shadow-xs"></span>
                                     )}
                                 </button>
                             </li>

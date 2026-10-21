@@ -27,13 +27,13 @@ export default function Edit({ mustVerifyEmail, status }) {
 
             <div className="mx-auto max-w-5xl px-3 sm:px-4 lg:px-6">
                 {/* Header */}
-                <div className="rounded-2xl bg-gradient-to-r from-green-600 to-green-500 p-5 text-white shadow-md">
+                <div className="rounded-2xl bg-gradient-to-r from-primary-600 to-primary-500 p-5 text-white shadow-md">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-xl font-bold">
                                 Pengaturan Akun
                             </h1>
-                            <p className="mt-1 text-xs text-green-100">
+                            <p className="mt-1 text-xs text-primary-100">
                                 Kelola informasi profil, keamanan akun, dan
                                 lainnya.
                             </p>
@@ -55,7 +55,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                                     activeTab === tab.id
                                         ? tab.id === "delete"
                                             ? "bg-red-500 text-white shadow-xs"
-                                            : "bg-green-600 text-white shadow-xs"
+                                            : "bg-primary-600 text-white shadow-xs"
                                         : "text-gray-600 hover:bg-gray-100"
                                 }`}
                             >
@@ -75,8 +75,8 @@ export default function Edit({ mustVerifyEmail, status }) {
                         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xs">
                             <div className="border-b border-gray-100 px-4 py-3.5">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100">
-                                        <i className="fa-solid fa-user text-green-600 text-xs"></i>
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-100">
+                                        <i className="fa-solid fa-user text-primary-600 text-xs"></i>
                                     </div>
                                     <div>
                                         <h2 className="text-sm font-semibold text-gray-800">

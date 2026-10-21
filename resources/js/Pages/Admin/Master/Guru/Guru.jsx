@@ -313,7 +313,7 @@ export default function Guru() {
                 render: (row) => (
                     <button
                         type="button"
-                        className="text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 p-2 rounded-md transition-colors"
+                        className="text-primary-600 hover:text-primary-900 bg-primary-50 hover:bg-primary-100 p-2 rounded-md transition-colors"
                         onClick={() =>
                             setModal({
                                 show: true,
@@ -494,7 +494,7 @@ export default function Guru() {
                                                         className={`text-xs font-semibold ${
                                                             option.status ===
                                                             "Aktif"
-                                                                ? "text-green-600"
+                                                                ? "text-primary-600"
                                                                 : "text-gray-500"
                                                         }`}
                                                     >
@@ -564,7 +564,7 @@ export default function Guru() {
                         </h2>
                         <p className="text-sm text-gray-500 font-medium mt-1">
                             {modal.data?.mapel}{" "}
-                            <span className="text-teal-600 font-bold">
+                            <span className="text-primary-600 font-bold">
                                 ({modal.data?.kode_mapel})
                             </span>
                         </p>
@@ -622,7 +622,7 @@ export default function Guru() {
                                                     <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
                                                         Total Jam
                                                     </p>
-                                                    <span className="text-lg font-black text-teal-600">
+                                                    <span className="text-lg font-black text-primary-600">
                                                         {totalJam}
                                                     </span>
                                                 </div>
@@ -645,13 +645,13 @@ export default function Guru() {
                                                     {g.mengajar.map((item) => (
                                                         <tr
                                                             key={item.id}
-                                                            className="hover:bg-teal-50/30 transition-colors"
+                                                            className="hover:bg-primary-50/30 transition-colors"
                                                         >
                                                             <td className="px-5 py-3 font-semibold text-gray-700">
                                                                 {item.kelas}
                                                             </td>
                                                             <td className="px-5 py-3 text-right font-mono text-gray-600">
-                                                                <span className="bg-teal-100 text-teal-700 px-2 py-1 rounded text-xs font-bold">
+                                                                <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs font-bold">
                                                                     {
                                                                         item.beban_jam
                                                                     }{" "}

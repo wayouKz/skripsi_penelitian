@@ -218,7 +218,7 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                             />
                         )}
 
@@ -230,7 +230,7 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                             />
                         )}
 
@@ -241,7 +241,7 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                             >
                                 <option value="">Pilih Jenis Kelamin</option>
                                 {field.options.map((item, i) => (
@@ -261,13 +261,13 @@ export default function Add({
                                 onChange={(e) =>
                                     setData(field.name, e.target.value)
                                 }
-                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                                className="w-full rounded-xl border border-gray-300 px-3 py-1.5 text-xs focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                             />
                         )}
 
                         {/* PHONE */}
                         {field.type === "phone" && (
-                            <div className="flex rounded-xl border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-green-500">
+                            <div className="flex rounded-xl border border-gray-300 overflow-hidden focus-within:ring-2 focus-within:ring-primary-500">
                                 <div className="px-2.5 bg-gray-100 flex items-center text-xs text-gray-500 border-r">
                                     +62
                                 </div>

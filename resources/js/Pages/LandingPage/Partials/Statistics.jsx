@@ -36,7 +36,7 @@ export default function Statistics({
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-50 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-50 text-xs font-semibold text-emerald-700">
                     {i + 1}
                 </span>
             ),
@@ -51,7 +51,7 @@ export default function Statistics({
                         className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-100"
                     />
                 ) : (
-                    <span className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
+                    <span className="w-9 h-9 rounded-full bg-primary-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
                         {(row.nama_siswa || "?").charAt(0).toUpperCase()}
                     </span>
                 ),
@@ -81,7 +81,7 @@ export default function Statistics({
             header: "Jenis Kelamin",
             render: (row) =>
                 row.jenis_kelamin === "Laki-laki" ? (
-                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-emerald-800">
                         {row.jenis_kelamin}
                     </span>
                 ) : row.jenis_kelamin === "Perempuan" ? (
@@ -131,7 +131,7 @@ export default function Statistics({
                             className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-100"
                         />
                     ) : (
-                        <span className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
+                        <span className="w-9 h-9 rounded-full bg-primary-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
                             {(row.nama_guru || "?").charAt(0).toUpperCase()}
                         </span>
                     ),
@@ -164,7 +164,7 @@ export default function Statistics({
                 {STATS.map((s) => (
                     <Reveal
                         key={s.label}
-                        className="py-8 px-5 text-center bg-white rounded-2xl border border-emerald-200 shadow-[0_12px_30px_-18px_rgba(5,150,105,0.45)]"
+                        className="py-8 px-5 text-center bg-white rounded-2xl border border-primary-200 shadow-[0_12px_30px_-18px_rgba(5,150,105,0.45)]"
                     >
                         <div className="font-serif-display text-4xl md:text-[46px] text-emerald-700 font-semibold">
                             <Counter
@@ -184,7 +184,7 @@ export default function Statistics({
             <div className="mt-10">
                 <div
                     role="tablist"
-                    className="flex w-full md:inline-flex md:w-auto gap-1 p-1 rounded-xl bg-white border border-emerald-200 shadow-sm overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    className="flex w-full md:inline-flex md:w-auto gap-1 p-1 rounded-xl bg-white border border-primary-200 shadow-sm overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 >
                     {TABS.map((tab) => (
                         <button
@@ -194,8 +194,8 @@ export default function Statistics({
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex-1 md:flex-none whitespace-nowrap px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
                                 activeTab === tab.id
-                                    ? "bg-emerald-600 text-white shadow"
-                                    : "text-emerald-900/70 hover:text-emerald-900 hover:bg-emerald-50"
+                                    ? "bg-primary-600 text-white shadow"
+                                    : "text-emerald-900/70 hover:text-emerald-900 hover:bg-primary-50"
                             }`}
                         >
                             {tab.label}
@@ -210,7 +210,7 @@ export default function Statistics({
                     <h3 className="text-xl font-serif-display text-emerald-900 mb-4">
                         {TABS.find((t) => t.id === activeTab)?.label}
                     </h3>
-                    <div className="bg-white rounded-2xl p-5 border border-emerald-200 shadow-[0_20px_40px_-24px_rgba(5,150,105,0.4)] overflow-x-auto">
+                    <div className="bg-white rounded-2xl p-5 border border-primary-200 shadow-[0_20px_40px_-24px_rgba(5,150,105,0.4)] overflow-x-auto">
                         {activeTab === "siswa" && (
                             <DataTable
                                 columns={columnsSiswa}

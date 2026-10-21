@@ -40,7 +40,7 @@ export default function Proses({
                 {/* Header */}
                 <div className="flex items-center justify-between py-10">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center border border-emerald-100 shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-primary-50 flex items-center justify-center border border-emerald-100 shrink-0">
                             {isComplete ? (
                                 <svg
                                     className="w-4 h-4 text-emerald-600"
@@ -101,7 +101,7 @@ export default function Proses({
                 <div className="space-y-1.5">
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                         <div
-                            className="bg-emerald-600 h-full rounded-full transition-all duration-300 ease-out"
+                            className="bg-primary-600 h-full rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${progress}%` }}
                         ></div>
                     </div>
@@ -119,7 +119,7 @@ export default function Proses({
                             setActiveTab("konfigurasi");
                         }}
                         type="button"
-                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-xl text-[11px] transition-all shadow-sm cursor-pointer"
+                        className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-xl text-[11px] transition-all shadow-sm cursor-pointer"
                     >
                         <i
                             className={`fa ${

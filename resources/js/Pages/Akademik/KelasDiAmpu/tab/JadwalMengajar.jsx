@@ -165,7 +165,7 @@ export default function JadwalMengajar({ dataKelas }) {
             {/* Header & Filter Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 border-b border-gray-100 bg-white">
                 <div className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shadow-xs border border-green-100">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center shadow-xs border border-primary-100">
                         <i className="fa fa-calendar-alt text-base"></i>
                     </div>
                     <div>
@@ -205,11 +205,11 @@ export default function JadwalMengajar({ dataKelas }) {
             {/* Content Section */}
             {loadingJadwal ? (
                 <div className="flex justify-center items-center py-16">
-                    <i className="fa fa-spinner fa-spin text-2xl text-green-500"></i>
+                    <i className="fa fa-spinner fa-spin text-2xl text-primary-500"></i>
                 </div>
             ) : daftarJam.length === 0 || filteredJadwal.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50/50 my-4 mx-6 rounded-2xl border border-dashed border-gray-200">
-                    <div className="w-14 h-14 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-3 text-xl shadow-inner">
+                    <div className="w-14 h-14 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center mb-3 text-xl shadow-inner">
                         <i className="fa fa-calendar-times"></i>
                     </div>
                     <h4 className="text-gray-800 font-bold text-sm mb-1">
@@ -279,7 +279,7 @@ export default function JadwalMengajar({ dataKelas }) {
                                                     className="p-2 border-r border-gray-200 text-center align-middle"
                                                 >
                                                     {matchItem ? (
-                                                        <div className="p-2.5 bg-white border border-green-200 rounded-xl shadow-2xs hover:shadow-md transition-all flex flex-col justify-center min-h-[70px]">
+                                                        <div className="p-2.5 bg-white border border-primary-200 rounded-xl shadow-2xs hover:shadow-md transition-all flex flex-col justify-center min-h-[70px]">
                                                             <div className="font-mono text-[10px] text-gray-400 mb-1">
                                                                 {matchItem.jam_mulai.substring(
                                                                     0,

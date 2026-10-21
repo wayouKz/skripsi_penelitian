@@ -30,13 +30,13 @@ export default function HistoryJadwal({
             "
             >
                 <button
-                    className="text-sm font-semibold text-white bg-green-600 rounded-lg py-1 px-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                    className="text-sm font-semibold text-white bg-primary-600 rounded-lg py-1 px-2 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-300"
                     onClick={() => setActiveTab("konfigurasi")}
                 >
                     <i className="fa fa-arrow-left mr-2"></i> Kembali
                 </button>
                 <h3 className="text-sm font-extrabold text-gray-800 flex items-center gap-1">
-                    <History className="text-green-600" size={18} /> Riwayat
+                    <History className="text-primary-600" size={18} /> Riwayat
                     Jadwal Aktif
                 </h3>
             </div>

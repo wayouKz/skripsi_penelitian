@@ -92,7 +92,7 @@ export default function Add({
                             errors.tahun_ajaran
                                 ? "border-red-500"
                                 : "border-gray-300"
-                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-xs`}
+                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-xs`}
                     >
                         <option value="">[Pilih Tahun]</option>
                         {ambilTahun().map((tahun, index) => (
@@ -122,7 +122,7 @@ export default function Add({
                             errors.semester
                                 ? "border-red-500"
                                 : "border-gray-300"
-                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-xs`}
+                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-xs`}
                     >
                         <option value="">[Pilih Semester]</option>
                         <option value="ganjil">Ganjil</option>

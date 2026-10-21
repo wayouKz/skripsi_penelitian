@@ -416,7 +416,7 @@ export default function Configurasi({
                                     </p>
                                 </div>
                             </div>
-                            <span className="text-[10px] font-black tracking-wider bg-green-100 text-green-700 px-2.5 py-1 rounded-lg border border-green-200 shrink-0">
+                            <span className="text-[10px] font-black tracking-wider bg-primary-100 text-primary-700 px-2.5 py-1 rounded-lg border border-primary-200 shrink-0">
                                 {selectedPrioritas?.length || 0} KELAS DIPILIH
                             </span>
                         </div>
@@ -431,7 +431,7 @@ export default function Configurasi({
                                 placeholder="Cari Mata Pelajaran, Kelas, atau Guru..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border-gray-300 focus:ring-2 focus:ring-green-500 bg-gray-50 font-medium placeholder:text-gray-400"
+                                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border-gray-300 focus:ring-2 focus:ring-primary-500 bg-gray-50 font-medium placeholder:text-gray-400"
                             />
 
                             {/* Tombol Filter Mapel (Flex Row Layout) */}
@@ -501,12 +501,12 @@ export default function Configurasi({
                                         key={mapelObj.id}
                                         className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3"
                                     >
-                                        <div className="flex items-center gap-2 bg-green-50/80 px-3 py-2 border-b border-green-100">
+                                        <div className="flex items-center gap-2 bg-primary-50/80 px-3 py-2 border-b border-primary-100">
                                             <Library
                                                 size={14}
-                                                className="text-green-600"
+                                                className="text-primary-600"
                                             />
-                                            <span className="text-[11px] font-black text-green-800 uppercase tracking-wider">
+                                            <span className="text-[11px] font-black text-primary-800 uppercase tracking-wider">
                                                 {mapelObj.mapel}
                                             </span>
                                         </div>
@@ -546,13 +546,13 @@ export default function Configurasi({
                                                                         }
                                                                         className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[11px] cursor-pointer transition-all ${
                                                                             isChecked
-                                                                                ? "bg-green-100 border-green-300 text-green-800 font-bold shadow-sm"
-                                                                                : "bg-white border-gray-200 text-gray-600 hover:border-green-300 hover:bg-green-50/30"
+                                                                                ? "bg-primary-100 border-primary-300 text-primary-800 font-bold shadow-sm"
+                                                                                : "bg-white border-gray-200 text-gray-600 hover:border-primary-300 hover:bg-primary-50/30"
                                                                         }`}
                                                                     >
                                                                         <input
                                                                             type="checkbox"
-                                                                            className="w-3 h-3 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+                                                                            className="w-3 h-3 text-primary-600 border-gray-300 rounded focus:ring-primary-500 cursor-pointer"
                                                                             checked={
                                                                                 isChecked ||
                                                                                 false
@@ -602,7 +602,7 @@ export default function Configurasi({
                                     listMapelGuru.length === 0 ||
                                     !selectedTahunAjaran
                                         ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
-                                        : "bg-green-600 hover:bg-green-700 hover:-translate-y-0.5 hover:shadow-green-200 text-white cursor-pointer"
+                                        : "bg-primary-600 hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-primary-200 text-white cursor-pointer"
                                 }`}
                             >
                                 <Play size={14} fill="currentColor" />

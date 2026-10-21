@@ -11,9 +11,9 @@ export default function DraggableSiswa({ siswa }) {
             {...listeners}
             {...attributes}
             style={{ opacity: isDragging ? 0.3 : 1 }}
-            className={`flex items-center gap-3 p-2.5 rounded-xl border ${isDragging ? "bg-gray-50 border-dashed border-gray-300 shadow-inner" : "bg-white border-gray-200 shadow-sm hover:border-green-300 hover:shadow-md cursor-grab transition-all duration-200"}`}
+            className={`flex items-center gap-3 p-2.5 rounded-xl border ${isDragging ? "bg-gray-50 border-dashed border-gray-300 shadow-inner" : "bg-white border-gray-200 shadow-sm hover:border-primary-300 hover:shadow-md cursor-grab transition-all duration-200"}`}
         >
-            <span className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-green-100 to-green-200 rounded-full text-xs font-bold text-green-700 shadow-sm">
+            <span className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full text-xs font-bold text-primary-700 shadow-sm">
                 {siswa.label
                     .split(" ")
                     .map((k) => k.charAt(0))

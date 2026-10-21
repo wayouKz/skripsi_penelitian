@@ -46,7 +46,7 @@ export default function Switch({
                         inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition
                         ${
                             checked
-                                ? "bg-green-500 text-white"
+                                ? "bg-primary-500 text-white"
                                 : "bg-gray-100 text-gray-600"
                         }
                         ${
@@ -93,7 +93,7 @@ export default function Switch({
                 onClick={handleToggle}
                 className={`
                     relative inline-flex h-6 w-11 items-center rounded-full transition
-                    ${checked ? "bg-green-500" : "bg-gray-300"}
+                    ${checked ? "bg-primary-500" : "bg-gray-300"}
                     ${isDisabled ? "cursor-not-allowed opacity-50" : ""}
                 `}
             >

@@ -51,7 +51,7 @@ export default function JadwalMengajarAnda({
                         className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden animate-pulse"
                     >
                         {/* Header Skeleton */}
-                        <div className="bg-green-600/60 px-6 py-4 flex items-center justify-between">
+                        <div className="bg-primary-600/60 px-6 py-4 flex items-center justify-between">
                             <div className="h-6 bg-white/40 rounded w-48"></div>
                             <div className="h-6 bg-white/40 rounded-full w-32"></div>
                         </div>
@@ -59,17 +59,17 @@ export default function JadwalMengajarAnda({
                         {/* Table Skeleton */}
                         <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full text-sm text-left border-collapse">
-                                <thead className="bg-green-50 border-b border-green-100">
+                                <thead className="bg-primary-50 border-b border-primary-100">
                                     <tr>
-                                        <th className="px-4 py-3 text-center w-32 border-r border-green-100">
-                                            <div className="h-4 bg-green-200 rounded w-16 mx-auto"></div>
+                                        <th className="px-4 py-3 text-center w-32 border-r border-primary-100">
+                                            <div className="h-4 bg-primary-200 rounded w-16 mx-auto"></div>
                                         </th>
                                         {daysPlaceholder.map((day) => (
                                             <th
                                                 key={day}
-                                                className="px-4 py-3 text-center border-r border-green-100 min-w-[200px]"
+                                                className="px-4 py-3 text-center border-r border-primary-100 min-w-[200px]"
                                             >
-                                                <div className="h-4 bg-green-200 rounded w-20 mx-auto"></div>
+                                                <div className="h-4 bg-primary-200 rounded w-20 mx-auto"></div>
                                             </th>
                                         ))}
                                     </tr>

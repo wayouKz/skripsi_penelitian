@@ -125,7 +125,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                             }}
                             className={`p-4 border-b cursor-pointer hover:bg-gray-50 ${
                                 selectedMenu?.id === menu.id
-                                    ? "bg-emerald-50"
+                                    ? "bg-primary-50"
                                     : ""
                             }`}
                         >
@@ -194,7 +194,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                             </button>
                                             <button
                                                 onClick={saveEdit}
-                                                className="bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm"
+                                                className="bg-primary-600 text-white px-3 py-2 rounded-lg text-sm"
                                             >
                                                 Simpan
                                             </button>
@@ -372,7 +372,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                         className={`cursor-pointer p-4 rounded-lg border flex items-center justify-center transition
                                             ${
                                                 isSelected
-                                                    ? "bg-emerald-50 border-emerald-500 text-emerald-600"
+                                                    ? "bg-primary-50 border-emerald-500 text-emerald-600"
                                                     : "hover:bg-gray-50"
                                             }`}
                                     >

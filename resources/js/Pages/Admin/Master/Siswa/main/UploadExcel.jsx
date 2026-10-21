@@ -196,7 +196,7 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
     return (
         <div className="p-2 space-y-2">
             <label className="text-sm font-bold text-gray-700 whitespace-nowrap">
-                <i className="fa fa-calendar-alt mr-2 text-green-500"></i>
+                <i className="fa fa-calendar-alt mr-2 text-primary-500"></i>
                 Tahun Ajaran:
             </label>
             <div className="w-full ">
@@ -231,7 +231,7 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
                         className="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
                         <svg
-                            className="w-12 h-12 text-green-600 mb-3"
+                            className="w-12 h-12 text-primary-600 mb-3"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -261,7 +261,7 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
             ) : (
                 <div className="w-full flex flex-col items-center justify-center p-8 border-2 border-gray-200 rounded-lg bg-gray-50">
                     <svg
-                        className="animate-spin h-8 w-8 text-green-600 mb-4"
+                        className="animate-spin h-8 w-8 text-primary-600 mb-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -283,13 +283,13 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
 
                     {/* Komponen Progress Bar */}
                     <div className="w-full max-w-xs mt-4">
-                        <div className="flex justify-between text-xs font-semibold text-green-600 mb-1">
+                        <div className="flex justify-between text-xs font-semibold text-primary-600 mb-1">
                             <span>Progress</span>
                             <span>{progress}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                             <div
-                                className="bg-green-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                                className="bg-primary-600 h-2.5 rounded-full transition-all duration-300 ease-out"
                                 style={{ width: `${progress}%` }}
                             ></div>
                         </div>

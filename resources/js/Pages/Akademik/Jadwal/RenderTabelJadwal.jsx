@@ -61,9 +61,9 @@ export default function RenderTabelJadwal({
             text: "text-orange-700",
         },
         {
-            bg: "bg-teal-50",
-            border: "border-teal-200",
-            text: "text-teal-700",
+            bg: "bg-primary-50",
+            border: "border-primary-200",
+            text: "text-primary-700",
         },
         {
             bg: "bg-rose-50",
@@ -71,8 +71,8 @@ export default function RenderTabelJadwal({
             text: "text-rose-700",
         },
         {
-            bg: "bg-emerald-50",
-            border: "border-emerald-200",
+            bg: "bg-primary-50",
+            border: "border-primary-200",
             text: "text-emerald-700",
         },
         {
@@ -265,12 +265,12 @@ export default function RenderTabelJadwal({
             {/* =================================================
                 HEADER
             ================================================= */}
-            <div className="bg-green-600 px-6 py-4 flex items-center justify-between">
+            <div className="bg-primary-600 px-6 py-4 flex items-center justify-between">
                 <h3 className="text-lg font-black text-white tracking-wide">
                     JADWAL MENGAJAR GURU
                 </h3>
 
-                <span className="bg-green-800 text-green-100 text-xs font-bold px-3 py-1 rounded-full">
+                <span className="bg-primary-800 text-primary-100 text-xs font-bold px-3 py-1 rounded-full">
                     {selectedNamaTahunAjaran}
                 </span>
             </div>

@@ -24,7 +24,7 @@ export default function PrimaryButton({
         <button
             {...props}
             disabled={disabled}
-            className={`inline-flex items-center rounded-xl border border-transparent bg-green-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+            className={`inline-flex items-center rounded-xl border border-transparent bg-primary-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white transition duration-150 ease-in-out hover:bg-primary-700 focus:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
                 disabled ? "opacity-25" : ""
             } ${className}`}
         >

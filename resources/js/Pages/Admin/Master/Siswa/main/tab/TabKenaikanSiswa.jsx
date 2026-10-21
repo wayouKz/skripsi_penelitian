@@ -588,7 +588,7 @@ export default function TabKenaikanKelas() {
                 <button
                     type="button"
                     onClick={startTour}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-md text-[11px] font-bold transition-all shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-md text-[11px] font-bold transition-all shadow-sm"
                 >
                     <i className="fa fa-question-circle" />
                     <span className="hidden sm:inline">Panduan Pemakaian</span>
@@ -624,7 +624,7 @@ export default function TabKenaikanKelas() {
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden border border-gray-200">
                                 <div
-                                    className="bg-emerald-600 h-2 rounded-full transition-all duration-300 ease-out"
+                                    className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out"
                                     style={{ width: `${progressPercentage}%` }}
                                 />
                             </div>
@@ -633,7 +633,7 @@ export default function TabKenaikanKelas() {
                             </div>
                         </div>
 
-                        <div className="bg-black rounded-lg p-2 h-24 overflow-y-auto font-mono text-[10px] text-green-400 flex flex-col gap-1 shadow-inner border border-slate-700">
+                        <div className="bg-black rounded-lg p-2 h-24 overflow-y-auto font-mono text-[10px] text-primary-400 flex flex-col gap-1 shadow-inner border border-slate-700">
                             {autoLogs.length === 0 ? (
                                 <span className="text-slate-500">
                                     Menyiapkan data...
@@ -648,7 +648,7 @@ export default function TabKenaikanKelas() {
                                                 ? "text-red-400"
                                                 : log.includes("[SKIP]")
                                                   ? "text-amber-400"
-                                                  : "text-green-400"
+                                                  : "text-primary-400"
                                         }
                                     >
                                         {`> ${log}`}
@@ -795,7 +795,7 @@ export default function TabKenaikanKelas() {
                                                 return (
                                                     <li key={siswa.value}>
                                                         <label
-                                                            className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer transition-all border ${isChecked ? "bg-emerald-50/70 border-emerald-200" : "border-transparent hover:bg-gray-50"}`}
+                                                            className={`flex items-center gap-2 px-2 py-1 rounded-md cursor-pointer transition-all border ${isChecked ? "bg-primary-50/70 border-primary-200" : "border-transparent hover:bg-gray-50"}`}
                                                         >
                                                             <input
                                                                 type="checkbox"
@@ -862,7 +862,7 @@ export default function TabKenaikanKelas() {
                         className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden transition-all duration-200"
                     >
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100">
-                            <span className="w-4 h-4 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
+                            <span className="w-4 h-4 rounded-full bg-primary-600 text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0">
                                 2
                             </span>
                             <div className="min-w-0">
@@ -946,7 +946,7 @@ export default function TabKenaikanKelas() {
                                         label="Siswa dipilih"
                                         value={
                                             <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
-                                                <span className="w-1 h-1 rounded-full bg-emerald-500 inline-block" />
+                                                <span className="w-1 h-1 rounded-full bg-primary-500 inline-block" />
                                                 {selectedSiswa.length} siswa
                                             </span>
                                         }
@@ -1032,7 +1032,7 @@ export default function TabKenaikanKelas() {
                         type="button"
                         onClick={handleAutoProcessAll}
                         disabled={!taAsal || !taTujuan || isAutoProcessing}
-                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-white border-2 border-green-500 text-green-600 hover:bg-green-50 disabled:border-gray-200 disabled:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed text-xs font-bold rounded-lg shadow-sm transition-all duration-200"
+                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-white border-2 border-primary-500 text-primary-600 hover:bg-primary-50 disabled:border-gray-200 disabled:text-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed text-xs font-bold rounded-lg shadow-sm transition-all duration-200"
                     >
                         <i className="fa fa-magic text-[10px]" />
                         <span>Kenaikan Otomatis Semua Kelas</span>
@@ -1047,7 +1047,7 @@ export default function TabKenaikanKelas() {
                             !kelasTujuanId ||
                             loading
                         }
-                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
+                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-primary-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
                     >
                         {loading ? (
                             <>

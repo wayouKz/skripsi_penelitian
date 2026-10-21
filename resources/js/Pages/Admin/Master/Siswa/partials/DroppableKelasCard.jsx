@@ -57,7 +57,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
                     <div
                         className={`flex-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
                             isOver
-                                ? "border-emerald-300 bg-emerald-50"
+                                ? "border-emerald-300 bg-primary-50"
                                 : "border-gray-100"
                         }`}
                     >
@@ -84,7 +84,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
                                 className="group flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-transparent hover:border-gray-100 hover:bg-gray-50 transition-colors"
                             >
                                 {/* Avatar */}
-                                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-50 flex items-center justify-center text-[10px] font-medium text-emerald-600">
+                                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-50 flex items-center justify-center text-[10px] font-medium text-emerald-600">
                                     {initials(siswa.label)}
                                 </span>
 
@@ -113,7 +113,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
 
                         {/* Drop hint ketika ada siswa dan sedang di-hover */}
                         {isOver && (
-                            <li className="flex items-center justify-center px-2.5 py-2 rounded-lg border-2 border-dashed border-emerald-200 bg-emerald-50">
+                            <li className="flex items-center justify-center px-2.5 py-2 rounded-lg border-2 border-dashed border-primary-200 bg-primary-50">
                                 <span className="text-xs text-emerald-400">
                                     Lepaskan di sini
                                 </span>

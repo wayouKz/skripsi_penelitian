@@ -52,7 +52,7 @@ export default function Login({ status, canResetPassword, config }) {
                 }}
             >
                 {/* OVERLAY: Warna biru semi transparan menutupi seluruh gambar */}
-                <div className="absolute inset-0 bg-teal-500/70 mix-blend-multiply"></div>
+                <div className="absolute inset-0 bg-primary-500/70 mix-blend-multiply"></div>
 
                 {/* AREA TENGAH: Teks Kiri & Form Kanan */}
                 <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center container mx-auto px-6 lg:px-16 gap-10 lg:gap-24 py-12">
@@ -64,7 +64,7 @@ export default function Login({ status, canResetPassword, config }) {
                         {/* <p className="text-xl lg:text-2xl font-semibold mb-2 drop-shadow-md">
 
                         </p> */}
-                        <p className="text-sm lg:text-base text-green-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        <p className="text-sm lg:text-base text-primary-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
                             {config?.alamat_instansi ||
                                 "CONTOH JALAN, CONTOH KOTA"}
                             <br className="hidden lg:block" />
@@ -90,7 +90,7 @@ export default function Login({ status, canResetPassword, config }) {
 
                         {/* 2. Judul Form */}
                         <div className="text-center mb-8">
-                            <h2 className="text-3xl font-extrabold text-green-600 tracking-tight">
+                            <h2 className="text-3xl font-extrabold text-primary-600 tracking-tight">
                                 {config?.nama_instansi ||
                                     "SISTEM INFORMASI NAMA SEKOLAH"}
                             </h2>
@@ -98,7 +98,7 @@ export default function Login({ status, canResetPassword, config }) {
 
                         {/* 3. Notifikasi Error / Status */}
                         {status && (
-                            <div className="mb-4 text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg text-center">
+                            <div className="mb-4 text-sm font-medium text-primary-600 bg-primary-50 p-3 rounded-lg text-center">
                                 {status}
                             </div>
                         )}
@@ -113,7 +113,7 @@ export default function Login({ status, canResetPassword, config }) {
                                     name="username"
                                     value={data.username}
                                     placeholder="Ketik Nama Pengguna"
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                                     icon="email"
                                     autoComplete="username"
                                     onChange={(e) =>
@@ -134,7 +134,7 @@ export default function Login({ status, canResetPassword, config }) {
                                     name="password"
                                     value={data.password}
                                     placeholder="Ketik Password"
-                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors pr-10"
+                                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors pr-10"
                                     autoComplete="current-password"
                                     onChange={(e) =>
                                         setData("password", e.target.value)
@@ -166,7 +166,7 @@ export default function Login({ status, canResetPassword, config }) {
                                         type="text"
                                         value={data.captcha}
                                         placeholder="Ketik Captcha"
-                                        className="w-full h-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                        className="w-full h-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                                         onChange={(e) =>
                                             setData("captcha", e.target.value)
                                         }
@@ -205,7 +205,7 @@ export default function Login({ status, canResetPassword, config }) {
                             {/* Tombol Submit */}
                             <div className="pt-2">
                                 <PrimaryButton
-                                    className="w-full justify-center py-3.5 text-sm font-bold bg-emerald-600 hover:bg-green-700 active:bg-green-800 rounded-xl tracking-wide shadow-md transition-all"
+                                    className="w-full justify-center py-3.5 text-sm font-bold bg-primary-600 hover:bg-primary-700 active:bg-primary-800 rounded-xl tracking-wide shadow-md transition-all"
                                     disabled={processing}
                                 >
                                     {processing ? (
@@ -219,7 +219,7 @@ export default function Login({ status, canResetPassword, config }) {
                 </div>
 
                 {/* BAGIAN BAWAH: Footer Copyright */}
-                <div className="relative z-10 py-6 text-center text-green-100/80 text-xs font-medium tracking-wide">
+                <div className="relative z-10 py-6 text-center text-primary-100/80 text-xs font-medium tracking-wide">
                     &copy; {currentYear} Aplikasi by INFORMATIKA UNG
                 </div>
             </div>

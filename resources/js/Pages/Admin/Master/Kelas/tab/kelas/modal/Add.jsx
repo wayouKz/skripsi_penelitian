@@ -141,7 +141,7 @@ export default function Add({
                                     {option.label} - {option.nip}
                                 </span>
                                 <span
-                                    className={`text-[10px] font-semibold ${option.kelas ? "text-red-600" : "text-green-600"}`}
+                                    className={`text-[10px] font-semibold ${option.kelas ? "text-red-600" : "text-primary-600"}`}
                                 >
                                     {option.kelas
                                         ? `Dipakai ${option.kelas.nama_kelas}`

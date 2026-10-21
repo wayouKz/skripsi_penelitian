@@ -81,7 +81,7 @@ export default function KelasDiAmpu({
                             <input
                                 type="text"
                                 placeholder="Cari kelas..."
-                                className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 text-xs transition-all shadow-sm"
+                                className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 text-xs transition-all shadow-sm"
                                 value={searchQuery}
                                 onChange={handleSearch}
                             />
@@ -119,7 +119,7 @@ export default function KelasDiAmpu({
                                     <div className="p-4 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
                                         <div>
                                             <div className="flex items-center gap-2 mb-0.5">
-                                                <p className="text-[10px] font-semibold text-green-600 tracking-wider uppercase">
+                                                <p className="text-[10px] font-semibold text-primary-600 tracking-wider uppercase">
                                                     Ruang Kelas
                                                 </p>
                                                 {item.gurupengganti && (
@@ -129,11 +129,11 @@ export default function KelasDiAmpu({
                                                     </span>
                                                 )}
                                             </div>
-                                            <h3 className="text-sm font-bold text-gray-800 group-hover:text-green-600 transition-colors">
+                                            <h3 className="text-sm font-bold text-gray-800 group-hover:text-primary-600 transition-colors">
                                                 {item.nama_kelas}
                                             </h3>
                                         </div>
-                                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                        <span className="bg-primary-100 text-primary-700 text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                                             <svg
                                                 className="w-3.5 h-3.5"
                                                 fill="none"
@@ -175,7 +175,7 @@ export default function KelasDiAmpu({
                                                     {item.mapel.map(
                                                         (mapel, index) => (
                                                             <li
-                                                                className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100 shadow-2xs"
+                                                                className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-semibold bg-primary-50 text-primary-700 border border-primary-100 shadow-2xs"
                                                                 key={
                                                                     mapel.id ||
                                                                     index
@@ -242,7 +242,7 @@ export default function KelasDiAmpu({
                                                 "akademik.kelas-diampu.detail",
                                                 item.kelas_id,
                                             )}
-                                            className="w-full flex items-center justify-center gap-1.5 bg-green-50 text-green-700 border border-green-100 px-3 py-1 text-xs rounded-lg hover:bg-green-600 hover:text-white transition-all font-semibold group-hover:shadow-xs"
+                                            className="w-full flex items-center justify-center gap-1.5 bg-primary-50 text-primary-700 border border-primary-100 px-3 py-1 text-xs rounded-lg hover:bg-primary-600 hover:text-white transition-all font-semibold group-hover:shadow-xs"
                                         >
                                             Lihat Detail
                                             <svg
@@ -298,9 +298,9 @@ export default function KelasDiAmpu({
                         {/* Empty State 2: Hasil Pencarian Tidak Ditemukan */}
                         {kelas.length > 0 && filteredKelas.length === 0 && (
                             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center flex flex-col items-center justify-center mt-4">
-                                <div className="bg-green-50 p-3 rounded-full mb-3">
+                                <div className="bg-primary-50 p-3 rounded-full mb-3">
                                     <svg
-                                        className="w-8 h-8 text-green-400"
+                                        className="w-8 h-8 text-primary-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -325,7 +325,7 @@ export default function KelasDiAmpu({
                                 </p>
                                 <button
                                     onClick={() => setSearchQuery("")}
-                                    className="mt-3 text-green-600 hover:text-green-800 text-xs font-medium"
+                                    className="mt-3 text-primary-600 hover:text-primary-800 text-xs font-medium"
                                 >
                                     Hapus Pencarian
                                 </button>

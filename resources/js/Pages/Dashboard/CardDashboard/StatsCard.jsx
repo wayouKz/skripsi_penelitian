@@ -27,7 +27,7 @@ export default function StatCard({
                     <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold ${
                             badgeUp
-                                ? "bg-emerald-50 text-emerald-600"
+                                ? "bg-primary-50 text-emerald-600"
                                 : "bg-red-50 text-red-600"
                         }`}
                     >

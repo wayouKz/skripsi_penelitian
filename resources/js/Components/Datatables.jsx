@@ -112,7 +112,7 @@ export default function DataTable({
             {/* <div className="flex items-center gap-4 p-2 mb-4">
         <h2 className="text-base font-bold text-gray-800">{header}</h2>
         {title && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full bg-green-100 text-green-700">
+            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full bg-primary-100 text-primary-700">
                 {sortedData.length} {title}
             </span>
         )}
@@ -127,7 +127,7 @@ export default function DataTable({
                             placeholder="Cari..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs outline-none transition focus:border-green-500 focus:bg-white focus:shadow-sm"
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs outline-none transition focus:border-primary-500 focus:bg-white focus:shadow-sm"
                         />
                     </div>
                 )}
@@ -139,7 +139,7 @@ export default function DataTable({
                             setRowsPerPage(Number(e.target.value));
                             setCurrentPage(1);
                         }}
-                        className="rounded-xl border border-gray-200 px-6 py-1.5 text-xs outline-none focus:border-green-500 bg-white"
+                        className="rounded-xl border border-gray-200 px-6 py-1.5 text-xs outline-none focus:border-primary-500 bg-white"
                     >
                         <option value={10}>10</option>
                         <option value={15}>15</option>
@@ -180,7 +180,7 @@ export default function DataTable({
                                                             "asc"
                                                                 ? "fa-sort-up"
                                                                 : "fa-sort-down"
-                                                        } text-green-500 text-xs`}
+                                                        } text-primary-500 text-xs`}
                                                     />
                                                 )}
                                         </div>
@@ -227,7 +227,7 @@ export default function DataTable({
                                 paginatedData.map((row, rowIndex) => (
                                     <tr
                                         key={rowIndex}
-                                        className="transition-colors hover:bg-green-50/30"
+                                        className="transition-colors hover:bg-primary-50/30"
                                     >
                                         {columns.map((col, colIndex) => (
                                             <td
@@ -286,7 +286,7 @@ export default function DataTable({
                                     onClick={() => setCurrentPage(page)}
                                     className={`min-w-[30px] h-7 rounded-xl text-[11px] font-bold transition select-none ${
                                         currentPage === page
-                                            ? "bg-green-600 text-white shadow-sm shadow-green-100"
+                                            ? "bg-primary-600 text-white shadow-sm shadow-primary-100"
                                             : "border border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                                     }`}
                                 >

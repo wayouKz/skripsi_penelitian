@@ -49,7 +49,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
                                 "bg-red-50 text-red-600 border-red-200";
                         else if (log.tahap === "NEW_BEST")
                             badgeClass =
-                                "bg-emerald-50 text-emerald-600 border-emerald-200";
+                                "bg-primary-50 text-emerald-600 border-primary-200";
 
                         const timeOnly = log.waktu
                             ? log.waktu.includes(" ")
@@ -177,6 +177,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
                                                                                     {
                                                                                         subK
                                                                                     }
+
                                                                                     :
                                                                                 </span>{" "}
                                                                                 {String(
@@ -317,7 +318,7 @@ export default function ProsesViewJadwal({
             title: "text-blue-700",
         },
         {
-            bg: "bg-emerald-100",
+            bg: "bg-primary-100",
             border: "border-emerald-400",
             text: "text-emerald-900",
             title: "text-emerald-700",
@@ -353,10 +354,10 @@ export default function ProsesViewJadwal({
             title: "text-indigo-700",
         },
         {
-            bg: "bg-teal-100",
-            border: "border-teal-400",
-            text: "text-teal-900",
-            title: "text-teal-700",
+            bg: "bg-primary-100",
+            border: "border-primary-400",
+            text: "text-primary-900",
+            title: "text-primary-700",
         },
         {
             bg: "bg-orange-100",
@@ -685,7 +686,7 @@ export default function ProsesViewJadwal({
                         </div>
                         <div className="w-full bg-gray-100 rounded-full p-1 border border-gray-200/80 shadow-inner">
                             <div
-                                className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400 h-3 rounded-full transition-all duration-500 ease-out shadow-sm shadow-emerald-500/40 relative"
+                                className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-primary-400 h-3 rounded-full transition-all duration-500 ease-out shadow-sm shadow-emerald-500/40 relative"
                                 style={{
                                     width: `${Math.min(Math.max(progress, 0), 100)}%`,
                                 }}
@@ -747,7 +748,7 @@ export default function ProsesViewJadwal({
                                         onClick={() => setActiveKelas(kId)}
                                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
                                             activeKelas === kId
-                                                ? "bg-emerald-600 text-white shadow-sm shadow-emerald-200"
+                                                ? "bg-primary-600 text-white shadow-sm shadow-emerald-200"
                                                 : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
                                         }`}
                                     >

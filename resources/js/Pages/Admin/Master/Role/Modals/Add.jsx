@@ -217,7 +217,7 @@ export default function Add({
                                 key={item.id}
                                 className={`overflow-hidden rounded-2xl border transition-all duration-200 ${
                                     isActive
-                                        ? "border-green-200 bg-white shadow-xs"
+                                        ? "border-primary-200 bg-white shadow-xs"
                                         : "border-gray-200 bg-white"
                                 }`}
                             >
@@ -226,7 +226,7 @@ export default function Add({
                                         <div
                                             className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all ${
                                                 isActive
-                                                    ? "bg-green-600 text-white shadow-xs"
+                                                    ? "bg-primary-600 text-white shadow-xs"
                                                     : "bg-gray-100 text-gray-500"
                                             }`}
                                         >
@@ -245,7 +245,7 @@ export default function Add({
                                                     </span>
                                                 ) : (
                                                     isActive && (
-                                                        <span className="rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700">
+                                                        <span className="rounded-full bg-primary-100 px-2 py-0.5 text-[9px] font-semibold text-primary-700">
                                                             ACTIVE
                                                         </span>
                                                     )
@@ -259,7 +259,7 @@ export default function Add({
 
                                     <div>
                                         {isDashboard ? (
-                                            <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-700 flex items-center gap-1">
+                                            <span className="rounded-full bg-primary-50 px-2 py-0.5 text-[10px] font-medium text-primary-700 flex items-center gap-1">
                                                 <i className="fa fa-lock text-[8px]"></i>{" "}
                                                 Read-Only
                                             </span>
@@ -290,7 +290,7 @@ export default function Add({
                                     <div className="overflow-hidden">
                                         <div className="border-t border-gray-100 bg-gray-50/50 p-3">
                                             {isDashboard ? (
-                                                <div className="rounded-lg border border-green-100 bg-white p-2 text-[11px] text-green-700">
+                                                <div className="rounded-lg border border-primary-100 bg-white p-2 text-[11px] text-primary-700">
                                                     Dashboard otomatis
                                                     Read-Only.
                                                 </div>
@@ -318,8 +318,9 @@ export default function Add({
                                                             can_delete: "trash",
                                                         };
                                                         const colorMap = {
-                                                            can_view: "green",
-                                                            can_create: "green",
+                                                            can_view: "primary",
+                                                            can_create:
+                                                                "primary",
                                                             can_update:
                                                                 "yellow",
                                                             can_delete: "red",

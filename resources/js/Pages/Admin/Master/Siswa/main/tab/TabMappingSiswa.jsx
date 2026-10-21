@@ -195,7 +195,7 @@ export default function TabMappingSiswa({
                         <button
                             type="button"
                             onClick={startTour}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-xs font-bold transition-all shadow-sm"
                         >
                             <i className="fa fa-question-circle" />
                             <span className="hidden sm:inline">
@@ -206,7 +206,7 @@ export default function TabMappingSiswa({
                             id="tour-btn-simpan"
                             type="submit"
                             disabled={processing}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md disabled:shadow-none transition-all duration-200"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md disabled:shadow-none transition-all duration-200"
                         >
                             {processing ? (
                                 <>
@@ -253,7 +253,7 @@ export default function TabMappingSiswa({
                                 <div className="flex items-center gap-2 mb-3">
                                     <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                                            className="h-full bg-primary-500 rounded-full transition-all duration-300"
                                             style={{
                                                 width: totalSiswa
                                                     ? `${(totalTerpetakan / totalSiswa) * 100}%`
@@ -313,7 +313,7 @@ export default function TabMappingSiswa({
                         >
                             <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-200">
                                 {kelasList?.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center h-full w-full bg-white border-2 border-dashed border-gray-200 rounded-xl p-8 transition-all duration-200 hover:border-green-200 hover:bg-gray-50/50">
+                                    <div className="flex flex-col items-center justify-center h-full w-full bg-white border-2 border-dashed border-gray-200 rounded-xl p-8 transition-all duration-200 hover:border-primary-200 hover:bg-gray-50/50">
                                         <div className="flex flex-col items-center gap-3 text-center">
                                             <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-50">
                                                 <i className="fa fa-inbox text-xl text-gray-300" />
@@ -353,8 +353,8 @@ export default function TabMappingSiswa({
                         }}
                     >
                         {activeSiswa ? (
-                            <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border bg-white border-emerald-200 shadow-lg cursor-grabbing min-w-[200px]">
-                                <span className="inline-flex items-center justify-center w-8 h-8 bg-emerald-50 rounded-full text-[11px] font-medium text-emerald-600 flex-shrink-0">
+                            <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border bg-white border-primary-200 shadow-lg cursor-grabbing min-w-[200px]">
+                                <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-50 rounded-full text-[11px] font-medium text-emerald-600 flex-shrink-0">
                                     {initials(activeSiswa.label)}
                                 </span>
                                 <div className="flex flex-col min-w-0">

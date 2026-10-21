@@ -61,7 +61,7 @@ export default function Navbar({ user, onToggle, startTour }) {
                     <button
                         type="button"
                         onClick={startTour}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-[11px] font-bold transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-[11px] font-bold transition-all shadow-sm"
                     >
                         <i className="fa fa-question-circle text-xs" />
                         <span className="hidden sm:inline">
@@ -98,12 +98,12 @@ export default function Navbar({ user, onToggle, startTour }) {
                                 onClick={() => setOpen(!open)}
                                 className="relative focus:outline-none flex items-center structure"
                             >
-                                <div className="w-8 h-8 bg-green-600 text-white flex items-center justify-center rounded-full text-xs font-bold shadow-sm hover:bg-green-700 transition-colors">
+                                <div className="w-8 h-8 bg-primary-600 text-white flex items-center justify-center rounded-full text-xs font-bold shadow-sm hover:bg-primary-700 transition-colors">
                                     {user?.name?.charAt(0).toUpperCase()}
                                 </div>
 
                                 {/* Status Dot */}
-                                {/* <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-white rounded-full"></span> */}
+                                {/* <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary-400 border-2 border-white rounded-full"></span> */}
                             </button>
 
                             {/* DROPDOWN */}

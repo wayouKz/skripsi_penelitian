@@ -49,8 +49,8 @@ export default function Configure() {
             <form className="space-y-6" onSubmit={submit}>
                 <div className="rounded-2xl shadow-sm p-6">
                     <div className="flex items-center gap-2 mb-6">
-                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                            <i className="fa fa-building text-green-600"></i>
+                        <div className="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                            <i className="fa fa-building text-primary-600"></i>
                         </div>
 
                         <div>
@@ -71,7 +71,7 @@ export default function Configure() {
                             </label>
 
                             <TextInput
-                                className="block w-full rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                                className="block w-full rounded-xl border-gray-300 focus:border-primary-500 focus:ring-primary-500"
                                 type="text"
                                 placeholder="Masukkan nama instansi"
                                 value={data.nama_instansi}
@@ -104,8 +104,8 @@ export default function Configure() {
                                     </div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center text-center py-6">
-                                        <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-3">
-                                            <i className="fa fa-image text-green-600 text-xl"></i>
+                                        <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center mb-3">
+                                            <i className="fa fa-image text-primary-600 text-xl"></i>
                                         </div>
 
                                         <p className="text-sm font-medium text-gray-700">
@@ -119,7 +119,7 @@ export default function Configure() {
                                 )}
 
                                 <label className="cursor-pointer flex justify-center">
-                                    <span className="px-4 py-2 bg-green-500 hover:bg-green-600 transition text-white text-sm rounded-xl shadow-sm">
+                                    <span className="px-4 py-2 bg-primary-500 hover:bg-primary-600 transition text-white text-sm rounded-xl shadow-sm">
                                         Pilih File
                                     </span>
 
@@ -146,7 +146,7 @@ export default function Configure() {
                             </label>
 
                             <TextInput
-                                className="block w-full rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                                className="block w-full rounded-xl border-gray-300 focus:border-primary-500 focus:ring-primary-500"
                                 type="text"
                                 placeholder="Masukkan alamat instansi"
                                 value={data.alamat_instansi}
@@ -169,7 +169,7 @@ export default function Configure() {
                             </label>
 
                             <TextInput
-                                className="block w-full rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                                className="block w-full rounded-xl border-gray-300 focus:border-primary-500 focus:ring-primary-500"
                                 type="text"
                                 placeholder="08xxxxxxxxxx"
                                 value={data.telepon_instansi}
@@ -186,7 +186,7 @@ export default function Configure() {
                             </label>
 
                             <TextInput
-                                className="block w-full rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                                className="block w-full rounded-xl border-gray-300 focus:border-primary-500 focus:ring-primary-500"
                                 type="email"
                                 placeholder="email@instansi.com"
                                 value={data.email_instansi}
@@ -209,7 +209,7 @@ export default function Configure() {
                             </label>
 
                             <TextInput
-                                className="block w-full rounded-xl border-gray-300 focus:border-green-500 focus:ring-green-500"
+                                className="block w-full rounded-xl border-gray-300 focus:border-primary-500 focus:ring-primary-500"
                                 type="text"
                                 placeholder="https://website.com"
                                 value={data.website_instansi}
@@ -230,7 +230,7 @@ export default function Configure() {
                     <div className="flex justify-end mt-8">
                         <button
                             type="submit"
-                            className="px-6 py-3 bg-green-500 hover:bg-green-600 transition text-white rounded-xl shadow-md font-medium"
+                            className="px-6 py-3 bg-primary-500 hover:bg-primary-600 transition text-white rounded-xl shadow-md font-medium"
                         >
                             Simpan Perubahan
                         </button>

@@ -158,7 +158,7 @@ export default function SlotWaktu({
                     <button
                         onClick={handleAddSlot}
                         type="button"
-                        className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-1 rounded-lg hover:bg-green-100 flex items-center gap-1 transition-colors border border-green-200"
+                        className="text-[10px] text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded-lg hover:bg-primary-100 flex items-center gap-1 transition-colors border border-primary-200"
                     >
                         <Plus size={12} /> Tambah
                     </button>
@@ -168,8 +168,8 @@ export default function SlotWaktu({
             {/* UI GENERATOR OTOMATIS */}
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-3">
                 <span className="text-[11px] font-bold text-gray-700 block mb-2 flex items-center gap-1">
-                    <Wand2 size={12} className="text-green-600" /> Generator Jam
-                    Otomatis
+                    <Wand2 size={12} className="text-primary-600" /> Generator
+                    Jam Otomatis
                 </span>
                 <div className="grid grid-cols-3 gap-2 mb-2">
                     <div>
@@ -222,14 +222,14 @@ export default function SlotWaktu({
                             onChange={(e) =>
                                 setTerapkanSemuaHari(e.target.checked)
                             }
-                            className="rounded border-gray-300 text-green-600 focus:ring-green-500 w-3.5 h-3.5"
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-3.5 h-3.5"
                         />
                         Terapkan ke semua hari (Senin - Jumat)
                     </label>
                     <button
                         type="button"
                         onClick={handleGenerateSlots}
-                        className="text-[10px] bg-green-600 hover:bg-green-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
+                        className="text-[10px] bg-primary-600 hover:bg-primary-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition-colors"
                     >
                         Generate
                     </button>
@@ -254,7 +254,7 @@ export default function SlotWaktu({
                     type="button"
                     className={`text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 transition-colors ${
                         isCopied
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-primary-100 text-primary-700"
                             : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
                     }`}
                 >
@@ -275,8 +275,8 @@ export default function SlotWaktu({
                         onClick={() => setActiveHari(hari)}
                         className={`flex-shrink-0 flex items-center me-1 px-2 py-1 justify-center rounded-lg shadow-sm cursor-pointer transition-all border ${
                             activeHari === hari
-                                ? "bg-green-600 text-white border-green-600 shadow-green-200"
-                                : "bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:bg-green-50"
+                                ? "bg-primary-600 text-white border-primary-600 shadow-primary-200"
+                                : "bg-white text-gray-600 border-gray-200 hover:border-primary-300 hover:bg-primary-50"
                         }`}
                     >
                         <span
@@ -312,7 +312,7 @@ export default function SlotWaktu({
                                     e.target.value,
                                 )
                             }
-                            className="text-xs font-medium px-2 py-1.5 border border-gray-300 rounded-lg w-full focus:ring-green-500 focus:border-green-500"
+                            className="text-xs font-medium px-2 py-1.5 border border-gray-300 rounded-lg w-full focus:ring-primary-500 focus:border-primary-500"
                         />
                         <span className="text-gray-300">-</span>
                         <input
@@ -325,7 +325,7 @@ export default function SlotWaktu({
                                     e.target.value,
                                 )
                             }
-                            className="text-xs font-medium px-2 py-1.5 border border-gray-300 rounded-lg w-full focus:ring-green-500 focus:border-green-500"
+                            className="text-xs font-medium px-2 py-1.5 border border-gray-300 rounded-lg w-full focus:ring-primary-500 focus:border-primary-500"
                         />
                         <button
                             type="button"

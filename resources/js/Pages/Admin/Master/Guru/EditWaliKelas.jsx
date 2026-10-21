@@ -176,10 +176,10 @@ export default function Add({
                                     <span
                                         className={`text-xs font-semibold ${
                                             option.kelas == null
-                                                ? "text-green-600"
+                                                ? "text-primary-600"
                                                 : option.kelas.id_wali_kelas ==
                                                     data.id_wali_kelas
-                                                  ? "text-green-600"
+                                                  ? "text-primary-600"
                                                   : "text-red-600"
                                         }`}
                                     >

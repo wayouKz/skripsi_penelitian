@@ -277,8 +277,8 @@ export default function Absensi({ dataKelas }) {
         {
             value: "hadir",
             short: "H",
-            active: "bg-emerald-100 text-emerald-700 border-emerald-500 shadow-sm",
-            dot: "bg-emerald-500",
+            active: "bg-primary-100 text-emerald-700 border-emerald-500 shadow-sm",
+            dot: "bg-primary-500",
         },
         {
             value: "sakit",
@@ -306,7 +306,7 @@ export default function Absensi({ dataKelas }) {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
                 {/* Title block */}
                 <div className="flex items-center gap-2.5">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center shadow-sm">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-sm">
                         <i className="fa fa-user-check text-white text-sm"></i>
                     </div>
                     <div>
@@ -476,7 +476,7 @@ export default function Absensi({ dataKelas }) {
                         <div className="flex justify-between items-center mb-3">
                             {/* Live clock */}
                             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
                                 <span className="text-[10px] text-slate-400 font-medium hidden sm:block">
                                     Waktu
                                 </span>
@@ -489,7 +489,7 @@ export default function Absensi({ dataKelas }) {
                             <div className="flex items-center gap-2">
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-semibold py-1.5 px-4 rounded-md text-[11px] transition-all shadow-sm"
+                                    className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold py-1.5 px-4 rounded-md text-[11px] transition-all shadow-sm"
                                 >
                                     <i className="fa fa-save"></i>
                                     Simpan Absensi

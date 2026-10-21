@@ -28,7 +28,7 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                                 href={pdfUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-medium text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 px-2.5 py-1 rounded-md transition-colors flex items-center gap-1"
+                                className="text-xs font-medium text-primary-600 hover:text-primary-800 bg-primary-50 hover:bg-primary-100 px-2.5 py-1 rounded-md transition-colors flex items-center gap-1"
                                 title="Buka di tab baru"
                             >
                                 <i className="fas fa-external-link-alt text-[10px]"></i>
@@ -52,7 +52,7 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                             {isLoading && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 backdrop-blur-xs">
                                     <div className="flex flex-col items-center gap-1.5">
-                                        <div className="w-6 h-6 border-3 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                                        <div className="w-6 h-6 border-3 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                                         <p className="text-xs text-gray-600 font-medium">
                                             <i className="fa fa-spinner animate-spin"></i>{" "}
                                             Memuat PDF...

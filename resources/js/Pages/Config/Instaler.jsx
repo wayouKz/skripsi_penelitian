@@ -98,7 +98,7 @@ export default function Installer() {
                 <button
                     type="submit"
                     disabled={processing}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 rounded-lg transition"
                 >
                     {processing ? "Installing..." : "Install Application"}
                 </button>

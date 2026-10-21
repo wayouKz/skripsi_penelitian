@@ -28,7 +28,7 @@ createInertiaApp({
         );
     },
     progress: {
-        color: "#10B981", // ganti ke hex primary-500 kamu
+        color: "#22C55E",
         includeCSS: true,
         showSpinner: true,
         delay: 600,

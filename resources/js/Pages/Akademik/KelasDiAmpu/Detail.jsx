@@ -85,7 +85,7 @@ export default function Detail({ dataKelas }) {
                     <div className="mb-4 flex items-center gap-3">
                         <Link
                             href={route("akademik.kelas-diampu.index")}
-                            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-green-600 transition-all shadow-2xs group"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-all shadow-2xs group"
                             title="Kembali ke Daftar Kelas"
                         >
                             <i className="fa fa-arrow-left text-xs transform group-hover:-translate-x-0.5 transition-transform"></i>
@@ -106,7 +106,7 @@ export default function Detail({ dataKelas }) {
                         <div className="p-4">
                             <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
                                 <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-                                    <i className="fa fa-info-circle text-green-500"></i>
+                                    <i className="fa fa-info-circle text-primary-500"></i>
                                     Informasi Umum Kelas
                                 </h3>
                                 <div
@@ -184,7 +184,7 @@ export default function Detail({ dataKelas }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 {/* Item 1: Nama Kelas */}
                                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex items-start gap-2.5">
-                                    <div className="bg-green-100 text-green-600 p-2 rounded-md">
+                                    <div className="bg-primary-100 text-primary-600 p-2 rounded-md">
                                         <i className="fa fa-chalkboard-teacher fa-fw text-xs"></i>
                                     </div>
                                     <div>
@@ -199,7 +199,7 @@ export default function Detail({ dataKelas }) {
 
                                 {/* Item 2: Tahun Ajaran */}
                                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex items-start gap-2.5">
-                                    <div className="bg-emerald-100 text-emerald-600 p-2 rounded-md">
+                                    <div className="bg-primary-100 text-emerald-600 p-2 rounded-md">
                                         <i className="fa fa-calendar-alt fa-fw text-xs"></i>
                                     </div>
                                     <div>
@@ -214,7 +214,7 @@ export default function Detail({ dataKelas }) {
 
                                 {/* Item 3: Semester */}
                                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex items-start gap-2.5">
-                                    <div className="bg-green-100 text-green-600 p-2 rounded-md">
+                                    <div className="bg-primary-100 text-primary-600 p-2 rounded-md">
                                         <i className="fa fa-bookmark fa-fw text-xs"></i>
                                     </div>
                                     <div>

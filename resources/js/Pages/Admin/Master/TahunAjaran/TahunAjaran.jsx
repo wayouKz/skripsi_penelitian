@@ -275,7 +275,7 @@ export default function TahunAjaran() {
 
                     <div className="w-full bg-gray-200 rounded-full h-4 mb-2 relative overflow-hidden">
                         <div
-                            className="bg-green-500 h-4 rounded-full transition-all duration-300 ease-out"
+                            className="bg-primary-500 h-4 rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${progress}%` }}
                         ></div>
                         <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-gray-700">
@@ -292,7 +292,7 @@ export default function TahunAjaran() {
                         <div className="flex justify-center">
                             <button
                                 onClick={() => setOpenModalResponse(false)}
-                                className="px-4 py-1.5 bg-green-600 text-white text-xs font-semibold rounded shadow hover:bg-green-700 transition-colors"
+                                className="px-4 py-1.5 bg-primary-600 text-white text-xs font-semibold rounded shadow hover:bg-primary-700 transition-colors"
                             >
                                 Tutup & Selesai
                             </button>

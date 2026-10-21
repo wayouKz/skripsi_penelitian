@@ -76,8 +76,8 @@ export default function Sidebar({ collapsed, menuItems }) {
                                                 : "space-x-2.5"
                                         } py-1.5 px-2.5 rounded-xl transition ${
                                             parentActive
-                                                ? "bg-green-600 text-white shadow-sm"
-                                                : "text-gray-500 hover:bg-green-500 hover:text-white"
+                                                ? "bg-primary-600 text-white shadow-sm"
+                                                : "text-gray-500 hover:bg-primary-500 hover:text-white"
                                         }`}
                                     >
                                         {/* ICON */}
@@ -123,8 +123,8 @@ export default function Sidebar({ collapsed, menuItems }) {
                         href={route("profile.edit")}
                         className={`flex items-center py-2 rounded-xl transition ${
                             route().current("profile.edit")
-                                ? "bg-green-600 text-white shadow-sm"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-green-600"
+                                ? "bg-primary-600 text-white shadow-sm"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-primary-600"
                         } ${collapsed ? "justify-center" : "px-3 space-x-2.5"}`}
                     >
                         {/* ICON */}

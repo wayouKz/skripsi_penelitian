@@ -469,7 +469,7 @@ public function getSiswaInKelas(Request $request){
 
     }
 
-public function getKelasAktif(Request $request)
+    public function getKelasAktif(Request $request)
     {
         // 1. Ambil tanggal dari request (jika ada), jika tidak gunakan tanggal hari ini (Asia/Makassar)
         $waktuSekarang = Carbon::now('Asia/Makassar');
@@ -511,7 +511,7 @@ public function getKelasAktif(Request $request)
                 $warnaBadge = 'bg-yellow-100 text-yellow-700';
             } else {
                 $statusKbm  = $belumAbsen ? 'Belum Absen' : 'Hadir';
-                $warnaBadge = $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700';
+                $warnaBadge = $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-primary-100 text-emerald-700';
             }
 
             return [

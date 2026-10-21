@@ -202,7 +202,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                         onClick={() => setActiveTab("baru")}
                         className={`py-3 px-2 font-semibold text-sm border-b-2 transition-colors ${
                             activeTab === "baru"
-                                ? "border-green-600 text-green-600"
+                                ? "border-primary-600 text-primary-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700"
                         }`}
                         type="button"
@@ -214,7 +214,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                         onClick={() => setActiveTab("naik")}
                         className={`py-3 px-2 font-semibold text-sm border-b-2 transition-colors ${
                             activeTab === "naik"
-                                ? "border-green-600 text-green-600"
+                                ? "border-primary-600 text-primary-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700"
                         }`}
                         type="button"
@@ -230,7 +230,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                         {/* Filter Tahun Ajaran */}
                         <div className="flex items-center gap-2 w-full sm:w-auto">
                             <label className="text-sm font-bold text-gray-700 whitespace-nowrap">
-                                <i className="fa fa-calendar-alt mr-2 text-green-500"></i>
+                                <i className="fa fa-calendar-alt mr-2 text-primary-500"></i>
                                 Tahun Ajaran:
                             </label>
                             <div className="w-full sm:w-[220px]">
@@ -255,7 +255,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                         {/* Filter Kelas */}
                         <div className="flex items-center gap-2 w-full sm:w-auto">
                             <label className="text-sm font-bold text-gray-700 whitespace-nowrap">
-                                <i className="fa fa-school mr-2 text-green-500"></i>
+                                <i className="fa fa-school mr-2 text-primary-500"></i>
                                 Kelas:
                             </label>
                             <div className="w-full sm:w-[160px]">

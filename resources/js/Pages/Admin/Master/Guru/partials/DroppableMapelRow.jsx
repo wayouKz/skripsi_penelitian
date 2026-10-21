@@ -18,7 +18,7 @@ function DroppableMapelRow({
 
     return (
         <tr
-            className={`transition-colors ${isOver ? "bg-green-50/40" : "hover:bg-gray-50/50"}`}
+            className={`transition-colors ${isOver ? "bg-primary-50/40" : "hover:bg-gray-50/50"}`}
         >
             <td className="px-5 py-3.5 align-top w-56">
                 <div className="flex items-start gap-2.5">
@@ -33,7 +33,7 @@ function DroppableMapelRow({
             <td className="px-5 py-3">
                 <div
                     ref={setNodeRef}
-                    className={`min-h-[48px] rounded-lg border-2 px-2.5 py-2 flex flex-wrap gap-2 items-center transition-all ${isOver ? "border-green-400 bg-green-50 border-dashed" : "border-transparent"}`}
+                    className={`min-h-[48px] rounded-lg border-2 px-2.5 py-2 flex flex-wrap gap-2 items-center transition-all ${isOver ? "border-primary-400 bg-primary-50 border-dashed" : "border-transparent"}`}
                 >
                     {mapel.guru.map((guru) => (
                         <GuruChip
@@ -48,7 +48,7 @@ function DroppableMapelRow({
                     ))}
                     {mapel.guru.length === 0 && (
                         <p
-                            className={`text-xs w-full text-center ${isOver ? "text-green-500 font-medium" : "text-gray-400"}`}
+                            className={`text-xs w-full text-center ${isOver ? "text-primary-500 font-medium" : "text-gray-400"}`}
                         >
                             {isOver
                                 ? "↓ Lepaskan di sini"

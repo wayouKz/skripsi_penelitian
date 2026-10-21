@@ -135,7 +135,7 @@ function GuruChip({
                     : "bg-white border-gray-200 shadow-sm"
             }`}
         >
-            <Avatar name={guru?.label || "Guru"} size="sm" color="green" />
+            <Avatar name={guru?.label || "Guru"} size="sm" color="primary" />
             <span
                 className="text-xs font-semibold text-gray-700 max-w-[100px] truncate"
                 title={guru?.label}

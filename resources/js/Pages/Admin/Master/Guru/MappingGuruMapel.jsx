@@ -457,7 +457,7 @@ export default function MappingGuruMapel({
                     <button
                         type="button"
                         onClick={startTour}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 border border-green-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-xs font-bold transition-all shadow-sm"
                     >
                         <i className="fa fa-info-circle" />
                         <span>Panduan Penggunaan</span>
@@ -486,7 +486,7 @@ export default function MappingGuruMapel({
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari guru…"
-                                className="w-full px-3 py-2 text-sm bg-gray-50 border rounded-lg focus:ring-2 focus:ring-green-500/30"
+                                className="w-full px-3 py-2 text-sm bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500/30"
                             />
                         </div>
                         <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">

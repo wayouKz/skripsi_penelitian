@@ -54,7 +54,7 @@ export default forwardRef(function TextInput(
                     " pl-10 pr-10 py-2 rounded-md border-gray-300 shadow-sm bg-gray-100 " +
                     (error
                         ? "border-red-500 focus:border-red-500 focus:ring-red-500 "
-                        : "focus:border-green-500 focus:ring-green-500 ") +
+                        : "focus:border-primary-500 focus:ring-primary-500 ") +
                     "transition-all duration-300 group-focus-within:pl-3 " +
                     className
                 }

@@ -118,7 +118,7 @@ export default function MasterKelas({
                                         <span
                                             className={`text-xs font-semibold ${
                                                 option.status === "Aktif"
-                                                    ? "text-green-600"
+                                                    ? "text-primary-600"
                                                     : "text-gray-500"
                                             }`}
                                         >

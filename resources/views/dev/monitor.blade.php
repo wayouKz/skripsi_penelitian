@@ -21,7 +21,7 @@
         .animate-chromosome { animation: fadeInScale 0.25s ease-in-out forwards; }
         .highlight-update { animation: highlightPulse 1.2s ease-in-out infinite; }
         .toast-animate { animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
+
         /* Custom scrollbar untuk log */
         .log-scroll::-webkit-scrollbar { width: 6px; }
         .log-scroll::-webkit-scrollbar-track { background: #111827; }
@@ -42,7 +42,7 @@
                     <h1 class="text-2xl font-bold flex items-center gap-2">⚡ Real-Time GA Scheduler Monitor</h1>
                     <p class="text-xs text-gray-400 mt-1">Konfigurasi Algoritma Genetika & Jam Operasional (Mulai 07:00, 35 Menit/JP)</p>
                 </div>
-                <button id="btnStart" onclick="mulaiGenerate()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-semibold shadow transition duration-200 cursor-pointer">
+                <button id="btnStart" onclick="mulaiGenerate()" class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-lg font-semibold shadow transition duration-200 cursor-pointer">
                     🚀 Mulai Generate Jadwal
                 </button>
             </div>
@@ -85,7 +85,7 @@
                 </div>
                 <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700/50 flex justify-between items-center">
                     <span class="text-xs text-gray-400">Fitness Terbaik:</span>
-                    <span id="fitnessVal" class="text-green-400 font-bold font-mono text-base">0.0000</span>
+                    <span id="fitnessVal" class="text-primary-400 font-bold font-mono text-base">0.0000</span>
                 </div>
             </div>
 
@@ -105,7 +105,7 @@
         <div class="bg-gray-800 p-5 rounded-xl shadow border border-gray-700">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                    <span class="animate-pulse h-2 w-2 bg-red-500 rounded-full inline-block"></span> 
+                    <span class="animate-pulse h-2 w-2 bg-red-500 rounded-full inline-block"></span>
                     Live Activity Log
                 </h2>
                 <span id="logCounterBadge" class="text-xs font-mono bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-700">0 Events Terpantau</span>
@@ -208,7 +208,7 @@
             { bg: 'bg-rose-950/80', border: 'border-rose-500', text: 'text-rose-200', title: 'text-rose-300' },
             { bg: 'bg-cyan-950/80', border: 'border-cyan-500', text: 'text-cyan-200', title: 'text-cyan-300' },
             { bg: 'bg-indigo-950/80', border: 'border-indigo-500', text: 'text-indigo-200', title: 'text-indigo-300' },
-            { bg: 'bg-teal-950/80', border: 'border-teal-500', text: 'text-teal-200', title: 'text-teal-300' },
+            { bg: 'bg-primary-950/80', border: 'border-primary-500', text: 'text-primary-200', title: 'text-primary-300' },
             { bg: 'bg-orange-950/80', border: 'border-orange-500', text: 'text-orange-200', title: 'text-orange-300' },
             { bg: 'bg-pink-950/80', border: 'border-pink-500', text: 'text-pink-200', title: 'text-pink-300' }
         ];
@@ -230,18 +230,18 @@
             const fitDiff = (newFit - oldFit).toFixed(6);
             const isClashFree = clashCount === 0;
 
-            toast.className = `toast-animate pointer-events-auto bg-gray-800 border ${isClashFree ? 'border-green-500' : 'border-yellow-500'} p-4 rounded-xl shadow-2xl space-y-1 text-xs`;
+            toast.className = `toast-animate pointer-events-auto bg-gray-800 border ${isClashFree ? 'border-primary-500' : 'border-yellow-500'} p-4 rounded-xl shadow-2xl space-y-1 text-xs`;
             toast.innerHTML = `
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-yellow-400 flex items-center gap-1">⚡ Generasi ${gen} Updated!</span>
                     <span class="text-[10px] font-mono bg-gray-900 text-gray-400 px-2 py-0.5 rounded">GA Event</span>
                 </div>
                 <div class="text-gray-200">
-                    Fitness: <strong class="text-green-400 font-mono">${parseFloat(newFit).toFixed(6)}</strong>
+                    Fitness: <strong class="text-primary-400 font-mono">${parseFloat(newFit).toFixed(6)}</strong>
                     <span class="text-emerald-400 text-[10px]">(+${fitDiff})</span>
                 </div>
                 <div class="text-gray-400 text-[11px]">
-                    Status Bentrok: <strong class="${isClashFree ? 'text-green-400' : 'text-red-400'}">${isClashFree ? '0 Bentrok (Optimal!)' : clashCount + ' Bentrok Terdeteksi'}</strong>
+                    Status Bentrok: <strong class="${isClashFree ? 'text-primary-400' : 'text-red-400'}">${isClashFree ? '0 Bentrok (Optimal!)' : clashCount + ' Bentrok Terdeteksi'}</strong>
                 </div>
             `;
 
@@ -270,7 +270,7 @@
             if (logObj.tahap === 'TUKAR_MAPEL') badgeClass = "bg-blue-900 border border-blue-600 text-blue-300";
             else if (logObj.tahap === 'RELOKASI_MAPEL') badgeClass = "bg-orange-900 border border-orange-600 text-orange-300";
             else if (logObj.tahap === 'STAGNASI') badgeClass = "bg-red-900 border border-red-600 text-red-300";
-            else if (logObj.tahap === 'NEW_BEST') badgeClass = "bg-green-900 border border-green-600 text-green-300";
+            else if (logObj.tahap === 'NEW_BEST') badgeClass = "bg-primary-900 border border-primary-600 text-primary-300";
             else if (logObj.tahap === 'START' || logObj.tahap === 'FINISH') badgeClass = "bg-purple-900 border border-purple-600 text-purple-300";
 
             // Parse jam dari datetime (misal "2026-10-03 19:35:00" -> "19:35:00")
@@ -298,7 +298,7 @@
                 </div>
                 ${detailHtml}
             `;
-            
+
             container.appendChild(item);
 
             // Auto-scroll kebawah
@@ -344,7 +344,7 @@
             const groupedTableBody = document.getElementById('groupedTeacherTableBody');
             const clashContainer = document.getElementById('clashContainer');
             const clashBadge = document.getElementById('clashBadge');
-            
+
             // Log Container Reset
             const activityLogContainer = document.getElementById('activityLogContainer');
             activityLogContainer.innerHTML = '<div id="emptyLogText" class="text-gray-600 italic">[System] Proses dimulai, memantau log mutasi...</div>';
@@ -421,7 +421,7 @@
                                         kromosomGenInfo.innerText = `Gen: ${data.generation}`;
                                     } else {
                                         statusMessage.innerText = data.message;
-                                        statusMessage.className = "text-sm text-green-400 font-bold";
+                                        statusMessage.className = "text-sm text-primary-400 font-bold";
                                         progressBar.style.width = '100%';
                                         progressBar.innerText = '100%';
                                         btn.disabled = false;
@@ -495,9 +495,9 @@
 
                                         // Badge Bentrok
                                         if (clashReports.length === 0) {
-                                            clashBadge.className = "text-xs font-mono bg-green-900/80 text-green-300 px-2.5 py-1 rounded border border-green-600 font-bold";
+                                            clashBadge.className = "text-xs font-mono bg-primary-900/80 text-primary-300 px-2.5 py-1 rounded border border-primary-600 font-bold";
                                             clashBadge.innerText = "0 Bentrok (Optimal!)";
-                                            clashContainer.innerHTML = `<div class="text-green-400 font-semibold p-2">✅ Jadwal Bebas Bentrok! Semua guru & kelas memiliki slot steril.</div>`;
+                                            clashContainer.innerHTML = `<div class="text-primary-400 font-semibold p-2">✅ Jadwal Bebas Bentrok! Semua guru & kelas memiliki slot steril.</div>`;
                                         } else {
                                             clashBadge.className = "text-xs font-mono bg-red-900/80 text-red-300 px-2.5 py-1 rounded border border-red-600 font-bold";
                                             clashBadge.innerText = `${clashReports.length} Bentrok`;
@@ -515,7 +515,7 @@
                                             let tr = document.createElement('tr');
                                             tr.className = "hover:bg-gray-800/50 border-b border-gray-700/50";
                                             tr.innerHTML = `
-                                                <td class="border border-gray-700 p-2.5 font-bold text-green-400 text-center">ID: ${gId}</td>
+                                                <td class="border border-gray-700 p-2.5 font-bold text-primary-400 text-center">ID: ${gId}</td>
                                                 <td class="border border-gray-700 p-2.5 text-amber-300">${Array.from(info.mapels).join(', ')}</td>
                                                 <td class="border border-gray-700 p-2.5 text-center font-bold text-cyan-300">${info.total_beban} JP</td>
                                                 <td class="border border-gray-700 p-2.5 text-gray-300">${Array.from(info.kelas).join(', ')}</td>
@@ -567,7 +567,7 @@
                                             title.innerHTML = `
                                                 <h3 class="text-yellow-400 font-bold text-base">📁 Kelas ID: ${kelasId}</h3>
                                                 <span class="text-xs font-mono bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded-full">
-                                                    Total Blok: <strong class="text-cyan-400">${totalBlok}</strong> | Total Jam: <strong class="text-green-400">${totalJam} JP</strong>
+                                                    Total Blok: <strong class="text-cyan-400">${totalBlok}</strong> | Total Jam: <strong class="text-primary-400">${totalJam} JP</strong>
                                                 </span>
                                             `;
                                             kelasWrapper.appendChild(title);
@@ -639,7 +639,7 @@
                                         if (data.type === 'new_best') {
                                             showToastAlert(data.generation, lastFitness, currentFitness, clashReports.length);
                                             lastFitness = currentFitness;
-                                            focusOnUpdate(kromosomData); 
+                                            focusOnUpdate(kromosomData);
                                         }
                                     }
                                 }

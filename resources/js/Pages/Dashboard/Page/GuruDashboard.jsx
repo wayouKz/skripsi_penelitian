@@ -45,7 +45,7 @@ function hitungKehadiranGuru(info) {
 
 function HeroSection({ user, tglStr, peran }) {
     return (
-        <div className="relative bg-gradient-to-r from-green-700 to-green-900 rounded-2xl p-6 md:p-8 text-white overflow-hidden shadow-xl">
+        <div className="relative bg-gradient-to-r from-primary-700 to-primary-900 rounded-2xl p-6 md:p-8 text-white overflow-hidden shadow-xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
 
             <div className="relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 z-10">
@@ -142,7 +142,7 @@ function PanelKehadiranGuru({ info }) {
                         </h3>
                     </div>
 
-                    <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-primary-100 text-emerald-600 flex items-center justify-center">
                         <i className="fa-solid fa-chart-pie text-2xl"></i>
                     </div>
                 </div>
@@ -150,7 +150,7 @@ function PanelKehadiranGuru({ info }) {
                 <div className="mt-5">
                     <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                         <div
-                            className="bg-emerald-500 h-2.5 rounded-full transition-all duration-700"
+                            className="bg-primary-500 h-2.5 rounded-full transition-all duration-700"
                             style={{
                                 width: `${Math.min(Math.max(persentase, 0), 100)}%`,
                             }}
@@ -277,7 +277,7 @@ function DashboardWaliKelas({ info }) {
                 <div className="flex space-x-2">
                     <button
                         type="button"
-                        className="bg-green-500 hover:bg-green-600 text-white py-1 px-2 rounded"
+                        className="bg-primary-500 hover:bg-primary-600 text-white py-1 px-2 rounded"
                         onClick={() => {
                             setSiswaTerpilih(row);
                             setOpenChart(true);
@@ -299,7 +299,7 @@ function DashboardWaliKelas({ info }) {
                 <div className="lg:col-span-2 bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shadow-inner">
+                            <div className="w-10 h-10 rounded-2xl bg-primary-50 text-emerald-600 flex items-center justify-center font-bold shadow-inner">
                                 <i className="fa-solid fa-chalkboard-user text-base"></i>
                             </div>
                             <div>
@@ -313,7 +313,7 @@ function DashboardWaliKelas({ info }) {
                             </div>
                         </div>
 
-                        <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
+                        <span className="text-[11px] font-semibold bg-primary-100 text-emerald-700 px-3 py-1 rounded-full">
                             Aktif
                         </span>
                     </div>
@@ -329,7 +329,7 @@ function DashboardWaliKelas({ info }) {
                                 </div>
                             </div>
 
-                            <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full bg-primary-100 text-emerald-600 flex items-center justify-center">
                                 <i className="fa-solid fa-users text-xl"></i>
                             </div>
                         </div>
@@ -388,7 +388,7 @@ function DashboardWaliKelas({ info }) {
                 <div className="flex flex-col bg-white rounded-2xl overflow-hidden">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center border border-green-100">
+                            <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center border border-primary-100">
                                 <i className="fa-solid fa-chart-pie text-sm"></i>
                             </div>
                             <div>

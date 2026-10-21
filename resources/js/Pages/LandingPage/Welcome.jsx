@@ -139,7 +139,7 @@ export default function Welcome({ auth, data }) {
                                     className="text-sm text-emerald-900/70 hover:text-emerald-900 transition-colors relative group"
                                 >
                                     {label}
-                                    <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-emerald-500 group-hover:w-full transition-all duration-300" />
+                                    <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-primary-500 group-hover:w-full transition-all duration-300" />
                                 </a>
                             ))}
                         </nav>
@@ -148,14 +148,14 @@ export default function Welcome({ auth, data }) {
                             {auth?.user ? (
                                 <Link
                                     href={route("dashboard")}
-                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
+                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-primary-100 transition-colors"
                                 >
                                     Dashboard
                                 </Link>
                             ) : (
                                 <Link
                                     href={route("login")}
-                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors"
+                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-primary-600 hover:bg-emerald-700 shadow-sm transition-colors"
                                 >
                                     Masuk
                                 </Link>
@@ -180,7 +180,7 @@ export default function Welcome({ auth, data }) {
                                         key={href}
                                         href={href}
                                         onClick={() => setMenuOpen(false)}
-                                        className="px-3 py-3 rounded-lg text-sm font-medium text-emerald-900/80 hover:bg-emerald-50 hover:text-emerald-900 transition-colors"
+                                        className="px-3 py-3 rounded-lg text-sm font-medium text-emerald-900/80 hover:bg-primary-50 hover:text-emerald-900 transition-colors"
                                     >
                                         {label}
                                     </a>
@@ -189,14 +189,14 @@ export default function Welcome({ auth, data }) {
                                 {auth?.user ? (
                                     <Link
                                         href={route("dashboard")}
-                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
+                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-primary-100 transition-colors"
                                     >
                                         Dashboard
                                     </Link>
                                 ) : (
                                     <Link
                                         href={route("login")}
-                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors"
+                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-white bg-primary-600 hover:bg-emerald-700 shadow-sm transition-colors"
                                     >
                                         Masuk
                                     </Link>
@@ -239,7 +239,7 @@ export default function Welcome({ auth, data }) {
                                 {!auth?.user && (
                                     <Link
                                         href={route("login")}
-                                        className="inline-flex mt-8 px-7 py-3 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition-colors"
+                                        className="inline-flex mt-8 px-7 py-3 rounded-full text-sm font-semibold text-white bg-primary-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition-colors"
                                     >
                                         Masuk ke sistem
                                     </Link>
@@ -253,7 +253,7 @@ export default function Welcome({ auth, data }) {
                     {/* ================= STATS ================= */}
                     <div
                         id="statistik"
-                        className="bg-emerald-100 border-y border-emerald-200"
+                        className="bg-primary-100 border-y border-primary-200"
                     >
                         <div className="max-w-[1180px] mx-auto px-5 md:px-7">
                             <Statistics
@@ -287,14 +287,14 @@ export default function Welcome({ auth, data }) {
 
                             <Reveal
                                 as="div"
-                                className="grid grid-cols-1 md:grid-cols-3 gap-px bg-emerald-100 border border-emerald-100 rounded-2xl overflow-hidden shadow-[0_20px_50px_-25px_rgba(5,150,105,0.35)]"
+                                className="grid grid-cols-1 md:grid-cols-3 gap-px bg-primary-100 border border-emerald-100 rounded-2xl overflow-hidden shadow-[0_20px_50px_-25px_rgba(5,150,105,0.35)]"
                             >
                                 {FEATURES.map((f) => (
                                     <div
                                         key={f.title}
-                                        className="bg-white hover:bg-emerald-50 transition-colors p-8 md:p-9"
+                                        className="bg-white hover:bg-primary-50 transition-colors p-8 md:p-9"
                                     >
-                                        <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-5">
+                                        <div className="w-12 h-12 rounded-xl bg-primary-100 text-emerald-700 flex items-center justify-center mb-5">
                                             <f.icon className="w-7 h-7" />
                                         </div>
                                         <h3 className="text-lg text-emerald-900 font-serif-display font-semibold mb-2.5">
@@ -311,7 +311,7 @@ export default function Welcome({ auth, data }) {
                 </main>
 
                 {/* ================= FOOTER ================= */}
-                <footer className="pt-16 pb-8 bg-emerald-50 border-t border-emerald-100">
+                <footer className="pt-16 pb-8 bg-primary-50 border-t border-emerald-100">
                     <div className="max-w-[1180px] mx-auto px-5 md:px-7 text-center">
                         <div className="text-emerald-900/60 text-xs font-medium tracking-wide">
                             &copy; {currentYear} Aplikasi by INFORMATIKA UNG

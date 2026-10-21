@@ -1,4 +1,4 @@
-export default function Avatar({ name, size = "sm", color = "green" }) {
+export default function Avatar({ name, size = "sm", color = "primary" }) {
     const initials = name
         .split(" ")
         .map((k) => k.charAt(0))
@@ -8,7 +8,7 @@ export default function Avatar({ name, size = "sm", color = "green" }) {
 
     const sizes = { sm: "w-7 h-7 text-[11px]", md: "w-8 h-8 text-xs" };
     const colors = {
-        green: "bg-green-100 text-green-700",
+        primary: "bg-primary-100 text-primary-700",
         violet: "bg-violet-100 text-violet-700",
         sky: "bg-sky-100 text-sky-700",
     };

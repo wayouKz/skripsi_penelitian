@@ -90,7 +90,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                     className={`group relative aspect-square rounded-2xl border p-2 text-left transition-all duration-150
                         ${
                             absenData
-                                ? "border-emerald-200 bg-emerald-50 hover:border-emerald-400 hover:bg-emerald-100 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                                ? "border-primary-200 bg-primary-50 hover:border-emerald-400 hover:bg-primary-100 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
                                 : "border-gray-300 bg-gray-50/40 cursor-default"
                         }
                     `}
@@ -111,7 +111,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
 
                     {absenData && (
                         <span className="absolute bottom-2 left-2 right-2 flex items-center gap-1 rounded-md bg-white/70 px-1.5 py-1 text-[10px] font-bold text-emerald-700 backdrop-blur-sm">
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500" />
                             <span className="truncate">{absenData.waktu}</span>
                         </span>
                     )}
@@ -222,7 +222,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                             Total Siswa
                         </p>
                     </div>
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-center shadow-sm">
+                    <div className="rounded-xl border border-primary-200 bg-primary-50 p-3 text-center shadow-sm">
                         <p className="text-lg font-extrabold text-emerald-700">
                             {hadirCount}
                         </p>
@@ -280,7 +280,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                                                             ${
                                                                 status ===
                                                                 "hadir"
-                                                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                                                    ? "border-primary-200 bg-primary-50 text-emerald-700"
                                                                     : status ===
                                                                         "alpha"
                                                                       ? "border-red-200 bg-red-50 text-red-700"

@@ -245,7 +245,7 @@ export default function KelolaInformasiInstansi() {
                 </div>
                 <Form onSubmit={submit} loading={processing}>
                     {/* Header Banner */}
-                    <div className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl">
+                    <div className="px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-2xl">
                         <div className="flex items-center gap-2.5">
                             <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
                                 <i className="fa fa-building text-white text-sm"></i>
@@ -255,7 +255,7 @@ export default function KelolaInformasiInstansi() {
                                 <h2 className="text-sm font-bold text-white">
                                     Profil Instansi
                                 </h2>
-                                <p className="text-[11px] text-green-100">
+                                <p className="text-[11px] text-primary-100">
                                     Kelola informasi dan identitas instansi
                                 </p>
                             </div>
@@ -272,7 +272,7 @@ export default function KelolaInformasiInstansi() {
                                 </label>
 
                                 <TextInput
-                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     type="text"
                                     icon="building"
                                     placeholder="Masukkan nama instansi"
@@ -293,7 +293,7 @@ export default function KelolaInformasiInstansi() {
                                     Kepala Sekolah
                                 </label>
                                 <Select
-                                    className="block w-full text-xs rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     options={dataGuru}
                                     value={data?.kepala_sekolah} // BERIKAN OBJECT PENUH (bukan .value)
                                     onChange={
@@ -318,7 +318,7 @@ export default function KelolaInformasiInstansi() {
                                     Logo Instansi
                                 </label>
 
-                                <div className="border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 p-3 hover:border-green-400 transition">
+                                <div className="border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 p-3 hover:border-primary-400 transition">
                                     {logoPreview || data?.logo_instansi ? (
                                         <div className="flex flex-col items-center">
                                             <div className="w-24 h-24 bg-white rounded-xl shadow-sm flex items-center justify-center overflow-hidden border">
@@ -341,8 +341,8 @@ export default function KelolaInformasiInstansi() {
                                         </div>
                                     ) : (
                                         <div className="flex flex-col items-center justify-center py-3">
-                                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-1.5">
-                                                <i className="fa fa-image text-green-600 text-base"></i>
+                                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mb-1.5">
+                                                <i className="fa fa-image text-primary-600 text-base"></i>
                                             </div>
 
                                             <p className="text-xs font-medium text-gray-700">
@@ -357,7 +357,7 @@ export default function KelolaInformasiInstansi() {
 
                                     <div className="flex justify-center mt-3">
                                         <label className="cursor-pointer">
-                                            <span className="px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm transition inline-block">
+                                            <span className="px-3 py-1.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium shadow-sm transition inline-block">
                                                 {logoPreview ||
                                                 data?.logo_instansi
                                                     ? "Ganti Logo"
@@ -385,7 +385,7 @@ export default function KelolaInformasiInstansi() {
                                     Foto Sampul (Header/Banner)
                                 </label>
 
-                                <div className="border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 p-3 hover:border-green-400 transition">
+                                <div className="border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 p-3 hover:border-primary-400 transition">
                                     {/* Preview Area */}
                                     <div className="w-full rounded-xl overflow-hidden mb-2.5 shadow-sm">
                                         {sampulPreview ||
@@ -402,8 +402,8 @@ export default function KelolaInformasiInstansi() {
                                             />
                                         ) : (
                                             <div className="flex flex-col items-center justify-center py-3">
-                                                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-1.5">
-                                                    <i className="fa fa-image text-green-600 text-base"></i>
+                                                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mb-1.5">
+                                                    <i className="fa fa-image text-primary-600 text-base"></i>
                                                 </div>
 
                                                 <p className="text-xs font-medium text-gray-700">
@@ -420,7 +420,7 @@ export default function KelolaInformasiInstansi() {
                                     {/* Tombol Upload */}
                                     <div className="flex justify-center">
                                         <label className="cursor-pointer">
-                                            <span className="px-3 py-1.5 rounded-xl bg-green-500 hover:bg-green-600 text-white text-xs font-medium shadow-sm transition inline-block">
+                                            <span className="px-3 py-1.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white text-xs font-medium shadow-sm transition inline-block">
                                                 {sampulPreview ||
                                                 data?.sampul_instansi
                                                     ? "Ganti Sampul"
@@ -467,7 +467,7 @@ export default function KelolaInformasiInstansi() {
                                         return (
                                             <div
                                                 key={index}
-                                                className="relative w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:border-green-400 transition overflow-hidden"
+                                                className="relative w-full h-40 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 hover:border-primary-400 transition overflow-hidden"
                                             >
                                                 {displaySrc ? (
                                                     <div className="relative w-full h-full">
@@ -491,8 +491,8 @@ export default function KelolaInformasiInstansi() {
                                                 ) : (
                                                     <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer p-3">
                                                         <div className="flex flex-col items-center justify-center text-center">
-                                                            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-1.5">
-                                                                <i className="fa fa-image text-green-600 text-base"></i>
+                                                            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mb-1.5">
+                                                                <i className="fa fa-image text-primary-600 text-base"></i>
                                                             </div>
                                                             <p className="text-xs font-medium text-gray-700">
                                                                 Upload Foto{" "}
@@ -537,7 +537,7 @@ export default function KelolaInformasiInstansi() {
                                 </label>
 
                                 <TextInput
-                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     type="text"
                                     icon="map-marker-alt"
                                     placeholder="Masukkan alamat"
@@ -564,7 +564,7 @@ export default function KelolaInformasiInstansi() {
                                 </label>
 
                                 <TextInput
-                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     type="text"
                                     icon="phone"
                                     placeholder="08xxxxxxxxxx"
@@ -585,7 +585,7 @@ export default function KelolaInformasiInstansi() {
                                 </label>
 
                                 <TextInput
-                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     type="email"
                                     icon="envelope"
                                     placeholder="email@instansi.com"
@@ -612,7 +612,7 @@ export default function KelolaInformasiInstansi() {
                                 </label>
 
                                 <TextInput
-                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                                    className="block w-full text-xs py-1.5 px-3 rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                                     type="text"
                                     icon="globe"
                                     placeholder="https://website.com"

@@ -36,7 +36,7 @@ const COLOR_PALETTE = [
         text: "text-blue-900",
     },
     {
-        bg: "bg-emerald-100",
+        bg: "bg-primary-100",
         border: "border-emerald-400",
         hover: "hover:bg-emerald-200",
         text: "text-emerald-900",
@@ -84,10 +84,10 @@ const COLOR_PALETTE = [
         text: "text-indigo-900",
     },
     {
-        bg: "bg-teal-100",
-        border: "border-teal-400",
-        hover: "hover:bg-teal-200",
-        text: "text-teal-900",
+        bg: "bg-primary-100",
+        border: "border-primary-400",
+        hover: "hover:bg-primary-200",
+        text: "text-primary-900",
     },
     {
         bg: "bg-rose-100",
@@ -576,12 +576,12 @@ export default function DaftarJadwal({
 
         return (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
-                <div className="bg-green-600 px-4 py-2.5 flex items-center justify-between gap-2">
+                <div className="bg-primary-600 px-4 py-2.5 flex items-center justify-between gap-2">
                     <h3 className="text-sm font-black text-white tracking-wide uppercase">
                         Jadwal Mapel {namaMapelTerpilih}
                         {selectedKelas ? " - Kelas " + selectedKelas : ""}
                     </h3>
-                    <span className="text-[11px] font-bold text-white bg-green-700 px-2 py-0.5 rounded shrink-0">
+                    <span className="text-[11px] font-bold text-white bg-primary-700 px-2 py-0.5 rounded shrink-0">
                         Total {totalJamMapel} Jam
                     </span>
                 </div>
@@ -722,11 +722,11 @@ export default function DaftarJadwal({
 
         return (
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full">
-                <div className="bg-green-600 px-4 py-2.5 flex items-center justify-between gap-2">
+                <div className="bg-primary-600 px-4 py-2.5 flex items-center justify-between gap-2">
                     <h3 className="text-sm font-black text-white tracking-wide uppercase">
                         Jadwal Guru {selectedGuru.label}
                     </h3>
-                    <span className="text-[11px] font-bold text-white bg-green-700 px-2 py-0.5 rounded shrink-0">
+                    <span className="text-[11px] font-bold text-white bg-primary-700 px-2 py-0.5 rounded shrink-0">
                         Total {totalJamGuru} Jam
                     </span>
                 </div>
@@ -897,7 +897,7 @@ export default function DaftarJadwal({
                     key={namaKelas}
                     className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden w-full"
                 >
-                    <div className="bg-green-600 px-4 py-2.5">
+                    <div className="bg-primary-600 px-4 py-2.5">
                         <h3 className="text-sm font-black text-white tracking-wide uppercase">
                             Jadwal Kelas {namaKelas}
                         </h3>

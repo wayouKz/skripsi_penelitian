@@ -266,7 +266,7 @@ export default function Panel({ url, user }) {
                 <span
                     className={`px-2 py-0.5 text-[10px] font-semibold rounded-full ${
                         isOnline
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-primary-100 text-primary-700"
                             : "bg-red-100 text-red-700"
                     }`}
                 >
@@ -313,7 +313,7 @@ export default function Panel({ url, user }) {
                 {/* 3. Developer Console Screen (Terminal View) */}
                 <div className="p-3 bg-gray-900 rounded-lg border border-gray-800 space-y-2 text-white">
                     <div className="flex items-center justify-between border-b border-gray-800 pb-1.5">
-                        <h4 className="font-bold text-teal-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
+                        <h4 className="font-bold text-primary-400 uppercase tracking-wider text-[10px] flex items-center gap-1">
                             <span>
                                 <i className="fa fa-terminal"></i>
                             </span>{" "}
@@ -342,7 +342,7 @@ export default function Panel({ url, user }) {
                                     "info",
                                 );
                             }}
-                            className="bg-black text-teal-400 border border-gray-700 rounded px-2 py-1 text-[11px] focus:outline-none focus:border-teal-500 font-mono w-36"
+                            className="bg-black text-primary-400 border border-gray-700 rounded px-2 py-1 text-[11px] focus:outline-none focus:border-primary-500 font-mono w-36"
                         >
                             {tahunAjaranList.length === 0 ? (
                                 <option value="" disabled>
@@ -373,7 +373,7 @@ export default function Panel({ url, user }) {
                             logs.map((log, index) => {
                                 let textColor = "text-gray-300";
                                 if (log.type === "success")
-                                    textColor = "text-green-400";
+                                    textColor = "text-primary-400";
                                 if (log.type === "error")
                                     textColor = "text-red-400";
                                 if (log.type === "warning")
@@ -402,7 +402,7 @@ export default function Panel({ url, user }) {
                             type="button"
                             disabled={loading}
                             onClick={onCheckConflict}
-                            className="bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white text-[11px] font-semibold py-1.5 px-2 rounded transition-colors shadow-sm flex items-center justify-center gap-1"
+                            className="bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white text-[11px] font-semibold py-1.5 px-2 rounded transition-colors shadow-sm flex items-center justify-center gap-1"
                         >
                             <span>
                                 <i className="fa fa-search"></i>

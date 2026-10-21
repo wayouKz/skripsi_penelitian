@@ -57,7 +57,7 @@ export default function Offcanvas({
             >
                 {/* HEADER */}
                 <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                    <h2 className="text-sm font-semibold text-green-800 flex items-center gap-1.5 truncate">
+                    <h2 className="text-sm font-semibold text-primary-800 flex items-center gap-1.5 truncate">
                         {icon} <span className="truncate">{title}</span>
                     </h2>
 

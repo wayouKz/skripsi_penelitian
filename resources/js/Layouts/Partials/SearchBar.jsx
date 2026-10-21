@@ -116,7 +116,7 @@ const SearchBar = ({ context }) => {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => results.length && setOpen(true)}
-                        className="w-full pl-9 pr-16 py-1.5 text-xs border border-gray-200 rounded-xl focus:ring-1 focus:ring-green-500"
+                        className="w-full pl-9 pr-16 py-1.5 text-xs border border-gray-200 rounded-xl focus:ring-1 focus:ring-primary-500"
                     />
 
                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -183,7 +183,7 @@ const SearchBar = ({ context }) => {
                                                 }}
                                                 className="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-gray-50 transition"
                                             >
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-50 text-green-600 flex-shrink-0">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-50 text-primary-600 flex-shrink-0">
                                                     <i
                                                         className={`fa ${item.icon} text-xs`}
                                                     />

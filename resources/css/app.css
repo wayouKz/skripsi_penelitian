@@ -8,26 +8,26 @@
     --color-primary-light: 52 211 153; /* emerald-400 */
 }
 
-/* Optional: biar scrollbar & nprogress ikut tema */
 ::-webkit-scrollbar-thumb {
-    background-color: rgb(var(--color-primary) / 0.4);
+    background-color: rgba(
+        16,
+        185,
+        129,
+        0.4
+    ); /* sesuaikan dengan primary-500 */
+    border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: rgb(var(--color-primary-dark) / 0.8);
+    background-color: rgba(5, 150, 105, 0.8); /* primary-600 */
 }
 html {
-    scrollbar-color: rgb(var(--color-primary) / 0.5) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.5) transparent;
 }
+
 #nprogress .bar {
-    background: linear-gradient(
-        to right,
-        rgb(var(--color-primary-dark)),
-        rgb(var(--color-primary)),
-        rgb(var(--color-primary-light))
-    ) !important;
-    box-shadow:
-        0 0 12px rgb(var(--color-primary)),
-        0 0 4px rgb(var(--color-primary-dark)) !important;
+    background: linear-gradient(to right, #059669, #10b981, #34d399) !important;
+    /* ganti hex di atas sesuai primary kamu */
 }
 #nprogress .peg {
     box-shadow:

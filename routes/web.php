@@ -23,22 +23,14 @@ use App\Http\Controllers\Akademik\KelasDiAmpuController;
 use App\Http\Controllers\Helper\DevController;
 use App\Http\Controllers\Helper\GetDataController;
 use App\Http\Controllers\Helper\Pdf;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Master\JadwalController;
 use App\Http\Controllers\Master\KelasController;
 use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\TahunAjaranController;
 use App\Models\Config;
 
-Route::get('/', function () {
-    // return redirect()->route('login');
-    return Inertia::render('LandingPage/Welcome', [
-        'canLogin' => Route::has('login'),
-        'config' => Config::first(),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [LandingPageController::class, 'index'] );
 
 Route::prefix('install')->group(function () {
     Route::get('/', [InstalerController::class, 'index'])->name('install');

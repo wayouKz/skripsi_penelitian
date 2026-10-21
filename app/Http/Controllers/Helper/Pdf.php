@@ -19,19 +19,23 @@ class Pdf extends Controller
 
         $tahunAjaran = DB::table('m_tahun_ajarans')->where('id', $tahun_ajaran_id)->first();
         $namaTahunAjaran = $tahunAjaran ? $tahunAjaran->tahun_ajaran : 'Unknown';
+        $semester = $tahunAjaran ? $tahunAjaran->semester : 'Unknown';
         $jadwal = DB::table('t_jadwals')
+        ->select('t_jadwals.*', 'm_mapels.nama_mapel', 'm_kelas.nama_kelas', 'm_gurus.nama_guru', 'wali_kelas.nama_guru as wali_kelas','wali_kelas.nip as wali_kelas_nip')
         ->join('m_mapels', 't_jadwals.mapel_id', '=', 'm_mapels.id')
         ->join('m_kelas', 't_jadwals.kelas_id', '=', 'm_kelas.id')
         ->join('t_list_guru_mapels', 't_jadwals.t_list_guru_mapel_id', '=', 't_list_guru_mapels.id')
         ->join('t_list_gurus', 't_list_guru_mapels.t_list_guru_id', '=', 't_list_gurus.id')
         ->join('m_gurus', 't_list_gurus.guru_id', '=', 'm_gurus.id')
+        ->join('m_gurus as wali_kelas', 'm_kelas.id_wali_kelas', '=', 'wali_kelas.id')
         ->where('t_jadwals.tahun_ajaran_id', $tahun_ajaran_id)
         ->when($kelas && $kelas !== 'all', function ($query) use ($kelas) {
             return $query->where('t_jadwals.kelas_id', $kelas);
         })
         ->get();
-
-        $views = view('pdf.jadwal.jadwal', compact('jadwal','namaTahunAjaran', 'instansi'))->render();
+        // dd($jadwal);
+        $jenisGuru = "wali";
+        $views = view('pdf.jadwal.jadwal', compact('jadwal','namaTahunAjaran', 'instansi', 'jenisGuru','semester'))->render();
 
         ini_set('pcre.backtrack_limit', '5000000');
         ini_set('pcre.recursion_limit', '5000000');
@@ -80,7 +84,7 @@ class Pdf extends Controller
         $mpdf = new \Mpdf\Mpdf([
         'mode' => 'utf-8',
         'format' => 'A4',
-        'orientation' => 'P'
+        'orientation' => 'L'
         ]);
 
         $mpdf->SetHTMLFooter($this->footerPrintUser());
@@ -174,12 +178,12 @@ $daftarAbsenSiswa = DB::table('t_list_siswas')
     // dd($daftarAbsenSiswa);
         $instansi = $this->infoInstansi();
         $title = "Absensi" . ' - ' . $namaTahunAjaran->tahun_ajaran . ' - ' . strtoupper($namaTahunAjaran->semester);
-
-        $view = view('pdf.absensi.absensi_pdf', compact('kelas_id', 'instansi', 'title', 'namaTahunAjaran', 'daftarAbsenSiswa'))->render();
+        $jenisGuru = 'mapel';
+        $view = view('pdf.absensi.absensi_pdf', compact('kelas_id', 'instansi', 'title', 'namaTahunAjaran', 'daftarAbsenSiswa' ,'jenisGuru'))->render();
 
         $mpdf = new \Mpdf\Mpdf([
             'mode' => 'utf-8',
-            'format' => 'A4',
+            'format' => 'A4-L',
             'orientation' => 'L'
         ]);
 

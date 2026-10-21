@@ -11,7 +11,7 @@ class TListGuruMapel extends Model
 
     public function GuruMapel()
     {
-        return $this->belongsTo(MGuru::class, 'nip', 'nip');
+        return $this->belongsTo(MGuru::class, 'id', 'guru_id');
     }
 
  public static function MapelGuruKelas($kelasID, $tahunAjaran)

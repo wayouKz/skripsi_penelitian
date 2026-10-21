@@ -3,100 +3,200 @@
 @section('content')
 @include('pdf.format.kop_surat')
 
-<h4 style="text-align: center; margin-bottom: 20px; font-size: 12px; color: #666;">{{ $title }}</h4>
+<style>
+.judul {
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 13pt;
+    color: #444;
+}
+
+.tbl {
+    width: 100%;
+    table-layout: fixed;
+    font-size: 9pt;
+    font-family: sans-serif;
+    color: #333;
+    border-collapse: collapse;
+    margin-top: 6px;
+}
+
+.tbl th,
+.tbl td {
+    border: 1px solid #9ca3af;
+    padding: 4px 3px;
+    overflow: hidden;
+}
+
+.tbl th {
+    background-color: #e5e7eb;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Kolom kelas: sempit, angka di tengah */
+.tbl td.k {
+    padding: 4px 0;
+    text-align: center;
+    font-size: 9pt;
+}
+
+.tbl th.k {
+    padding: 2px 0;
+    font-size: 8pt;
+    height: 45px;
+    text-rotate: 90;
+}
+
+.tbl td.mid {
+    vertical-align: middle;
+}
+
+.c {
+    text-align: center;
+}
+
+.l {
+    text-align: left;
+}
+
+.r {
+    text-align: right;
+}
+
+.b {
+    font-weight: bold;
+}
+
+.total-row td {
+    background-color: #d1d5db;
+    font-weight: bold;
+    color: #111827;
+}
+
+.kosong {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+}
+</style>
 
 @php
-// Mengelompokkan data utama berdasarkan nama guru
-$groupGuruMapel = $DaftarGuruMapel->groupBy('nama');
+$no = 1;
+
+// Daftar kelas unik (kolom), diurutkan natural: X-1, X-2, ..., XII-13
+$kelas = $DaftarGuruMapel
+->pluck('kelas')
+->filter()
+->unique()
+->sort(function ($a, $b) {
+return strnatcmp($a, $b);
+})
+->values();
+
+$jumlahKelas = max($kelas->count(), 1);
+
+// Lebar kolom (dalam %) supaya total = 100
+$wNo = 3;
+$wGuru = 14;
+$wMapel = 12;
+$wTotal = 3.5;
+$wKelas = round((100 - $wNo - $wGuru - $wMapel - $wTotal) / $jumlahKelas, 3);
+
+// Group per guru
+$guruGroup = $DaftarGuruMapel->groupBy('nama');
+
+// Total vertikal per kelas
+$totalJamPerKelas = [];
 @endphp
 
-<table width="100%"
-    style="font-size: 10px; font-family: sans-serif; color: #333; border-collapse: collapse; margin-top: 10px;">
+<h4 class="judul">{{ $title }}</h4>
+
+<table class="tbl">
+    <colgroup>
+        <col style="width: {{ $wNo }}%;">
+        <col style="width: {{ $wGuru }}%;">
+        <col style="width: {{ $wMapel }}%;">
+        @for($i = 0; $i < $jumlahKelas; $i++) <col style="width: {{ $wKelas }}%;">
+            @endfor
+            <col style="width: {{ $wTotal }}%;">
+    </colgroup>
+
     <thead>
-        <tr style="background-color: #e5e7eb;">
-            <th style="border: 1px solid #9ca3af; padding: 6px 8px; text-align: left; width: 35%;">Mata Pelajaran</th>
-            <th style="border: 1px solid #9ca3af; padding: 6px 8px; text-align: center; width: 15%;">Beban Jam</th>
+        <tr>
+            <th rowspan="2">No</th>
+            <th rowspan="2" class="l">Nama Guru</th>
+            <th rowspan="2" class="l">Mata Pelajaran</th>
+            <th colspan="{{ $jumlahKelas }}">Kelas</th>
+            <th rowspan="2">Total</th>
+        </tr>
+        <tr>
+            @forelse($kelas as $kls)
+            <th class="k">{{ $kls }}</th>
+            @empty
+            <th class="k">-</th>
+            @endforelse
         </tr>
     </thead>
+
     <tbody>
-        @if ($groupGuruMapel->isEmpty())
+        @if ($guruGroup->isEmpty())
         <tr>
-            <td colspan="2" style="border: 1px solid #9ca3af;; padding: 8px; text-align: center;"><span
-                    style="color: red; text-weight: bold">Tidak ada data</span></td>
+            <td colspan="{{ 4 + $jumlahKelas }}" class="kosong">Tidak ada data</td>
         </tr>
         @endif
-        <!-- Loop 1: Group Berdasarkan Nama Guru -->
-        @foreach($groupGuruMapel as $namaGuru => $listMapelGuru)
 
+        @foreach($guruGroup as $namaGuru => $listGuru)
         @php
-        // Gunakan sum() untuk menjumlahkan beban jam keseluruhan guru
-        // Ganti 'beban_jam' dengan nama kolom beban jam yang ada di database Anda jika berbeda
-        $totalJamGuru = $listMapelGuru->sum('beban_jam');
+        $mapelGroup = $listGuru->groupBy('mapel');
+        $rowspan = $mapelGroup->count();
+        $firstGuru = true;
         @endphp
 
-        <!-- Baris Header Grup Guru -->
-        <tr style="background-color: #d1d5db;">
-            <td colspan="1" style="border: 1px solid #9ca3af; padding: 8px; font-weight: bold; color: #111827;">
-                Nama Guru: {{ $namaGuru }}
-            </td>
-            <td style="border: 1px solid #9ca3af; padding: 8px; font-weight: bold; color: #111827; text-align: center;">
-                Total: {{ $totalJamGuru }} Jam
-            </td>
-        </tr>
-
+        @foreach($mapelGroup as $namaMapel => $itemsMapel)
         @php
-        $groupKelas = $listMapelGuru->groupBy('kelas');
+        $totalJam = 0;
+        $jamPerKelas = $itemsMapel->groupBy('kelas')->map->sum('beban_jam');
         @endphp
 
-
-        @foreach($groupKelas as $namaKelas => $listJadwal)
-
-        <!-- Baris Sub-Header Grup Kelas -->
-        <tr style="background-color: #f3f4f6;">
-            <td colspan="2"
-                style="border: 1px solid #9ca3af; padding: 6px 8px 6px 20px; font-weight: bold; color: #374151; font-style: italic;">
-                Kelas: {{ $namaKelas ?? '-' }}
-            </td>
-        </tr>
-
-        @php
-        // Grouping berdasarkan Mapel
-        $groupMapel = $listJadwal->groupBy('mapel');
-        @endphp
-
-        <!-- Loop 3: Group Berdasarkan Mata Pelajaran -->
-        @foreach($groupMapel as $namaMapel => $itemsMapel)
-        @php
-        // Hitung total jam menggunakan sum() untuk mapel tersebut
-        $totalJamMapel = $itemsMapel->sum('beban_jam');
-        $rowspan = $itemsMapel->count();
-        @endphp
-
-        @foreach($itemsMapel as $index => $item)
         <tr>
-            {{-- Kolom Mata Pelajaran dengan Rowspan --}}
-            @if($index === 0)
-            <td rowspan="{{ $rowspan }}"
-                style="border: 1px solid #9ca3af; padding: 6px 8px; vertical-align: middle; font-weight: bold;">
-                {{ $namaMapel ?? '-' }}
-            </td>
+            @if($firstGuru)
+            <td rowspan="{{ $rowspan }}" class="c mid">{{ $no++ }}</td>
+            <td rowspan="{{ $rowspan }}" class="mid b">{{ $namaGuru }}</td>
+            @php $firstGuru = false; @endphp
             @endif
 
-            {{-- Kolom Beban Jam menggunakan hasil sum() --}}
-            @if($index === 0)
-            <td rowspan="{{ $rowspan }}"
-                style="border: 1px solid #9ca3af; padding: 6px 8px; text-align: center; vertical-align: middle;">
-                {{ $totalJamMapel }} Jam
-            </td>
-            @endif
+            <td>{{ $namaMapel ?? '-' }}</td>
+
+            @forelse($kelas as $kls)
+            @php
+            $nilaiJam = $jamPerKelas[$kls] ?? 0;
+            $totalJam += $nilaiJam;
+            $totalJamPerKelas[$kls] = ($totalJamPerKelas[$kls] ?? 0) + $nilaiJam;
+            @endphp
+            <td class="k">{{ $nilaiJam ?: '' }}</td>
+            @empty
+            <td class="k"></td>
+            @endforelse
+
+            <td class="c b">{{ $totalJam }}</td>
         </tr>
         @endforeach
-
         @endforeach
 
-        @endforeach
+        @if (!$guruGroup->isEmpty())
+        <tr class="total-row">
+            <td colspan="3" class="r">JUMLAH TOTAL</td>
 
-        @endforeach
+            @forelse($kelas as $kls)
+            <td class="k">{{ $totalJamPerKelas[$kls] ?? 0 }}</td>
+            @empty
+            <td class="k"></td>
+            @endforelse
+
+            <td class="c">{{ $DaftarGuruMapel->sum('beban_jam') }}</td>
+        </tr>
+        @endif
     </tbody>
 </table>
 

@@ -1,68 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* Mengatur lebar keseluruhan scrollbar */
-::-webkit-scrollbar {
-    width: 8px; /* Anda bisa mengecilkan/membesarkan angka ini */
-    height: 8px; /* Untuk scrollbar horizontal jika ada */
+
+:root {
+    --color-primary: 16 185 129; /* emerald-500 default (#10b981) */
+    --color-primary-dark: 5 150 105; /* emerald-600 */
+    --color-primary-light: 52 211 153; /* emerald-400 */
 }
 
-/* Mengatur jalur (track) di belakang scrollbar menjadi transparan */
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* Mengatur bar (thumb) menjadi warna hijau transparan */
+/* Optional: biar scrollbar & nprogress ikut tema */
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(
-        34,
-        197,
-        94,
-        0.4
-    ); /* Warna hijau dengan tingkat transparansi 40% */
-    border-radius: 10px; /* Membuat ujungnya membulat / rounded */
+    background-color: rgb(var(--color-primary) / 0.4);
 }
-
-/* Efek saat kursor diarahkan (hover) ke scrollbar, warnanya jadi hijau lebih pekat */
 ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(22, 163, 74, 0.8);
+    background-color: rgb(var(--color-primary-dark) / 0.8);
 }
-
-/* --- Opsional: Untuk dukungan browser Firefox --- */
 html {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(34, 197, 94, 0.5) transparent;
+    scrollbar-color: rgb(var(--color-primary) / 0.5) transparent;
 }
-
-/* Styling Modern untuk NProgress Inertia */
-#nprogress {
-    pointer-events: none;
-}
-
 #nprogress .bar {
-    background: linear-gradient(to right, #059669, #10b981, #34d399) !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3.5px !important; /* Ketebalan pas dan elegan */
-    z-index: 99999;
+    background: linear-gradient(
+        to right,
+        rgb(var(--color-primary-dark)),
+        rgb(var(--color-primary)),
+        rgb(var(--color-primary-light))
+    ) !important;
     box-shadow:
-        0 0 12px #10b981,
-        0 0 4px #059669 !important; /* Efek cahaya neon tipis */
-    border-radius: 0 4px 4px 0;
+        0 0 12px rgb(var(--color-primary)),
+        0 0 4px rgb(var(--color-primary-dark)) !important;
 }
-
-/* Efek kilau ujung bar */
 #nprogress .peg {
-    display: block;
-    position: absolute;
-    right: 0px;
-    width: 100px;
-    height: 100%;
     box-shadow:
-        0 0 10px #10b981,
-        0 0 5px #10b981;
-    opacity: 1;
-    transform: rotate(3deg) translate(0px, -4px);
+        0 0 10px rgb(var(--color-primary)),
+        0 0 5px rgb(var(--color-primary)) !important;
 }

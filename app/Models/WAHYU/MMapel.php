@@ -82,4 +82,9 @@ class MMapel extends Model
     ->values();
         return $data;
     }
+
+    public static function getMapel(){
+        $data = MMapel::query();
+        return $data;
+    }
 }

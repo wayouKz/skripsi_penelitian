@@ -1,73 +1,166 @@
 @extends('pdf.format.layout')
 @section('content')
-@include('pdf.format.kop_surat')
+
 @php
-// Kelompokkan data jadwal berdasarkan nama kelasnya terlebih dahulu
 $groupedByKelas = collect($jadwal)->groupBy('nama_kelas');
+$hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+
+// [background, border, warna teks]
+$palette = [
+['#eef2ff', '#a5b4fc', '#3730a3'],
+['#ecfdf5', '#6ee7b7', '#065f46'],
+['#fffbeb', '#fcd34d', '#92400e'],
+['#fff7ed', '#fdba74', '#9a3412'],
+['#f0f9ff', '#7dd3fc', '#075985'],
+['#fdf2f8', '#f9a8d4', '#9d174d'],
+['#f5f3ff', '#c4b5fd', '#5b21b6'],
+['#f0fdfa', '#5eead4', '#115e59'],
+];
 @endphp
 
+<style>
+.matrix {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 2px;
+    table-layout: fixed;
+}
+
+.matrix th {
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 3px;
+    font-size: 7px;
+    padding: 3px 1px;
+    text-align: center;
+    color: #111;
+}
+
+.matrix td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 3px 2px;
+    border-radius: 4px;
+}
+
+.matrix td.hari {
+    width: 10%;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    font-weight: bold;
+    font-size: 8px;
+}
+
+.matrix td.kosong {
+    color: #bbb;
+    font-size: 8px;
+    background-color: #fafafa;
+    border: 1px solid #eee;
+}
+
+.jam {
+    font-size: 6px;
+    color: #666;
+}
+
+.mapel {
+    font-size: 8px;
+    font-weight: bold;
+    color: #111;
+}
+
+.guru {
+    font-size: 6px;
+}
+</style>
+
 @foreach($groupedByKelas as $namaKelas => $jadwalPerKelas)
-<!-- Header Dokumen per Kelas -->
-<h2 style="text-align: center; margin-bottom: 5px; color: #222;">JADWAL PELAJARAN KELAS {{ $namaKelas }}</h2>
-<p style="text-align: center; margin-bottom: 20px; font-size: 12px; color: #666;">
-    Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }} / {{ $tahunAjaran->semester ?? '-' }}
-</p>
+@include('pdf.format.kop_surat')
 
-<!-- Tabel Jadwal -->
-<table style="width: 100%; border-collapse: collapse; margin-top: 10px;" border="1" cellpadding="5">
-    <thead>
-        <tr style="background-color: #22c55e; color: white;">
-            <th style="text-align: center; width: 14%; font-size: 11px;">Waktu</th>
-            <th style="text-align: center; font-size: 11px;">Senin</th>
-            <th style="text-align: center; font-size: 11px;">Selasa</th>
-            <th style="text-align: center; font-size: 11px;">Rabu</th>
-            <th style="text-align: center; font-size: 11px;">Kamis</th>
-            <th style="text-align: center; font-size: 11px;">Jumat</th>
-        </tr>
-    </thead>
-    <tbody>
-        @php
-        // Ambil daftar jam mulai yang unik khusus untuk kelas ini lalu urutkan
-        $daftarJamMulai = collect($jadwalPerKelas)->pluck('jam_mulai')->unique()->sort()->values();
+@php
+$items = collect($jadwalPerKelas)->map(fn($i) => (object) [
+'hari' => $i->hari,
+'mulai' => substr($i->jam_mulai, 0, 5),
+'selesai' => substr($i->jam_selesai, 0, 5),
+'mapel' => $i->nama_mapel,
+'guru' => $i->nama_guru,
+]);
+
+$batas = $items->pluck('mulai')->merge($items->pluck('selesai'))->unique()->sort()->values();
+
+$slots = collect();
+for ($k = 0; $k < $batas->count() - 1; $k++) {
+    $s = $batas[$k];
+    $e = $batas[$k + 1];
+    if ($items->contains(fn($it) => $it->mulai <= $s && $it->selesai >= $e)) {
+        $slots->push(['mulai' => $s, 'selesai' => $e]);
+        }
+        }
+        $n = $slots->count();
+        $mapelList = $items->pluck('mapel')->unique()->values();
         @endphp
 
-        @foreach($daftarJamMulai as $waktuMulai)
-        @php
-        $itemContoh = collect($jadwalPerKelas)->firstWhere('jam_mulai', $waktuMulai);
-        $waktuSelesai = $itemContoh ? $itemContoh->jam_selesai : '';
-        @endphp
-        <tr>
-            <td style="text-align:center; font-weight:bold; padding: 6px; font-size: 10px;">
-                {{ substr($waktuMulai, 0, 5) }} - {{ substr($waktuSelesai, 0, 5) }}
-            </td>
+        <h3 style="text-align: center; margin: 0 0 2px 0; color: #222;">JADWAL PELAJARAN KELAS {{ $namaKelas }}</h3>
+        <p style="text-align: center; margin: 0 0 6px 0; font-size: 9px; color: #666;">
+            Tahun Ajaran: {{ $namaTahunAjaran ?? '-' }} / {{ strtoupper($semester) ?? '-' }}
+        </p>
 
-            @foreach(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'] as $hari)
-            @php
-            // Cari data yang cocok berdasarkan jam_mulai dan hari dalam lingkup kelas ini
-            $itemJadwal = collect($jadwalPerKelas)->first(function($item) use ($waktuMulai, $hari) {
-            return $item->jam_mulai == $waktuMulai && $item->hari == $hari;
-            });
-            @endphp
+        <table class="matrix">
+            <thead>
+                <tr>
+                    <th style="width: 7%;">HARI / JAM</th>
+                    @foreach($slots as $slot)
+                    <th>{{ $slot['mulai'] }}<br>{{ $slot['selesai'] }}</th>
+                    @endforeach
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($hariList as $hari)
+                @php
+                $itemHari = $items->where('hari', $hari)->sortBy('mulai')->values();
+                $i = 0;
+                @endphp
+                <tr>
+                    <td class="hari">{{ strtoupper($hari) }}</td>
 
-            <td style="text-align:center; vertical-align:middle; padding: 6px;">
-                @if($itemJadwal)
-                <div style="font-weight: bold; font-size: 11px;">{{ $itemJadwal->nama_mapel }}</div>
-                <div style="font-size: 9px; color: #555;">{{ $itemJadwal->nama_guru }}</div>
-                @else
-                <span style="color: #aaa; font-size: 9px;">- KOSONG -</span>
-                @endif
-            </td>
-            @endforeach
-        </tr>
+                    @while($i < $n) @php $slot=$slots[$i]; $item=$itemHari->firstWhere('mulai', $slot['mulai']);
+                        @endphp
+
+                        @if($item)
+                        @php
+                        $span = max($slots->filter(fn($s) => $s['mulai'] >= $item->mulai && $s['selesai'] <= $item->
+                            selesai)->count(), 1);
+                            $c = $palette[$mapelList->search($item->mapel) % count($palette)];
+                            @endphp
+                            <td colspan="{{ $span }}"
+                                style="background-color: {{ $c[0] }}; border: 1px solid {{ $c[1] }};">
+                                @if($span > 1)
+                                <div class="jam">{{ $item->mulai }} - {{ $item->selesai }}</div>
+                                @endif
+                                <div class="mapel">{{ $item->mapel }}</div>
+                                <div class="guru" style="color: {{ $c[2] }};">{{ $item->guru }}</div>
+                            </td>
+                            @php $i += $span; @endphp
+                            @else
+                            @php
+                            $span = 1;
+                            while ($i + $span < $n && !$itemHari->contains('mulai', $slots[$i + $span]['mulai'])) {
+                                $span++;
+                                }
+                                @endphp
+                                <td colspan="{{ $span }}" class="kosong">-</td>
+                                @php $i += $span; @endphp
+                                @endif
+                                @endwhile
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        @include('pdf.format.sign_kepala_madrasah')
+        @if(!$loop->last)
+        <pagebreak />
+        @endif
         @endforeach
-    </tbody>
-</table>
 
-<!-- Page break otomatis tiap pindah kelas (kecuali kelas terakhir) -->
-@if(!$loop->last)
-
-<pagebreak />
-@endif
-@endforeach
-@include('pdf.format.sign_kepala_madrasah')
-@endsection
+        @endsection

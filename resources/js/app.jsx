@@ -2,13 +2,13 @@ import "../css/app.css";
 import "./bootstrap";
 import { AlertProvider } from "./Components/AlertContext";
 import GlobalLoader from "./Layouts/GlobalLoader"; // Import loader
-
+import { loadTheme } from "./utils/theme";
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createRoot } from "react-dom/client";
 
 const appName = import.meta.env.VITE_APP_NAME;
-
+loadTheme();
 createInertiaApp({
     title: (title) => `${title} `,
     resolve: (name) =>

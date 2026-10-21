@@ -141,7 +141,7 @@ export default function Detail({ dataKelas }) {
                                                         dataKelas?.nama_kelas,
                                                     );
                                                 }}
-                                                className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors"
+                                                className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors hidden"
                                             >
                                                 <i className="fa fa-file-pdf text-red-600 w-3.5"></i>
                                                 Cetak Raport
@@ -171,7 +171,7 @@ export default function Detail({ dataKelas }) {
                                                         dataKelas?.nama_kelas,
                                                     );
                                                 }}
-                                                className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors"
+                                                className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors hidden"
                                             >
                                                 <i className="fa fa-file-pdf text-red-600 w-3.5"></i>
                                                 Cetak Kartu Tugas

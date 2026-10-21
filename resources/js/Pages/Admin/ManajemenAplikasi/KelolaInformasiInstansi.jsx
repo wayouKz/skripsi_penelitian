@@ -6,7 +6,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Select from "react-select";
-
+import { PRESETS, applyTheme, getSavedTheme } from "@/utils/theme";
+import { Palette } from "lucide-react"; // atau pakai fontawesome kalau lebih suka
 export default function KelolaInformasiInstansi() {
     const [logoPreview, setLogoPreview] = useState(null);
     const [sampulPreview, setSampulPreview] = useState(null);
@@ -39,15 +40,7 @@ export default function KelolaInformasiInstansi() {
             parsedCardImg = rawData || {};
 
             // Console log sementara untuk nge-cek apakah datanya sukses ditangkap
-            console.log("Sukses Parse card_img:", parsedCardImg);
-        } catch (error) {
-            console.error(
-                "Gagal memparsing card_img:",
-                error,
-                "Data mentah:",
-                dataInstansi.card_img,
-            );
-        }
+        } catch (error) {}
     }
 
     const { data, setData, post, processing, errors } = useForm({
@@ -71,8 +64,6 @@ export default function KelolaInformasiInstansi() {
         foto_highlight_2: parsedCardImg[1] || parsedCardImg["1"] || null,
         foto_highlight_3: parsedCardImg[2] || parsedCardImg["2"] || null,
     });
-
-    console.log("Data form saat ini:", data);
 
     const handleSampulChange = (e) => {
         const file = e.target.files[0];
@@ -193,9 +184,65 @@ export default function KelolaInformasiInstansi() {
     useEffect(() => {
         getDataGuru();
     }, []);
+    const [activeTheme, setActiveTheme] = useState(() => getSavedTheme());
+
+    const handleChangeTheme = (key) => {
+        const colors = PRESETS[key];
+        applyTheme(colors);
+        setActiveTheme(colors);
+        showAlert(`Tema diganti ke ${colors.name}`, "success");
+    };
     return (
         <AuthenticatedLayout header="Kelola Informasi Instansi">
             <div className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden">
+                <div className="p-4 border-b bg-white">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-gray-100 rounded-lg">
+                                <i className="fa-solid fa-palette text-gray-600" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold text-gray-800">
+                                    Tema Aplikasi
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    Warna disimpan di browser (localStorage)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {Object.entries(PRESETS).map(([key, preset]) => {
+                                const isActive =
+                                    activeTheme.primary === preset.primary;
+
+                                return (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => handleChangeTheme(key)}
+                                        title={preset.name}
+                                        className={`
+                                        relative w-9 h-9 rounded-full border-2 transition-all
+                                        ${
+                                            isActive
+                                                ? "border-gray-800 scale-110 shadow-md"
+                                                : "border-white hover:scale-105 shadow"
+                                        }
+                                    `}
+                                        style={{ backgroundColor: preset.hex }}
+                                    >
+                                        {isActive && (
+                                            <span className="absolute inset-0 flex items-center justify-center">
+                                                <i className="fa-solid fa-check text-white text-xs drop-shadow" />
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
                 <Form onSubmit={submit} loading={processing}>
                     {/* Header Banner */}
                     <div className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 rounded-t-2xl">

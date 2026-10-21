@@ -55,7 +55,7 @@ export default function GenerateJadwal() {
 
     const [openView, setOpenView] = useState(false);
 
-    const { showCenterAlert } = useAlert();
+    const { showCenterAlert, showAlert } = useAlert();
     const [newKromosom, setNewKromosom] = useState({});
 
     const fetchDataTa = async () => {
@@ -63,7 +63,7 @@ export default function GenerateJadwal() {
             const response = await axios.get(route("getData.get-tahun-ajaran"));
             setTahunAjaranList(response.data.data);
         } catch (error) {
-            console.log(error);
+            showAlert("Terjadi Kesalahan", "error");
         }
     };
     useEffect(() => {

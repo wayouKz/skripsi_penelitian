@@ -1,21 +1,10 @@
 import { Head, Link, usePage } from "@inertiajs/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import DynamicTiltCard from "../Partials/DynamicTiltCard";
 import Reveal from "./Partials/Reveal";
 import Statistics from "./Partials/Statistics";
 
 const Icon = {
-    check: (p) => (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            {...p}
-        >
-            <path d="M20 6L9 17l-5-5" />
-        </svg>
-    ),
     users: (p) => (
         <svg
             viewBox="0 0 24 24"
@@ -74,23 +63,18 @@ const FEATURES = [
     },
 ];
 
-export default function Welcome({
-    auth,
-    totalGuru = 0,
-    totalSiswa = 0,
-    totalMapel = 0,
-}) {
+export default function Welcome({ auth, data }) {
     const config = usePage().props.config ?? {
         logo_instansi: "img/logo-default.png",
         nama_instansi: "Man 1 Kota Gorontalo",
     };
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-
     const currentYear = new Date().getFullYear();
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 20);
+        onScroll();
         window.addEventListener("scroll", onScroll);
         return () => window.removeEventListener("scroll", onScroll);
     }, []);
@@ -111,27 +95,27 @@ export default function Welcome({
             </Head>
 
             <div
-                className="bg-[#0c4a4c] text-[#9dbdba] min-h-screen"
+                className="bg-white text-slate-800 min-h-screen"
                 style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}
             >
                 <style>{`
                     .font-serif-display { font-family: 'Fraunces', Georgia, serif; }
                     .font-mono-ui { font-family: 'IBM Plex Mono', monospace; }
-                    .eyebrow::before { content:''; width:18px; height:1px; background:#10b981; display:inline-block; }
+                    .eyebrow::before { content:''; width:18px; height:1px; background:currentColor; display:inline-block; }
                 `}</style>
 
                 {/* ================= NAV ================= */}
                 <header
                     className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
                         scrolled
-                            ? "py-3.5 bg-[#0c4a4c]/95 backdrop-blur-md border-b border-white/10 shadow-lg"
+                            ? "py-3.5 bg-white/90 backdrop-blur-md border-b border-emerald-100 shadow-sm"
                             : "py-5 border-b border-transparent"
                     }`}
                 >
                     <div className="max-w-[1180px] mx-auto px-5 md:px-7 flex items-center justify-between">
                         <a
                             href="#"
-                            className="flex items-center gap-2.5 font-serif-display text-xl font-bold text-[#eafaf3]"
+                            className="flex items-center gap-2.5 font-serif-display text-xl font-bold text-emerald-900"
                         >
                             <img
                                 src={
@@ -152,10 +136,10 @@ export default function Welcome({
                                 <a
                                     key={href}
                                     href={href}
-                                    className="text-sm text-[#9dbdba] hover:text-[#eafaf3] transition-colors relative group"
+                                    className="text-sm text-emerald-900/70 hover:text-emerald-900 transition-colors relative group"
                                 >
                                     {label}
-                                    <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#10b981] group-hover:w-full transition-all duration-300" />
+                                    <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-emerald-500 group-hover:w-full transition-all duration-300" />
                                 </a>
                             ))}
                         </nav>
@@ -164,53 +148,102 @@ export default function Welcome({
                             {auth?.user ? (
                                 <Link
                                     href={route("dashboard")}
-                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-[#eafaf3] border border-white/20 hover:border-[#34d399] hover:text-[#34d399] transition-colors"
+                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
                                 >
                                     Dashboard
                                 </Link>
                             ) : (
                                 <Link
                                     href={route("login")}
-                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-[#eafaf3] bg-[#10b981] hover:bg-[#059669] shadow-sm transition-all"
+                                    className="hidden sm:inline-flex px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors"
                                 >
                                     Masuk
                                 </Link>
                             )}
                             <button
                                 onClick={() => setMenuOpen((v) => !v)}
-                                className="md:hidden text-[#eafaf3] text-2xl leading-none"
+                                className="md:hidden text-emerald-900 text-2xl leading-none"
                                 aria-label="Buka menu"
                             >
                                 ☰
                             </button>
                         </div>
                     </div>
+                    {menuOpen && (
+                        <div className="md:hidden border-t border-emerald-100 bg-white">
+                            <div className="max-w-[1180px] mx-auto px-5 py-4 flex flex-col gap-1">
+                                {[
+                                    ["Overview", "#fitur"],
+                                    ["Statistik", "#statistik"],
+                                ].map(([label, href]) => (
+                                    <a
+                                        key={href}
+                                        href={href}
+                                        onClick={() => setMenuOpen(false)}
+                                        className="px-3 py-3 rounded-lg text-sm font-medium text-emerald-900/80 hover:bg-emerald-50 hover:text-emerald-900 transition-colors"
+                                    >
+                                        {label}
+                                    </a>
+                                ))}
+
+                                {auth?.user ? (
+                                    <Link
+                                        href={route("dashboard")}
+                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route("login")}
+                                        className="mt-2 inline-flex justify-center px-5 py-3 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors"
+                                    >
+                                        Masuk
+                                    </Link>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </header>
 
                 <main>
                     {/* ================= HERO ================= */}
-                    <section className="relative pt-[150px] md:pt-[172px] pb-20 md:pb-[120px] overflow-hidden">
+                    <section
+                        className="relative pt-[150px] md:pt-[172px] pb-20 md:pb-[120px] overflow-hidden"
+                        style={{
+                            background:
+                                "linear-gradient(160deg, #D1FAE5 0%, #ECFDF5 55%, #FFFFFF 100%)",
+                        }}
+                    >
                         <div
-                            className="absolute inset-x-0 -top-24 h-[600px] pointer-events-none"
+                            className="absolute inset-0 pointer-events-none"
                             style={{
                                 background:
-                                    "radial-gradient(ellipse 700px 400px at 18% 10%, rgba(13,148,136,0.22), transparent 70%), radial-gradient(ellipse 600px 400px at 85% 0%, rgba(16,185,129,0.18), transparent 70%)",
+                                    "radial-gradient(ellipse 650px 420px at 12% 8%, rgba(110,231,183,0.45), transparent 70%), radial-gradient(ellipse 600px 450px at 90% 90%, rgba(167,243,208,0.35), transparent 70%)",
                             }}
                         />
                         <div className="relative z-10 max-w-[1180px] mx-auto px-5 md:px-7 grid grid-cols-1 md:grid-cols-[1.05fr_0.95fr] gap-14 md:gap-[60px] items-center">
                             <div>
-                                <span className="eyebrow font-mono-ui text-xs tracking-[0.14em] uppercase text-[#34d399] inline-flex items-center gap-2.5 mb-2">
+                                <span className="eyebrow font-mono-ui text-xs tracking-[0.14em] uppercase text-emerald-700 inline-flex items-center gap-2.5 mb-2">
                                     Sistem Informasi Akademik
                                 </span>
-                                <h1 className="font-serif-display font-semibold text-[#eafaf3] leading-[1.08] text-[34px] md:text-[54px] mt-3 mb-5">
+                                <h1 className="font-serif-display font-semibold text-emerald-900 leading-[1.08] text-[34px] md:text-[54px] mt-3 mb-5">
                                     {config.nama_instansi}
                                 </h1>
-                                <p className="text-[16px] text-[#9dbdba] leading-relaxed max-w-[480px]">
+                                <p className="text-[16px] text-emerald-950/70 leading-relaxed max-w-[480px]">
                                     Platform terpadu untuk pengelolaan data
                                     akademik, pemantauan jadwal, serta
                                     rekapitulasi nilai siswa dan kinerja guru
                                     secara efisien.
                                 </p>
+                                {!auth?.user && (
+                                    <Link
+                                        href={route("login")}
+                                        className="inline-flex mt-8 px-7 py-3 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition-colors"
+                                    >
+                                        Masuk ke sistem
+                                    </Link>
+                                )}
                             </div>
 
                             <DynamicTiltCard />
@@ -220,25 +253,33 @@ export default function Welcome({
                     {/* ================= STATS ================= */}
                     <div
                         id="statistik"
-                        className="bg-[#083537] border-t border-b border-white/10 shadow-inner"
+                        className="bg-emerald-100 border-y border-emerald-200"
                     >
                         <div className="max-w-[1180px] mx-auto px-5 md:px-7">
                             <Statistics
-                                totalGuru={totalGuru}
-                                totalSiswa={totalSiswa}
-                                totalMapel={totalMapel}
+                                totalGuru={data.totalGuru}
+                                totalSiswa={data.totalSiswa}
+                                totalMapel={data.totalMapel}
+                                dataSiswa={data.dataSiswa}
+                                dataGuru={data.dataGuru}
+                                dataJadwal={data.dataJadwal}
+                                dataMapel={data.dataMapel}
+                                dataGuruMapel={data.dataGuruMapel}
                             />
                         </div>
                     </div>
 
                     {/* ================= FITUR ================= */}
-                    <section id="fitur" className="py-24 md:py-[120px]">
+                    <section
+                        id="fitur"
+                        className="py-24 md:py-[120px] bg-white"
+                    >
                         <div className="max-w-[1180px] mx-auto px-5 md:px-7">
                             <Reveal className="max-w-[640px] mb-14 md:mb-16">
-                                <span className="eyebrow font-mono-ui text-xs tracking-[0.14em] uppercase text-[#34d399] mb-2">
+                                <span className="eyebrow font-mono-ui text-xs tracking-[0.14em] uppercase text-emerald-700 inline-flex items-center gap-2.5 mb-2">
                                     Fitur Utama
                                 </span>
-                                <h2 className="font-serif-display text-[28px] md:text-4xl text-[#eafaf3] mt-3 leading-tight">
+                                <h2 className="font-serif-display text-[28px] md:text-4xl text-emerald-900 mt-3 leading-tight">
                                     Setiap bagian administrasi, dalam satu ruang
                                     kerja.
                                 </h2>
@@ -246,18 +287,20 @@ export default function Welcome({
 
                             <Reveal
                                 as="div"
-                                className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10 rounded-2xl overflow-hidden shadow-xl"
+                                className="grid grid-cols-1 md:grid-cols-3 gap-px bg-emerald-100 border border-emerald-100 rounded-2xl overflow-hidden shadow-[0_20px_50px_-25px_rgba(5,150,105,0.35)]"
                             >
                                 {FEATURES.map((f) => (
                                     <div
                                         key={f.title}
-                                        className="bg-[#0c4a4c] hover:bg-[#0f595b] transition-colors p-8 md:p-9"
+                                        className="bg-white hover:bg-emerald-50 transition-colors p-8 md:p-9"
                                     >
-                                        <f.icon className="w-9 h-9 text-[#34d399] mb-5" />
-                                        <h3 className="text-lg text-[#eafaf3] font-serif-display mb-2.5">
+                                        <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-5">
+                                            <f.icon className="w-7 h-7" />
+                                        </div>
+                                        <h3 className="text-lg text-emerald-900 font-serif-display font-semibold mb-2.5">
                                             {f.title}
                                         </h3>
-                                        <p className="text-[14.5px] text-[#9dbdba] leading-relaxed">
+                                        <p className="text-[14.5px] text-slate-600 leading-relaxed">
                                             {f.desc}
                                         </p>
                                     </div>
@@ -268,9 +311,9 @@ export default function Welcome({
                 </main>
 
                 {/* ================= FOOTER ================= */}
-                <footer className="pt-16 pb-8 border-t border-white/10 bg-[#083537]">
+                <footer className="pt-16 pb-8 bg-emerald-50 border-t border-emerald-100">
                     <div className="max-w-[1180px] mx-auto px-5 md:px-7 text-center">
-                        <div className="text-emerald-100/70 text-xs font-medium tracking-wide">
+                        <div className="text-emerald-900/60 text-xs font-medium tracking-wide">
                             &copy; {currentYear} Aplikasi by INFORMATIKA UNG
                         </div>
                     </div>

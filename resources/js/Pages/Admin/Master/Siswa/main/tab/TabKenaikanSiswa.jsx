@@ -588,7 +588,7 @@ export default function TabKenaikanKelas() {
                 <button
                     type="button"
                     onClick={startTour}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-md text-[11px] font-bold transition-all shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 rounded-md text-[11px] font-bold transition-all shadow-sm"
                 >
                     <i className="fa fa-question-circle" />
                     <span className="hidden sm:inline">Panduan Pemakaian</span>
@@ -600,7 +600,7 @@ export default function TabKenaikanKelas() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm transition-opacity">
                     <div className="bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm mx-4 flex flex-col gap-3 border border-gray-100">
                         <div className="flex items-center gap-3 border-b border-gray-100 pb-2">
-                            <i className="fa fa-sync fa-spin text-emerald-600 text-base" />
+                            <i className="fa fa-sync fa-spin text-primary-600 text-base" />
                             <div>
                                 <h3 className="text-gray-800 font-bold text-sm">
                                     Memproses Kenaikan Otomatis
@@ -614,7 +614,7 @@ export default function TabKenaikanKelas() {
 
                         <div className="flex flex-col gap-1.5">
                             <div className="flex justify-between text-[11px] font-semibold">
-                                <span className="text-emerald-600">
+                                <span className="text-primary-600">
                                     Kelas: {autoProgress.kelasName}
                                 </span>
                                 <span className="text-gray-600">
@@ -633,9 +633,9 @@ export default function TabKenaikanKelas() {
                             </div>
                         </div>
 
-                        <div className="bg-black rounded-lg p-2 h-24 overflow-y-auto font-mono text-[10px] text-primary-400 flex flex-col gap-1 shadow-inner border border-slate-700">
+                        <div className="bg-black rounded-lg p-2 h-24 overflow-y-auto font-mono text-[10px] text-primary-400 flex flex-col gap-1 shadow-inner border border-primary-700">
                             {autoLogs.length === 0 ? (
-                                <span className="text-slate-500">
+                                <span className="text-primary-500">
                                     Menyiapkan data...
                                 </span>
                             ) : (
@@ -747,7 +747,7 @@ export default function TabKenaikanKelas() {
                                     >
                                         <input
                                             type="checkbox"
-                                            className="w-3.5 h-3.5 rounded text-emerald-600 focus:ring-emerald-500/30 accent-emerald-600 cursor-pointer"
+                                            className="w-3.5 h-3.5 rounded text-primary-600 focus:ring-primary-500/30 accent-primary-600 cursor-pointer"
                                             checked={isCheckAllChecked}
                                             ref={(el) => {
                                                 if (el)
@@ -772,7 +772,7 @@ export default function TabKenaikanKelas() {
 
                                 <div className="overflow-y-auto max-h-52 flex-1 p-1.5 scrollbar-thin scrollbar-thumb-gray-200">
                                     {loadingSiswa ? (
-                                        <div className="flex flex-col items-center justify-center h-full py-10 gap-2 text-emerald-500">
+                                        <div className="flex flex-col items-center justify-center h-full py-10 gap-2 text-primary-500">
                                             <i className="fa fa-spinner animate-spin text-xl" />
                                             <span className="text-[11px] font-medium text-gray-400">
                                                 Memuat daftar siswa...
@@ -799,7 +799,7 @@ export default function TabKenaikanKelas() {
                                                         >
                                                             <input
                                                                 type="checkbox"
-                                                                className="w-3.5 h-3.5 rounded text-emerald-600 accent-emerald-600 flex-shrink-0"
+                                                                className="w-3.5 h-3.5 rounded text-primary-600 accent-primary-600 flex-shrink-0"
                                                                 checked={
                                                                     isChecked
                                                                 }
@@ -839,7 +839,7 @@ export default function TabKenaikanKelas() {
                             <div className="w-px h-3 bg-gray-200" />
                             <div className="w-6 h-6 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center">
                                 <svg
-                                    className="w-3 h-3 text-emerald-500"
+                                    className="w-3 h-3 text-primary-500"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -945,7 +945,7 @@ export default function TabKenaikanKelas() {
                                     <SummaryRow
                                         label="Siswa dipilih"
                                         value={
-                                            <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                                            <span className="inline-flex items-center gap-1 font-semibold text-primary-600">
                                                 <span className="w-1 h-1 rounded-full bg-primary-500 inline-block" />
                                                 {selectedSiswa.length} siswa
                                             </span>
@@ -1047,7 +1047,7 @@ export default function TabKenaikanKelas() {
                             !kelasTujuanId ||
                             loading
                         }
-                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-primary-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
+                        className="w-full sm:w-auto flex justify-center items-center gap-1.5 px-4 py-1.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-md disabled:shadow-none hover:shadow-lg transition-all duration-200"
                     >
                         {loading ? (
                             <>

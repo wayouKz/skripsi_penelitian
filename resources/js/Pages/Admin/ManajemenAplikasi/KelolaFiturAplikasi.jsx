@@ -95,7 +95,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                         placeholder="Cari menu..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500"
+                        className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
                     />
 
                     <select
@@ -372,7 +372,7 @@ export default function KelolaFiturAplikasi({ list_fiture, roles }) {
                                         className={`cursor-pointer p-4 rounded-lg border flex items-center justify-center transition
                                             ${
                                                 isSelected
-                                                    ? "bg-primary-50 border-emerald-500 text-emerald-600"
+                                                    ? "bg-primary-50 border-primary-500 text-primary-600"
                                                     : "hover:bg-gray-50"
                                             }`}
                                     >

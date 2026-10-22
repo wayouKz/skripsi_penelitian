@@ -90,7 +90,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                     className={`group relative aspect-square rounded-2xl border p-2 text-left transition-all duration-150
                         ${
                             absenData
-                                ? "border-primary-200 bg-primary-50 hover:border-emerald-400 hover:bg-primary-100 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                                ? "border-primary-200 bg-primary-50 hover:border-primary-400 hover:bg-primary-100 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
                                 : "border-gray-300 bg-gray-50/40 cursor-default"
                         }
                     `}
@@ -99,9 +99,9 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                         className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold
                             ${
                                 isToday
-                                    ? "bg-emerald-900 text-white"
+                                    ? "bg-primary-900 text-white"
                                     : absenData
-                                      ? "text-emerald-800"
+                                      ? "text-primary-800"
                                       : "text-gray-600"
                             }
                         `}
@@ -110,7 +110,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                     </span>
 
                     {absenData && (
-                        <span className="absolute bottom-2 left-2 right-2 flex items-center gap-1 rounded-md bg-white/70 px-1.5 py-1 text-[10px] font-bold text-emerald-700 backdrop-blur-sm">
+                        <span className="absolute bottom-2 left-2 right-2 flex items-center gap-1 rounded-md bg-white/70 px-1.5 py-1 text-[10px] font-bold text-primary-700 backdrop-blur-sm">
                             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary-500" />
                             <span className="truncate">{absenData.waktu}</span>
                         </span>
@@ -187,7 +187,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                 <div className="mb-4 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                     <button
                         onClick={() => setSelectedItem(null)}
-                        className="flex w-fit items-center gap-2 rounded-lg bg-gray-50 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:text-emerald-700"
+                        className="flex w-fit items-center gap-2 rounded-lg bg-gray-50 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:text-primary-700"
                     >
                         <i className="fa fa-arrow-left" /> Kembali ke Kalender
                     </button>
@@ -206,7 +206,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                                 day: "numeric",
                             })}{" "}
                             •{" "}
-                            <span className="font-bold text-emerald-600">
+                            <span className="font-bold text-primary-600">
                                 {selectedItem.waktu} WITA
                             </span>
                         </p>
@@ -223,10 +223,10 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                         </p>
                     </div>
                     <div className="rounded-xl border border-primary-200 bg-primary-50 p-3 text-center shadow-sm">
-                        <p className="text-lg font-extrabold text-emerald-700">
+                        <p className="text-lg font-extrabold text-primary-700">
                             {hadirCount}
                         </p>
-                        <p className="text-[11px] font-medium text-emerald-600">
+                        <p className="text-[11px] font-medium text-primary-600">
                             Hadir
                         </p>
                     </div>
@@ -280,7 +280,7 @@ export default function HistoryAbsensi({ open, kode_jadwal, onClose }) {
                                                             ${
                                                                 status ===
                                                                 "hadir"
-                                                                    ? "border-primary-200 bg-primary-50 text-emerald-700"
+                                                                    ? "border-primary-200 bg-primary-50 text-primary-700"
                                                                     : status ===
                                                                         "alpha"
                                                                       ? "border-red-200 bg-red-50 text-red-700"

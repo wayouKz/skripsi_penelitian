@@ -80,9 +80,11 @@ const KandidatCard = ({ guru, onAssign }) => (
         <div className="absolute top-0 right-0 bg-indigo-100 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded-bl-xl">
             Match: {guru.matchScore}
         </div>
-        <h5 className="font-bold text-slate-800 text-xs pr-14">{guru.nama}</h5>
-        <p className="text-[10px] text-slate-600 mt-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100 flex items-start gap-1.5">
-            <i className="fa-solid fa-circle-check text-emerald-500 mt-0.5 shrink-0"></i>
+        <h5 className="font-bold text-primary-800 text-xs pr-14">
+            {guru.nama}
+        </h5>
+        <p className="text-[10px] text-primary-600 mt-1.5 bg-primary-50 p-2 rounded-lg border border-primary-100 flex items-start gap-1.5">
+            <i className="fa-solid fa-circle-check text-primary-500 mt-0.5 shrink-0"></i>
             <span>{guru.alasan}</span>
         </p>
         <button
@@ -99,9 +101,9 @@ const KandidatCard = ({ guru, onAssign }) => (
 function SkeletonCard() {
     return (
         <div className="bg-white border border-indigo-100 rounded-lg p-3 animate-pulse shadow-xs">
-            <div className="h-2.5 bg-slate-200 rounded w-3/4 mb-2"></div>
-            <div className="h-2 bg-slate-100 rounded w-full mb-1"></div>
-            <div className="h-2 bg-slate-100 rounded w-4/5 mb-2.5"></div>
+            <div className="h-2.5 bg-primary-200 rounded w-3/4 mb-2"></div>
+            <div className="h-2 bg-primary-100 rounded w-full mb-1"></div>
+            <div className="h-2 bg-primary-100 rounded w-4/5 mb-2.5"></div>
             <div className="h-7 bg-indigo-50 rounded-md w-full"></div>
         </div>
     );
@@ -110,15 +112,15 @@ function SkeletonCard() {
 // ─── Skeleton card untuk loading state Daftar Kelas (Kiri) ────────────────
 function SkeletonKelasCard() {
     return (
-        <div className="bg-white border border-slate-200 rounded-lg p-3.5 animate-pulse shadow-sm">
-            <div className="h-3.5 bg-slate-200 rounded w-1/2 mb-3"></div>
-            <div className="border border-slate-100 rounded-lg p-3 space-y-2">
+        <div className="bg-white border border-primary-200 rounded-lg p-3.5 animate-pulse shadow-sm">
+            <div className="h-3.5 bg-primary-200 rounded w-1/2 mb-3"></div>
+            <div className="border border-primary-100 rounded-lg p-3 space-y-2">
                 <div className="flex justify-between items-center">
-                    <div className="h-3 bg-slate-200 rounded w-1/3"></div>
-                    <div className="h-4 bg-slate-200 rounded w-12"></div>
+                    <div className="h-3 bg-primary-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-primary-200 rounded w-12"></div>
                 </div>
-                <div className="h-2 bg-slate-100 rounded w-3/4"></div>
-                <div className="h-2 bg-slate-100 rounded w-1/4"></div>
+                <div className="h-2 bg-primary-100 rounded w-3/4"></div>
+                <div className="h-2 bg-primary-100 rounded w-1/4"></div>
             </div>
         </div>
     );
@@ -296,7 +298,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
             {/* ── Header ── */}
             <div className="flex items-center justify-between border-b px-4 py-2.5 bg-white shrink-0 z-10">
                 <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <i className="fa fa-computer text-emerald-600"></i> {title}
+                    <i className="fa fa-computer text-primary-600"></i> {title}
                 </h2>
                 <DangerButton
                     type="button"
@@ -312,14 +314,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 {/* ════════════════════════════════════════════
                     KIRI — Status Kelas & Filter Hari
                 ════════════════════════════════════════════ */}
-                <div className="flex-1 overflow-y-auto p-4 bg-slate-50 custom-scrollbar flex flex-col">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 bg-white p-2.5 rounded-lg border border-slate-200 shadow-xs">
+                <div className="flex-1 overflow-y-auto p-4 bg-primary-50 custom-scrollbar flex flex-col">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 bg-white p-2.5 rounded-lg border border-primary-200 shadow-xs">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                            <h3 className="text-xs font-bold text-primary-800 uppercase tracking-wider">
                                 Filter Hari:
                             </h3>
                             {selectedHari === getHariIni() && (
-                                <span className="flex items-center gap-1 bg-primary-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                <span className="flex items-center gap-1 bg-primary-100 text-primary-800 text-[9px] font-bold px-2 py-0.5 rounded-full">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
                                     Hari Ini ({selectedTanggal})
                                 </span>
@@ -353,12 +355,12 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                         className={`text-[10px] font-bold px-2.5 py-1 rounded-md transition-all flex flex-col items-center ${
                                             isSelected
                                                 ? "bg-primary-600 text-white shadow-sm"
-                                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                                : "bg-primary-100 text-primary-600 hover:bg-primary-200"
                                         }`}
                                     >
                                         <span>{hari}</span>
                                         <span
-                                            className={`text-[8px] font-normal ${isSelected ? "text-emerald-100" : "text-slate-400"}`}
+                                            className={`text-[8px] font-normal ${isSelected ? "text-primary-100" : "text-primary-400"}`}
                                         >
                                             {tanggalHariIniPekan.slice(5)}{" "}
                                             {/* Menampilkan format MM-DD agar rapi di tombol */}
@@ -376,14 +378,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                 <SkeletonKelasCard />
                             </>
                         ) : isKelasEmpty ? (
-                            <div className="col-span-full flex flex-col items-center justify-center p-6 text-center bg-white border border-dashed border-slate-300 rounded-xl my-2">
-                                <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-3 text-xl shadow-sm">
+                            <div className="col-span-full flex flex-col items-center justify-center p-6 text-center bg-white border border-dashed border-primary-300 rounded-xl my-2">
+                                <div className="w-12 h-12 bg-primary-100 text-primary-400 rounded-full flex items-center justify-center mb-3 text-xl shadow-sm">
                                     <i className="fa-solid fa-calendar-xmark"></i>
                                 </div>
-                                <h4 className="text-sm font-bold text-slate-700">
+                                <h4 className="text-sm font-bold text-primary-700">
                                     Tidak Ada Kegiatan KBM
                                 </h4>
-                                <p className="text-xs text-slate-500 max-w-sm mt-1 leading-relaxed">
+                                <p className="text-xs text-primary-500 max-w-sm mt-1 leading-relaxed">
                                     Saat ini tidak ada jadwal kegiatan belajar
                                     mengajar yang terdeteksi untuk hari{" "}
                                     {selectedHari} ({selectedTanggal}).
@@ -400,14 +402,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                     return (
                                         <div
                                             key={namaKelas}
-                                            className="mb-1 bg-white border border-slate-200 p-3 rounded-lg shadow-sm flex flex-col"
+                                            className="mb-1 bg-white border border-primary-200 p-3 rounded-lg shadow-sm flex flex-col"
                                         >
-                                            <h4 className="text-xs font-extrabold text-slate-800 mb-2 border-b border-slate-100 pb-1.5 flex items-center justify-between">
+                                            <h4 className="text-xs font-extrabold text-primary-800 mb-2 border-b border-primary-100 pb-1.5 flex items-center justify-between">
                                                 <span className="flex items-center gap-1.5">
-                                                    <i className="fa-solid fa-door-open text-emerald-600"></i>
+                                                    <i className="fa-solid fa-door-open text-primary-600"></i>
                                                     Ruang Kelas {namaKelas}
                                                 </span>
-                                                <span className="text-[9px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                                                <span className="text-[9px] font-semibold text-primary-400 bg-primary-50 px-2 py-0.5 rounded border border-primary-100">
                                                     {selectedHari} (
                                                     {selectedTanggal})
                                                 </span>
@@ -458,14 +460,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     "p-2.5 rounded-lg border transition-all duration-200",
                                                                     bermasalah
                                                                         ? "bg-red-50 border-red-200 shadow-sm ring-1 ring-red-100  hover:ring-indigo-300"
-                                                                        : "bg-white border-slate-200 hover:border-emerald-300",
+                                                                        : "bg-white border-primary-200 hover:border-primary-300",
                                                                     isSelected
                                                                         ? "ring-1 ring-indigo-400 border-indigo-300"
                                                                         : "",
                                                                 ].join(" ")}
                                                             >
                                                                 <div className="flex justify-between items-start mb-1.5">
-                                                                    <span className="font-bold text-slate-800 text-xs">
+                                                                    <span className="font-bold text-primary-800 text-xs">
                                                                         {
                                                                             kls.nama_mapel
                                                                         }
@@ -479,10 +481,10 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     </span>
                                                                 </div>
 
-                                                                <div className="text-[10px] text-slate-600 space-y-1">
+                                                                <div className="text-[10px] text-primary-600 space-y-1">
                                                                     {/* Info Nama Guru & Label Pengganti */}
                                                                     <div className="flex items-start gap-1.5">
-                                                                        <i className="fa-solid fa-user-tie mt-0.5 text-slate-400 shrink-0"></i>
+                                                                        <i className="fa-solid fa-user-tie mt-0.5 text-primary-400 shrink-0"></i>
                                                                         <div className="flex flex-col">
                                                                             <span
                                                                                 className={
@@ -503,7 +505,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                                     {
                                                                                         kls.nama_guru_pengganti
                                                                                     }
-                                                                                    <span className="italic text-slate-400">
+                                                                                    <span className="italic text-primary-400">
                                                                                         {" "}
                                                                                         (
                                                                                         {
@@ -524,7 +526,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                                                     </div>
 
                                                                     {kls.jam_sesi && (
-                                                                        <p className="flex items-center gap-1.5 text-slate-400">
+                                                                        <p className="flex items-center gap-1.5 text-primary-400">
                                                                             <i className="fa-solid fa-clock shrink-0"></i>
                                                                             {
                                                                                 kls.jam_sesi
@@ -558,7 +560,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                 {/* ════════════════════════════════════════════
                     KANAN — AI Agent Panel
                 ════════════════════════════════════════════ */}
-                <div className="w-full lg:w-80 bg-white border-l border-slate-200 flex flex-col shrink-0 hidden">
+                <div className="w-full lg:w-80 bg-white border-l border-primary-200 flex flex-col shrink-0 hidden">
                     <div className="p-3 bg-gradient-to-br from-primary-900 to-primary-700 text-white shadow-inner">
                         <div className="flex items-center gap-2 mb-1">
                             <i
@@ -575,17 +577,17 @@ export default function MonitoringKBM({ title, onClose, open }) {
                         </p>
                     </div>
 
-                    <div className="p-3 flex-1 overflow-y-auto bg-slate-50/50 space-y-3">
+                    <div className="p-3 flex-1 overflow-y-auto bg-primary-50/50 space-y-3">
                         {anomaliList.length === 0 &&
                             !isAnalyzing &&
                             !isLoading && (
                                 <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 flex items-center gap-2">
-                                    <i className="fa-solid fa-circle-check text-emerald-500 text-base shrink-0"></i>
+                                    <i className="fa-solid fa-circle-check text-primary-500 text-base shrink-0"></i>
                                     <div>
-                                        <h4 className="text-xs font-bold text-emerald-800">
+                                        <h4 className="text-xs font-bold text-primary-800">
                                             Tidak Ada Anomali
                                         </h4>
-                                        <p className="text-[10px] text-emerald-700 mt-0.5">
+                                        <p className="text-[10px] text-primary-700 mt-0.5">
                                             Semua kelas pada hari {selectedHari}{" "}
                                             ({selectedTanggal}) terpantau
                                             normal.
@@ -616,14 +618,14 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                     ).map(([namaKelas, itemsMapel]) => (
                                         <div
                                             key={namaKelas}
-                                            className="bg-slate-50 border border-slate-200/80 rounded-lg p-2.5"
+                                            className="bg-primary-50 border border-primary-200/80 rounded-lg p-2.5"
                                         >
                                             {/* Header Nama Kelas */}
-                                            <div className="text-[10px] font-extrabold text-slate-700 mb-1.5 flex items-center justify-between">
-                                                <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded">
+                                            <div className="text-[10px] font-extrabold text-primary-700 mb-1.5 flex items-center justify-between">
+                                                <span className="bg-primary-200 text-primary-800 px-1.5 py-0.5 rounded">
                                                     Kelas {namaKelas}
                                                 </span>
-                                                <span className="text-[9px] text-slate-500 font-normal">
+                                                <span className="text-[9px] text-primary-500 font-normal">
                                                     {itemsMapel.length} Mapel
                                                     Kosong
                                                 </span>
@@ -708,10 +710,10 @@ export default function MonitoringKBM({ title, onClose, open }) {
                         )}
 
                         {/* ── Kotak Rekomendasi AI ── */}
-                        <div className="mt-4 pt-3 border-t border-slate-200">
+                        <div className="mt-4 pt-3 border-t border-primary-200">
                             {isAnalyzing && (
                                 <div className="space-y-2.5">
-                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <h4 className="text-[10px] font-bold text-primary-400 uppercase tracking-wider flex items-center gap-1.5">
                                         <span>✨ Rekomendasi Pengganti</span>
                                         <i className="fa-solid fa-spinner animate-spin text-indigo-500"></i>
                                     </h4>
@@ -723,7 +725,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                             {!isAnalyzing &&
                                 rekomendasiAI?.kandidat?.length > 0 && (
                                     <div>
-                                        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                                        <h4 className="text-[10px] font-bold text-primary-500 uppercase tracking-wider mb-2.5 flex items-center gap-1">
                                             <span>
                                                 ✨ Rekomendasi Guru Pengganti
                                             </span>

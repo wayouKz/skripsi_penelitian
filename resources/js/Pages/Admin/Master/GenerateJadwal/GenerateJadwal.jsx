@@ -368,9 +368,9 @@ export default function GenerateJadwal() {
                     )}
                     {activeTab === "hasil" && (
                         <div className="space-y-6 text-center py-20 animate-in zoom-in-95 duration-500">
-                            <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100">
+                            <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary-100">
                                 <CheckCircle2
-                                    className="text-emerald-500"
+                                    className="text-primary-500"
                                     size={56}
                                     strokeWidth={2.5}
                                 />
@@ -409,11 +409,11 @@ export default function GenerateJadwal() {
                             <span className="font-bold">
                                 Memproses Penjadwalan...
                             </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
+                            <span className="text-[10px] text-primary-400 font-mono">
                                 {progress}% selesai
                             </span>
                         </div>
-                        <i className="fa fa-expand text-slate-400 ml-1"></i>
+                        <i className="fa fa-expand text-primary-400 ml-1"></i>
                     </button>
                 </div>
             )}

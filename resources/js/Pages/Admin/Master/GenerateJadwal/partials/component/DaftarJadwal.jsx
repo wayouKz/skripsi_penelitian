@@ -37,9 +37,9 @@ const COLOR_PALETTE = [
     },
     {
         bg: "bg-primary-100",
-        border: "border-emerald-400",
-        hover: "hover:bg-emerald-200",
-        text: "text-emerald-900",
+        border: "border-primary-400",
+        hover: "hover:bg-primary-200",
+        text: "text-primary-900",
     },
     {
         bg: "bg-amber-100",
@@ -685,7 +685,7 @@ export default function DaftarJadwal({
                                                 {li === 0 && (
                                                     <td
                                                         rowSpan={laneCount}
-                                                        className="py-3 px-3 font-bold text-emerald-700 text-left border-r border-gray-200 bg-gray-50 align-middle"
+                                                        className="py-3 px-3 font-bold text-primary-700 text-left border-r border-gray-200 bg-gray-50 align-middle"
                                                     >
                                                         {hari}
                                                     </td>
@@ -855,7 +855,7 @@ export default function DaftarJadwal({
                                             key={hari}
                                             className="hover:bg-gray-50 transition-colors"
                                         >
-                                            <td className="py-3 px-3 font-bold text-emerald-700 text-left border-r border-gray-200 bg-gray-50">
+                                            <td className="py-3 px-3 font-bold text-primary-700 text-left border-r border-gray-200 bg-gray-50">
                                                 {hari}
                                             </td>
                                             {cells}
@@ -916,7 +916,7 @@ export default function DaftarJadwal({
                                                 key={hari}
                                                 className="hover:bg-gray-50 transition-colors"
                                             >
-                                                <td className="py-3 px-3 font-bold text-emerald-700 text-left border-r border-gray-200 bg-gray-50">
+                                                <td className="py-3 px-3 font-bold text-primary-700 text-left border-r border-gray-200 bg-gray-50">
                                                     {hari}
                                                 </td>
                                                 {DAFTAR_JAM.map(

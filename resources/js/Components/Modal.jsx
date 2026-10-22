@@ -57,16 +57,16 @@ export default function Modal({
                     enter="ease-out duration-300"
                     enterFrom={
                         isFullScreen
-                            ? "opacity-0 translate-y-full"
-                            : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            ? "opacity-0 tranprimary-y-full"
+                            : "opacity-0 tranprimary-y-4 sm:tranprimary-y-0 sm:scale-95"
                     }
-                    enterTo="opacity-100 translate-y-0 sm:scale-100"
+                    enterTo="opacity-100 tranprimary-y-0 sm:scale-100"
                     leave="ease-in duration-200"
-                    leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                    leaveFrom="opacity-100 tranprimary-y-0 sm:scale-100"
                     leaveTo={
                         isFullScreen
-                            ? "opacity-0 translate-y-full"
-                            : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            ? "opacity-0 tranprimary-y-full"
+                            : "opacity-0 tranprimary-y-4 sm:tranprimary-y-0 sm:scale-95"
                     }
                 >
                     <DialogPanel

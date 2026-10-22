@@ -19,7 +19,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
     const visibleLogs = logs.slice(-100);
 
     return (
-        <div className="px-6 py-3 bg-slate-50 border-b border-gray-200 shrink-0">
+        <div className="px-6 py-3 bg-primary-50 border-b border-gray-200 shrink-0">
             <div className="flex justify-between items-center mb-1.5">
                 <h3 className="text-[11px] font-bold text-gray-700 flex items-center gap-1.5 uppercase tracking-wide">
                     <span className="animate-pulse h-1.5 w-1.5 bg-red-500 rounded-full inline-block"></span>
@@ -49,7 +49,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
                                 "bg-red-50 text-red-600 border-red-200";
                         else if (log.tahap === "NEW_BEST")
                             badgeClass =
-                                "bg-primary-50 text-emerald-600 border-primary-200";
+                                "bg-primary-50 text-primary-600 border-primary-200";
 
                         const timeOnly = log.waktu
                             ? log.waktu.includes(" ")
@@ -319,9 +319,9 @@ export default function ProsesViewJadwal({
         },
         {
             bg: "bg-primary-100",
-            border: "border-emerald-400",
-            text: "text-emerald-900",
-            title: "text-emerald-700",
+            border: "border-primary-400",
+            text: "text-primary-900",
+            title: "text-primary-700",
         },
         {
             bg: "bg-purple-100",
@@ -672,9 +672,9 @@ export default function ProsesViewJadwal({
                         <div className="flex justify-between items-center mb-1 text-[11px] font-semibold text-gray-600">
                             <div className="flex items-center gap-2">
                                 <span>Progress Algoritma</span>
-                                <span className="text-slate-400 font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                <span className="text-primary-400 font-mono text-[10px] bg-primary-100 px-2 py-0.5 rounded-full border border-primary-200">
                                     <i className="fa fa-clock"></i> Estimasi:{" "}
-                                    <strong className="text-slate-700">
+                                    <strong className="text-primary-700">
                                         {estimatedTimeRemaining}
                                     </strong>
                                 </span>
@@ -686,7 +686,7 @@ export default function ProsesViewJadwal({
                         </div>
                         <div className="w-full bg-gray-100 rounded-full p-1 border border-gray-200/80 shadow-inner">
                             <div
-                                className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-primary-400 h-3 rounded-full transition-all duration-500 ease-out shadow-sm shadow-emerald-500/40 relative"
+                                className="bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 h-3 rounded-full transition-all duration-500 ease-out shadow-sm shadow-primary-500/40 relative"
                                 style={{
                                     width: `${Math.min(Math.max(progress, 0), 100)}%`,
                                 }}
@@ -748,7 +748,7 @@ export default function ProsesViewJadwal({
                                         onClick={() => setActiveKelas(kId)}
                                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 ${
                                             activeKelas === kId
-                                                ? "bg-primary-600 text-white shadow-sm shadow-emerald-200"
+                                                ? "bg-primary-600 text-white shadow-sm shadow-primary-200"
                                                 : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
                                         }`}
                                     >
@@ -767,7 +767,7 @@ export default function ProsesViewJadwal({
                             ref={tableRef}
                             className={`min-w-[1200px] bg-white rounded-2xl border transition-all duration-300 overflow-hidden shadow-sm ${
                                 isHighlighted
-                                    ? "border-emerald-500 ring-4 ring-emerald-100"
+                                    ? "border-primary-500 ring-4 ring-primary-100"
                                     : "border-gray-200"
                             }`}
                         >
@@ -795,7 +795,7 @@ export default function ProsesViewJadwal({
                                                 key={hari}
                                                 className="hover:bg-gray-50 transition-colors"
                                             >
-                                                <td className="py-4 px-4 font-bold text-emerald-700 text-left border-r border-gray-200 bg-gray-50 font-sans">
+                                                <td className="py-4 px-4 font-bold text-primary-700 text-left border-r border-gray-200 bg-gray-50 font-sans">
                                                     {hari}
                                                 </td>
                                                 {daftarJamDinamis.map((j) => {

@@ -8,6 +8,13 @@ export const PRESETS = {
         light: "52 211 153",
         hex: "#10b981",
     },
+    green: {
+        name: "Green",
+        primary: "34 197 94", // green-500 (RGB)
+        dark: "22 163 74", // green-600 (RGB)
+        light: "74 222 128", // green-400 (RGB)
+        hex: "#22c55e",
+    },
     blue: {
         name: "Biru",
         primary: "59 130 246",
@@ -61,8 +68,8 @@ export function loadTheme() {
             return JSON.parse(saved);
         }
     } catch (e) {}
-    applyTheme(PRESETS.emerald);
-    return PRESETS.emerald;
+    applyTheme(PRESETS.primary);
+    return PRESETS.primary;
 }
 
 export function getSavedTheme() {
@@ -70,5 +77,5 @@ export function getSavedTheme() {
         const saved = localStorage.getItem(THEME_KEY);
         if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return PRESETS.emerald;
+    return PRESETS.primary;
 }

@@ -547,21 +547,21 @@ export default function MappingGuruMapel({
                     </small>
                     <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
                         X:{" "}
-                        <strong className="font-bold text-emerald-600">
+                        <strong className="font-bold text-primary-600">
                             {totalJamRealtime[10]}
                         </strong>{" "}
                         Jam
                     </span>
                     <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
                         XI:{" "}
-                        <strong className="font-bold text-emerald-600">
+                        <strong className="font-bold text-primary-600">
                             {totalJamRealtime[11]}
                         </strong>{" "}
                         Jam
                     </span>
                     <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
                         XII:{" "}
-                        <strong className="font-bold text-emerald-600">
+                        <strong className="font-bold text-primary-600">
                             {totalJamRealtime[12]}
                         </strong>{" "}
                         Jam

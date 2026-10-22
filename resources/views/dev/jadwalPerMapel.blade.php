@@ -23,7 +23,7 @@
                 </div>
                 <div class="mt-4 md:mt-0">
                     <span
-                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-emerald-800">
+                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800">
                         Status: Aktif
                     </span>
                 </div>

@@ -205,8 +205,8 @@ export default function ChartRekapKehadiranSiswa({ siswa, onMapelChange }) {
     };
 
     return (
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col h-full">
-            <h3 className="text-sm font-bold text-slate-800 mb-3">
+        <div className="bg-white p-5 rounded-3xl border border-primary-100 shadow-sm flex flex-col h-full">
+            <h3 className="text-sm font-bold text-primary-800 mb-3">
                 Rekap Kehadiran Berdasarkan Mapel
             </h3>
 
@@ -231,21 +231,21 @@ export default function ChartRekapKehadiranSiswa({ siswa, onMapelChange }) {
 
             {/* Rincian Per Mapel jika memilih "Semua Mata Pelajaran" */}
             {tipeData === "all" && rincianMapel.length > 0 && (
-                <div className="mt-2 border-t border-slate-100 pt-3">
-                    <h4 className="text-xs font-bold text-slate-700 mb-2">
+                <div className="mt-2 border-t border-primary-100 pt-3">
+                    <h4 className="text-xs font-bold text-primary-700 mb-2">
                         Rincian Kehadiran Tiap Mata Pelajaran:
                     </h4>
                     <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                         {rincianMapel.map((item, idx) => (
                             <div
                                 key={idx}
-                                className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs flex justify-between items-center"
+                                className="bg-primary-50 p-2.5 rounded-xl border border-primary-100 text-xs flex justify-between items-center"
                             >
-                                <span className="font-semibold text-slate-800">
+                                <span className="font-semibold text-primary-800">
                                     {item.nama_mapel}
                                 </span>
                                 <div className="flex gap-2 text-[11px]">
-                                    <span className="text-emerald-600 font-medium">
+                                    <span className="text-primary-600 font-medium">
                                         H: {item.hadir}
                                     </span>
                                     <span className="text-blue-600 font-medium">

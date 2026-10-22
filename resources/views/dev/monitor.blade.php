@@ -15,8 +15,8 @@
             100% { box-shadow: 0 0 0 0rem rgba(234, 179, 8, 0); }
         }
         @keyframes toastSlideIn {
-            0% { transform: translateX(100%); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
+            0% { transform: tranprimaryX(100%); opacity: 0; }
+            100% { transform: tranprimaryX(0); opacity: 1; }
         }
         .animate-chromosome { animation: fadeInScale 0.25s ease-in-out forwards; }
         .highlight-update { animation: highlightPulse 1.2s ease-in-out infinite; }
@@ -202,7 +202,7 @@
 
         const colorPalette = [
             { bg: 'bg-blue-950/80', border: 'border-blue-500', text: 'text-blue-200', title: 'text-blue-300' },
-            { bg: 'bg-emerald-950/80', border: 'border-emerald-500', text: 'text-emerald-200', title: 'text-emerald-300' },
+            { bg: 'bg-primary-950/80', border: 'border-primary-500', text: 'text-primary-200', title: 'text-primary-300' },
             { bg: 'bg-purple-950/80', border: 'border-purple-500', text: 'text-purple-200', title: 'text-purple-300' },
             { bg: 'bg-amber-950/80', border: 'border-amber-500', text: 'text-amber-200', title: 'text-amber-300' },
             { bg: 'bg-rose-950/80', border: 'border-rose-500', text: 'text-rose-200', title: 'text-rose-300' },
@@ -238,7 +238,7 @@
                 </div>
                 <div class="text-gray-200">
                     Fitness: <strong class="text-primary-400 font-mono">${parseFloat(newFit).toFixed(6)}</strong>
-                    <span class="text-emerald-400 text-[10px]">(+${fitDiff})</span>
+                    <span class="text-primary-400 text-[10px]">(+${fitDiff})</span>
                 </div>
                 <div class="text-gray-400 text-[11px]">
                     Status Bentrok: <strong class="${isClashFree ? 'text-primary-400' : 'text-red-400'}">${isClashFree ? '0 Bentrok (Optimal!)' : clashCount + ' Bentrok Terdeteksi'}</strong>
@@ -249,7 +249,7 @@
 
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'translateX(100%)';
+                toast.style.transform = 'tranprimaryX(100%)';
                 toast.style.transition = 'all 0.3s ease-in-out';
                 setTimeout(() => toast.remove(), 300);
             }, 3500);

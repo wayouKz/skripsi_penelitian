@@ -45,7 +45,7 @@ export default function GlobalLoader() {
     return (
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-white/80 backdrop-blur-sm transition-all">
             <div className="flex flex-col items-center gap-3 p-5 ">
-                <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-sm font-medium text-gray-600 animate-pulse">
                     Memuat Ulang...
                 </p>

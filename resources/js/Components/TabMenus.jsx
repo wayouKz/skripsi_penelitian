@@ -39,7 +39,7 @@ export default function TabMenus({ menus = [], id = "main-tabs" }) {
                 onClick={() => setActiveTab(index)}
                 className={`flex-1 text-md py-4 px-6  font-medium transition-all duration-200 outline-none ${
                     activeTab === index
-                        ? "bg-white border-b-2 border-emerald-600 text-emerald-700 shadow-sm"
+                        ? "bg-white border-b-2 border-primary-600 text-primary-700 shadow-sm"
                         : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                 }`}
             >

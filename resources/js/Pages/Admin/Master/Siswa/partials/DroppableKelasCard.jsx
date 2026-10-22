@@ -20,7 +20,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
             ref={setNodeRef}
             className={`flex flex-col bg-white rounded-xl overflow-hidden min-h-[240px] transition-all duration-150 ${
                 isOver
-                    ? "border-2 border-emerald-400 ring-4 ring-emerald-100"
+                    ? "border-2 border-primary-400 ring-4 ring-primary-100"
                     : "border border-gray-200 hover:border-gray-300"
             }`}
         >
@@ -57,18 +57,18 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
                     <div
                         className={`flex-1 flex flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
                             isOver
-                                ? "border-emerald-300 bg-primary-50"
+                                ? "border-primary-300 bg-primary-50"
                                 : "border-gray-100"
                         }`}
                     >
                         <i
                             className={`fa fa-arrow-down text-base mb-1.5 ${
-                                isOver ? "text-emerald-400" : "text-gray-200"
+                                isOver ? "text-primary-400" : "text-gray-200"
                             }`}
                         />
                         <span
                             className={`text-xs ${
-                                isOver ? "text-emerald-500" : "text-gray-300"
+                                isOver ? "text-primary-500" : "text-gray-300"
                             }`}
                         >
                             {isOver
@@ -84,7 +84,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
                                 className="group flex items-center gap-2.5 px-2.5 py-2 rounded-lg border border-transparent hover:border-gray-100 hover:bg-gray-50 transition-colors"
                             >
                                 {/* Avatar */}
-                                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-50 flex items-center justify-center text-[10px] font-medium text-emerald-600">
+                                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary-50 flex items-center justify-center text-[10px] font-medium text-primary-600">
                                     {initials(siswa.label)}
                                 </span>
 
@@ -114,7 +114,7 @@ export default function DroppableKelasCard({ kelas, removeSiswa }) {
                         {/* Drop hint ketika ada siswa dan sedang di-hover */}
                         {isOver && (
                             <li className="flex items-center justify-center px-2.5 py-2 rounded-lg border-2 border-dashed border-primary-200 bg-primary-50">
-                                <span className="text-xs text-emerald-400">
+                                <span className="text-xs text-primary-400">
                                     Lepaskan di sini
                                 </span>
                             </li>

@@ -61,7 +61,7 @@ export default function Navbar({ user, onToggle, startTour }) {
                     <button
                         type="button"
                         onClick={startTour}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-[11px] font-bold transition-all shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-[11px] font-bold transition-all shadow-sm"
                     >
                         <i className="fa fa-question-circle text-xs" />
                         <span className="hidden sm:inline">

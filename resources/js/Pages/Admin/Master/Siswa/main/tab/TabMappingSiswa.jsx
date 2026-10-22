@@ -195,7 +195,7 @@ export default function TabMappingSiswa({
                         <button
                             type="button"
                             onClick={startTour}
-                            className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-emerald-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-primary-50 text-primary-600 hover:bg-primary-100 border border-primary-200 rounded-lg text-xs font-bold transition-all shadow-sm"
                         >
                             <i className="fa fa-question-circle" />
                             <span className="hidden sm:inline">
@@ -206,7 +206,7 @@ export default function TabMappingSiswa({
                             id="tour-btn-simpan"
                             type="submit"
                             disabled={processing}
-                            className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-emerald-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md disabled:shadow-none transition-all duration-200"
+                            className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md disabled:shadow-none transition-all duration-200"
                         >
                             {processing ? (
                                 <>
@@ -279,7 +279,7 @@ export default function TabMappingSiswa({
                                             setSearch(e.target.value)
                                         }
                                         placeholder="Cari nama siswa..."
-                                        className="w-full pl-8 pr-3 py-2 text-sm rounded-lg bg-gray-50 border border-gray-100 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 outline-none transition-all text-gray-700 placeholder-gray-300"
+                                        className="w-full pl-8 pr-3 py-2 text-sm rounded-lg bg-gray-50 border border-gray-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 outline-none transition-all text-gray-700 placeholder-gray-300"
                                     />
                                 </div>
                             </div>
@@ -354,7 +354,7 @@ export default function TabMappingSiswa({
                     >
                         {activeSiswa ? (
                             <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border bg-white border-primary-200 shadow-lg cursor-grabbing min-w-[200px]">
-                                <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-50 rounded-full text-[11px] font-medium text-emerald-600 flex-shrink-0">
+                                <span className="inline-flex items-center justify-center w-8 h-8 bg-primary-50 rounded-full text-[11px] font-medium text-primary-600 flex-shrink-0">
                                     {initials(activeSiswa.label)}
                                 </span>
                                 <div className="flex flex-col min-w-0">

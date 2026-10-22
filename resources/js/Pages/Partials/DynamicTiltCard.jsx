@@ -79,7 +79,7 @@ export default function DynamicTiltCard() {
             <div
                 className="perforation absolute top-0 w-[88%] max-w-[350px] bg-[#ffffff] text-[#0a2f31] rounded-[10px] p-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] transition-transform duration-200 ease-out flex flex-col"
                 style={{
-                    transform: `rotateY(${tilt.rx}deg) rotateX(${tilt.ry}deg) translate(${tilt.tx}px, ${tilt.ty}px)`,
+                    transform: `rotateY(${tilt.rx}deg) rotateX(${tilt.ry}deg) tranprimary(${tilt.tx}px, ${tilt.ty}px)`,
                     transformStyle: "preserve-3d",
                 }}
             >

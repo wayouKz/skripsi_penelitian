@@ -232,7 +232,7 @@ export default function Add({
                             icon="phone"
                             type="text"
                             placeholder="81234567890"
-                            className="w-full rounded-r-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
+                            className="w-full rounded-r-md border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                             value={data.no_telp}
                             onChange={(e) =>
                                 setData(

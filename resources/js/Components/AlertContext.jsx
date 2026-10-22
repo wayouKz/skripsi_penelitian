@@ -165,7 +165,7 @@ function ModalButton({ onClick, variant, children, customColor }) {
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.filter = "brightness(1.08)";
-                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.transform = "tranprimaryY(-1px)";
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.filter = "none";

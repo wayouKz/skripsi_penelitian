@@ -64,7 +64,7 @@ $nipTtd = data_get($dataMapel ?? [], 'nip');
             </td>
 
             <td style="width: 30%; text-align: center;">
-                Gorontalo, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}<br>
+                Gorontalo, {{ \Carbon\Carbon::now()->locale('id')->tranprimarydFormat('d F Y') }}<br>
                 {{ $judulTtd }}<br><br><br><br><br><br><br><br>
                 <div style="height: 60px;"></div>
 

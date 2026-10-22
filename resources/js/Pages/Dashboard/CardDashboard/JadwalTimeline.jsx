@@ -15,16 +15,16 @@ export default function JadwalTimeline({ jadwal }) {
                                     isAktif
                                         ? "bg-blue-600 border-blue-300 ring-4 ring-blue-100"
                                         : isSelesai
-                                          ? "bg-slate-300 border-slate-300"
-                                          : "bg-slate-100 border-slate-200"
+                                          ? "bg-primary-300 border-primary-300"
+                                          : "bg-primary-100 border-primary-200"
                                 }`}
                             />
                             {!isLast && (
                                 <div
                                     className={`w-0.5 flex-1 my-1.5 ${
                                         isAktif
-                                            ? "bg-gradient-to-b from-blue-400 to-slate-200"
-                                            : "bg-slate-200"
+                                            ? "bg-gradient-to-b from-blue-400 to-primary-200"
+                                            : "bg-primary-200"
                                     }`}
                                 />
                             )}
@@ -41,18 +41,18 @@ export default function JadwalTimeline({ jadwal }) {
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex-1 min-w-0">
                                     <div
-                                        className={`font-bold text-sm truncate ${isSelesai ? "text-slate-400" : "text-slate-900"}`}
+                                        className={`font-bold text-sm truncate ${isSelesai ? "text-primary-400" : "text-primary-900"}`}
                                     >
                                         {item.mk}
                                     </div>
-                                    <div className="text-xs text-slate-400 mt-1 truncate">
+                                    <div className="text-xs text-primary-400 mt-1 truncate">
                                         📍 {item.ruang} · 👤 {item.dosen}
                                     </div>
                                 </div>
 
                                 <div className="text-right flex-shrink-0">
                                     <div
-                                        className={`text-xs font-bold tabular-nums ${isAktif ? "text-blue-600" : "text-slate-500"}`}
+                                        className={`text-xs font-bold tabular-nums ${isAktif ? "text-blue-600" : "text-primary-500"}`}
                                     >
                                         {item.waktu}–{item.selesai}
                                     </div>
@@ -64,7 +64,7 @@ export default function JadwalTimeline({ jadwal }) {
                                         </span>
                                     )}
                                     {isSelesai && (
-                                        <span className="block mt-1.5 text-[10px] text-slate-400 font-medium">
+                                        <span className="block mt-1.5 text-[10px] text-primary-400 font-medium">
                                             ✓ Selesai
                                         </span>
                                     )}

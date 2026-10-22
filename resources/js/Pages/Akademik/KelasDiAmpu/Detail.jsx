@@ -199,7 +199,7 @@ export default function Detail({ dataKelas }) {
 
                                 {/* Item 2: Tahun Ajaran */}
                                 <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 flex items-start gap-2.5">
-                                    <div className="bg-primary-100 text-emerald-600 p-2 rounded-md">
+                                    <div className="bg-primary-100 text-primary-600 p-2 rounded-md">
                                         <i className="fa fa-calendar-alt fa-fw text-xs"></i>
                                     </div>
                                     <div>

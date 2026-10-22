@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import DaftarJadwal from "@/Pages/Admin/Master/GenerateJadwal/partials/component/DaftarJadwal";
 
 const Kosong = () => (
-    <span className="text-xs italic text-slate-400">Belum diisi</span>
+    <span className="text-xs italic text-primary-400">Belum diisi</span>
 );
 
 export default function Statistics({
@@ -36,7 +36,7 @@ export default function Statistics({
         {
             header: "No",
             render: (_, i) => (
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-50 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-50 text-xs font-semibold text-primary-700">
                     {i + 1}
                 </span>
             ),
@@ -48,10 +48,10 @@ export default function Statistics({
                     <img
                         src={`/storage/public/foto/${row.foto}`}
                         alt="Foto Siswa"
-                        className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-100"
+                        className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-100"
                     />
                 ) : (
-                    <span className="w-9 h-9 rounded-full bg-primary-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
+                    <span className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 text-sm font-semibold flex items-center justify-center">
                         {(row.nama_siswa || "?").charAt(0).toUpperCase()}
                     </span>
                 ),
@@ -61,7 +61,7 @@ export default function Statistics({
             accessor: "nisn",
             render: (row) =>
                 row.nisn ? (
-                    <span className="font-mono-ui text-xs text-slate-700">
+                    <span className="font-mono-ui text-xs text-primary-700">
                         {row.nisn}
                     </span>
                 ) : (
@@ -72,7 +72,7 @@ export default function Statistics({
             header: "Nama Siswa",
             accessor: "nama_siswa",
             render: (row) => (
-                <span className="font-medium text-slate-800">
+                <span className="font-medium text-primary-800">
                     {row.nama_siswa}
                 </span>
             ),
@@ -81,7 +81,7 @@ export default function Statistics({
             header: "Jenis Kelamin",
             render: (row) =>
                 row.jenis_kelamin === "Laki-laki" ? (
-                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-emerald-800">
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                         {row.jenis_kelamin}
                     </span>
                 ) : row.jenis_kelamin === "Perempuan" ? (
@@ -96,7 +96,7 @@ export default function Statistics({
             header: "Tempat Lahir",
             render: (row) =>
                 row.tempat_lahir ? (
-                    <span className="text-sm text-slate-700">
+                    <span className="text-sm text-primary-700">
                         {row.tempat_lahir}
                     </span>
                 ) : (
@@ -107,7 +107,7 @@ export default function Statistics({
             header: "Tanggal Lahir",
             render: (row) =>
                 row.tanggal_lahir ? (
-                    <span className="text-sm text-slate-700 whitespace-nowrap">
+                    <span className="text-sm text-primary-700 whitespace-nowrap">
                         {new Date(row.tanggal_lahir).toLocaleDateString(
                             "id-ID",
                             { day: "2-digit", month: "long", year: "numeric" },
@@ -128,10 +128,10 @@ export default function Statistics({
                         <img
                             src={`/storage/public/foto/${row.foto}`}
                             alt="Foto Siswa"
-                            className="w-9 h-9 rounded-full object-cover ring-2 ring-emerald-100"
+                            className="w-9 h-9 rounded-full object-cover ring-2 ring-primary-100"
                         />
                     ) : (
-                        <span className="w-9 h-9 rounded-full bg-primary-100 text-emerald-700 text-sm font-semibold flex items-center justify-center">
+                        <span className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 text-sm font-semibold flex items-center justify-center">
                             {(row.nama_guru || "?").charAt(0).toUpperCase()}
                         </span>
                     ),
@@ -166,14 +166,14 @@ export default function Statistics({
                         key={s.label}
                         className="py-8 px-5 text-center bg-white rounded-2xl border border-primary-200 shadow-[0_12px_30px_-18px_rgba(5,150,105,0.45)]"
                     >
-                        <div className="font-serif-display text-4xl md:text-[46px] text-emerald-700 font-semibold">
+                        <div className="font-serif-display text-4xl md:text-[46px] text-primary-700 font-semibold">
                             <Counter
                                 value={s.value}
                                 decimals={s.decimals}
                                 suffix={s.suffix}
                             />
                         </div>
-                        <div className="text-sm text-emerald-900/70 mt-2 tracking-wide">
+                        <div className="text-sm text-primary-900/70 mt-2 tracking-wide">
                             {s.label}
                         </div>
                     </Reveal>
@@ -195,7 +195,7 @@ export default function Statistics({
                             className={`flex-1 md:flex-none whitespace-nowrap px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
                                 activeTab === tab.id
                                     ? "bg-primary-600 text-white shadow"
-                                    : "text-emerald-900/70 hover:text-emerald-900 hover:bg-primary-50"
+                                    : "text-primary-900/70 hover:text-primary-900 hover:bg-primary-50"
                             }`}
                         >
                             {tab.label}
@@ -207,7 +207,7 @@ export default function Statistics({
             {/* ===== Tabel ===== */}
             <div className="py-6 pb-14 min-h-[400px]">
                 <Reveal key={activeTab}>
-                    <h3 className="text-xl font-serif-display text-emerald-900 mb-4">
+                    <h3 className="text-xl font-serif-display text-primary-900 mb-4">
                         {TABS.find((t) => t.id === activeTab)?.label}
                     </h3>
                     <div className="bg-white rounded-2xl p-5 border border-primary-200 shadow-[0_20px_40px_-24px_rgba(5,150,105,0.4)] overflow-x-auto">

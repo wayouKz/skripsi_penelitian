@@ -40,10 +40,10 @@ export default function Proses({
                 {/* Header */}
                 <div className="flex items-center justify-between py-10">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-primary-50 flex items-center justify-center border border-emerald-100 shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-primary-50 flex items-center justify-center border border-primary-100 shrink-0">
                             {isComplete ? (
                                 <svg
-                                    className="w-4 h-4 text-emerald-600"
+                                    className="w-4 h-4 text-primary-600"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -57,7 +57,7 @@ export default function Proses({
                                 </svg>
                             ) : (
                                 <svg
-                                    className="w-4 h-4 text-emerald-600 animate-spin"
+                                    className="w-4 h-4 text-primary-600 animate-spin"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                 >
@@ -78,12 +78,12 @@ export default function Proses({
                             )}
                         </div>
                         <div>
-                            <h3 className="text-xs font-bold text-slate-800">
+                            <h3 className="text-xs font-bold text-primary-800">
                                 {isComplete
                                     ? "Penjadwalan Selesai"
                                     : "Memproses Penjadwalan"}
                             </h3>
-                            <p className="text-[10px] text-slate-400 mt-0.5">
+                            <p className="text-[10px] text-primary-400 mt-0.5">
                                 {isComplete
                                     ? "Alokasi waktu & pengajar berhasil dioptimalkan."
                                     : "Sistem sedang mengoptimalkan alokasi waktu."}
@@ -91,7 +91,7 @@ export default function Proses({
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className="text-lg font-black text-emerald-600 font-mono">
+                        <span className="text-lg font-black text-primary-600 font-mono">
                             {progress}%
                         </span>
                     </div>
@@ -99,19 +99,19 @@ export default function Proses({
 
                 {/* Progress Bar */}
                 <div className="space-y-1.5">
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-primary-100 rounded-full h-2 overflow-hidden">
                         <div
                             className="bg-primary-600 h-full rounded-full transition-all duration-300 ease-out"
                             style={{ width: `${progress}%` }}
                         ></div>
                     </div>
-                    <p className="text-[10px] text-slate-400 text-center">
+                    <p className="text-[10px] text-primary-400 text-center">
                         {isComplete
                             ? "Proses telah berhasil diselesaikan."
                             : "Mohon tunggu sebentar, proses berjalan otomatis."}
                     </p>
                 </div>
-                <div className="h-0.5 bg-slate-100"></div>
+                <div className="h-0.5 bg-primary-100"></div>
                 <div className="flex justify-center">
                     <button
                         onClick={() => {
@@ -119,7 +119,7 @@ export default function Proses({
                             setActiveTab("konfigurasi");
                         }}
                         type="button"
-                        className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2 rounded-xl text-[11px] transition-all shadow-sm cursor-pointer"
+                        className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold px-3.5 py-2 rounded-xl text-[11px] transition-all shadow-sm cursor-pointer"
                     >
                         <i
                             className={`fa ${

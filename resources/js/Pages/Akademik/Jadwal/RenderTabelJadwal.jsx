@@ -73,7 +73,7 @@ export default function RenderTabelJadwal({
         {
             bg: "bg-primary-50",
             border: "border-primary-200",
-            text: "text-emerald-700",
+            text: "text-primary-700",
         },
         {
             bg: "bg-cyan-50",

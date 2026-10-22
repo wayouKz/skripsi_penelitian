@@ -100,7 +100,7 @@ export default function Migrate() {
                             <div className="absolute inset-0 bg-primary-100 rounded-full animate-ping opacity-75"></div>
                             <RefreshCw
                                 size={50}
-                                className="text-emerald-600 animate-spin relative z-10"
+                                className="text-primary-600 animate-spin relative z-10"
                             />
                         </div>
                     </div>
@@ -133,17 +133,17 @@ export default function Migrate() {
 
                 {/* Terminal Log Window */}
                 {(!before || logs.length > 0) && (
-                    <div className="flex flex-col rounded-xl overflow-hidden border border-slate-700 shadow-inner bg-slate-900">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 border-b border-slate-700">
-                            <Terminal size={14} className="text-slate-400" />
-                            <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                    <div className="flex flex-col rounded-xl overflow-hidden border border-primary-700 shadow-inner bg-primary-900">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-primary-800 border-b border-primary-700">
+                            <Terminal size={14} className="text-primary-400" />
+                            <span className="text-[11px] font-semibold tracking-wider text-primary-400 uppercase">
                                 System Output
                             </span>
                         </div>
 
-                        <div className="p-4 h-56 overflow-y-auto font-mono text-xs flex flex-col gap-1.5 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+                        <div className="p-4 h-56 overflow-y-auto font-mono text-xs flex flex-col gap-1.5 scrollbar-thin scrollbar-thumb-primary-600 scrollbar-track-transparent">
                             {logs.length === 0 ? (
-                                <span className="text-slate-500">
+                                <span className="text-primary-500">
                                     Menyiapkan lingkungan kerja...
                                 </span>
                             ) : (
@@ -154,10 +154,10 @@ export default function Migrate() {
                                             log.includes("[ERROR]")
                                                 ? "text-red-400 font-semibold"
                                                 : log.includes("[OK]")
-                                                  ? "text-emerald-400"
+                                                  ? "text-primary-400"
                                                   : log.includes("[SYSTEM]")
-                                                    ? "text-emerald-400 font-semibold"
-                                                    : "text-slate-300"
+                                                    ? "text-primary-400 font-semibold"
+                                                    : "text-primary-300"
                                         }`}
                                     >
                                         {log}
@@ -173,7 +173,7 @@ export default function Migrate() {
                 {before && !loading && (
                     <button
                         onClick={runMigration}
-                        className="w-full py-3.5 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all focus:ring-4 focus:ring-emerald-500/30 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 bg-primary-600 text-white font-bold rounded-xl shadow-md hover:bg-primary-700 hover:shadow-lg transition-all focus:ring-4 focus:ring-primary-500/30 flex items-center justify-center gap-2"
                     >
                         <Terminal size={18} />
                         Jalankan Instalasi

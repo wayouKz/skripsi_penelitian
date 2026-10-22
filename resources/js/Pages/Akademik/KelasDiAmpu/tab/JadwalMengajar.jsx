@@ -169,17 +169,17 @@ export default function JadwalMengajar({ dataKelas }) {
                         <i className="fa fa-calendar-alt text-base"></i>
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-slate-800 leading-tight m-0">
+                        <h3 className="text-sm font-bold text-primary-800 leading-tight m-0">
                             Jadwal Mengajar
                         </h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs text-primary-400 mt-0.5">
                             Kelola dan pantau jadwal mengajar kelas
                         </p>
                     </div>
                 </div>
 
                 <div className="w-full md:w-[220px]">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-primary-500 mb-1 block">
                         Mata Pelajaran
                     </label>
                     <Select

@@ -100,7 +100,7 @@ export default function Switch({
                 <span
                     className={`
                         inline-block h-4 w-4 transform rounded-full bg-white transition
-                        ${checked ? "translate-x-6" : "translate-x-1"}
+                        ${checked ? "tranprimary-x-6" : "tranprimary-x-1"}
                     `}
                 />
             </button>

@@ -246,7 +246,7 @@ export default function KelasDiAmpu({
                                         >
                                             Lihat Detail
                                             <svg
-                                                className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform"
+                                                className="w-3.5 h-3.5 transform group-hover:tranprimary-x-0.5 transition-transform"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"

@@ -380,7 +380,7 @@ public function getSiswaInKelas(Request $request){
     $jadwal = $request->kode_jadwal;
 
     $sekarang = Carbon::now();
-    // $hariIni = $sekarang->locale('id')->translatedFormat('l');
+    // $hariIni = $sekarang->locale('id')->tranprimarydFormat('l');
     $hariIni = "Senin";
     $jamSekarang = $sekarang->format('H:i:00');
     if($request->type != 'informasi'){
@@ -511,7 +511,7 @@ public function getSiswaInKelas(Request $request){
                 $warnaBadge = 'bg-yellow-100 text-yellow-700';
             } else {
                 $statusKbm  = $belumAbsen ? 'Belum Absen' : 'Hadir';
-                $warnaBadge = $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-primary-100 text-emerald-700';
+                $warnaBadge = $belumAbsen ? 'bg-red-100 text-red-700' : 'bg-primary-100 text-primary-700';
             }
 
             return [

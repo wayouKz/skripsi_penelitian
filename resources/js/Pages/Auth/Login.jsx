@@ -140,17 +140,17 @@ export default function Login({ status, canResetPassword, config }) {
                                         setData("password", e.target.value)
                                     }
                                 />
-                                <button
+                                {/* <button
                                     type="button"
                                     onClick={() =>
                                         setShowPassword(!showPassword)
                                     }
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                                >
-                                    <i
+                                > */}
+                                {/* <i
                                         className={`fa ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
-                                    ></i>
-                                </button>
+                                    ></i> */}
+                                {/* </button> */}
                                 <InputError
                                     message={errors.password}
                                     className="mt-1.5 ml-1"

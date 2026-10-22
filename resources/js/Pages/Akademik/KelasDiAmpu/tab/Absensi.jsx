@@ -277,7 +277,7 @@ export default function Absensi({ dataKelas }) {
         {
             value: "hadir",
             short: "H",
-            active: "bg-primary-100 text-emerald-700 border-emerald-500 shadow-sm",
+            active: "bg-primary-100 text-primary-700 border-primary-500 shadow-sm",
             dot: "bg-primary-500",
         },
         {
@@ -303,17 +303,17 @@ export default function Absensi({ dataKelas }) {
     return (
         <>
             {/* ── HEADER (Diperkecil gap dan padding) ─────────────────────────────────── */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 pb-4 border-b border-primary-100">
                 {/* Title block */}
                 <div className="flex items-center gap-2.5">
                     <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shadow-sm">
                         <i className="fa fa-user-check text-white text-sm"></i>
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-slate-800 leading-tight m-0">
+                        <h3 className="text-sm font-bold text-primary-800 leading-tight m-0">
                             Catat Absensi
                         </h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
+                        <p className="text-[10px] text-primary-400 mt-0.5">
                             Catat kehadiran siswa hari ini
                         </p>
                     </div>
@@ -323,13 +323,13 @@ export default function Absensi({ dataKelas }) {
                 <div className="flex flex-col sm:flex-row gap-2 items-end w-full md:w-auto">
                     {/* Tanggal */}
                     <div className="flex flex-col gap-1 w-full sm:w-auto">
-                        <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                        <label className="text-[9px] font-semibold uppercase tracking-widest text-primary-400">
                             Tanggal
                         </label>
                         <input
                             type="date"
                             readOnly
-                            className="block w-full sm:w-[130px] h-[30px] bg-slate-100 border border-slate-200 text-slate-500 py-1 px-2 rounded-md text-xs cursor-not-allowed select-none"
+                            className="block w-full sm:w-[130px] h-[30px] bg-primary-100 border border-primary-200 text-primary-500 py-1 px-2 rounded-md text-xs cursor-not-allowed select-none"
                             value={tanggal}
                             onChange={(e) => setTanggal(e.target.value)}
                         />
@@ -337,7 +337,7 @@ export default function Absensi({ dataKelas }) {
 
                     {/* Mata Pelajaran (React Select) */}
                     <div className="flex flex-col gap-1 w-full sm:w-[220px]">
-                        <label className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                        <label className="text-[9px] font-semibold uppercase tracking-widest text-primary-400">
                             Mata Pelajaran
                         </label>
                         <Select
@@ -355,7 +355,7 @@ export default function Absensi({ dataKelas }) {
 
                     <div className="flex flex-col gap-1">
                         <button
-                            className="inline-flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-600 font-semibold px-3 rounded-md text-[11px] transition-all shadow-sm h-[30px]"
+                            className="inline-flex items-center justify-center gap-2 bg-white border border-primary-200 hover:bg-primary-50 hover:border-primary-300 text-primary-600 font-semibold px-3 rounded-md text-[11px] transition-all shadow-sm h-[30px]"
                             type="button"
                             title="Lihat Riwayat Absensi"
                             onClick={() => {
@@ -370,7 +370,7 @@ export default function Absensi({ dataKelas }) {
                                 setOpen(true);
                             }}
                         >
-                            <i className="fa fa-history text-slate-400"></i>
+                            <i className="fa fa-history text-primary-400"></i>
                             Riwayat
                         </button>
                     </div>
@@ -379,14 +379,14 @@ export default function Absensi({ dataKelas }) {
 
             {/* ── KONDISI 1 : Belum pilih mapel ─────────── */}
             {!selectedMapel && (
-                <div className="flex flex-col items-center justify-center py-10 px-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 text-center">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center mb-3 shadow-sm">
-                        <i className="fa fa-book-open text-lg text-slate-300"></i>
+                <div className="flex flex-col items-center justify-center py-10 px-4 rounded-xl border border-dashed border-primary-200 bg-primary-50 text-center">
+                    <div className="w-10 h-10 rounded-xl bg-white border border-primary-200 flex items-center justify-center mb-3 shadow-sm">
+                        <i className="fa fa-book-open text-lg text-primary-300"></i>
                     </div>
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p className="text-xs font-semibold text-primary-500">
                         Pilih mata pelajaran terlebih dahulu
                     </p>
-                    <p className="text-[10px] text-slate-400 mt-1 max-w-xs">
+                    <p className="text-[10px] text-primary-400 mt-1 max-w-xs">
                         Daftar siswa akan muncul setelah Anda memilih pelajaran.
                     </p>
                 </div>
@@ -394,9 +394,9 @@ export default function Absensi({ dataKelas }) {
 
             {/* ── KONDISI 2 : Loading skeleton ──────────── */}
             {selectedMapel && isLoadingSiswa && (
-                <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm">
-                    <table className="min-w-full divide-y divide-slate-100 text-xs text-left">
-                        <thead className="bg-slate-50">
+                <div className="rounded-lg border border-primary-200 overflow-hidden shadow-sm">
+                    <table className="min-w-full divide-y divide-primary-100 text-xs text-left">
+                        <thead className="bg-primary-50">
                             <tr>
                                 {[
                                     "No",
@@ -406,7 +406,7 @@ export default function Absensi({ dataKelas }) {
                                 ].map((h, i) => (
                                     <th
                                         key={h}
-                                        className={`px-3 py-2 text-[9px] font-semibold uppercase tracking-widest text-slate-400 ${
+                                        className={`px-3 py-2 text-[9px] font-semibold uppercase tracking-widest text-primary-400 ${
                                             i === 0 ? "w-10 text-center" : ""
                                         } ${i === 1 ? "w-28" : ""} ${
                                             i === 3
@@ -419,24 +419,24 @@ export default function Absensi({ dataKelas }) {
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50 bg-white">
+                        <tbody className="divide-y divide-primary-50 bg-white">
                             {[...Array(5)].map((_, index) => (
                                 <tr key={index} className="animate-pulse">
                                     <td className="px-3 py-2 text-center">
-                                        <div className="h-3 bg-slate-100 rounded w-4 mx-auto"></div>
+                                        <div className="h-3 bg-primary-100 rounded w-4 mx-auto"></div>
                                     </td>
                                     <td className="px-3 py-2">
-                                        <div className="h-3 bg-slate-100 rounded w-20"></div>
+                                        <div className="h-3 bg-primary-100 rounded w-20"></div>
                                     </td>
                                     <td className="px-3 py-2">
-                                        <div className="h-3 bg-slate-100 rounded w-40"></div>
+                                        <div className="h-3 bg-primary-100 rounded w-40"></div>
                                     </td>
                                     <td className="px-3 py-2">
                                         <div className="flex justify-center gap-1.5">
                                             {[...Array(4)].map((_, i) => (
                                                 <div
                                                     key={i}
-                                                    className="h-6 w-10 bg-slate-100 rounded-md"
+                                                    className="h-6 w-10 bg-primary-100 rounded-md"
                                                 ></div>
                                             ))}
                                         </div>
@@ -475,12 +475,12 @@ export default function Absensi({ dataKelas }) {
                         {/* Action bar */}
                         <div className="flex justify-between items-center mb-3">
                             {/* Live clock */}
-                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-2.5 py-1.5">
+                            <div className="flex items-center gap-2 bg-primary-50 border border-primary-200 rounded-md px-2.5 py-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse"></span>
-                                <span className="text-[10px] text-slate-400 font-medium hidden sm:block">
+                                <span className="text-[10px] text-primary-400 font-medium hidden sm:block">
                                     Waktu
                                 </span>
-                                <span className="text-xs font-bold text-slate-700 font-mono tracking-wider tabular-nums">
+                                <span className="text-xs font-bold text-primary-700 font-mono tracking-wider tabular-nums">
                                     {jam}:{menit}:{detik}
                                 </span>
                             </div>
@@ -498,45 +498,45 @@ export default function Absensi({ dataKelas }) {
                         </div>
 
                         {/* Table */}
-                        <div className="rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                        <div className="rounded-lg border border-primary-200 overflow-hidden shadow-sm">
                             <div className="overflow-x-auto overflow-y-auto max-h-[60vh] custom-scrollbar">
                                 <table className="min-w-full text-xs text-left">
                                     {/* Sticky header */}
-                                    <thead className="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+                                    <thead className="bg-primary-50 border-b border-primary-200 sticky top-0 z-10">
                                         <tr>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 w-10 text-center">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 w-10 text-center">
                                                 No
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 w-28">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 w-28">
                                                 NISN
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400">
                                                 Nama Lengkap
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-slate-400 text-center min-w-[240px]">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 text-center min-w-[240px]">
                                                 Status Kehadiran
                                             </th>
                                         </tr>
                                     </thead>
 
-                                    <tbody className="divide-y divide-slate-100 bg-white">
+                                    <tbody className="divide-y divide-primary-100 bg-white">
                                         {siswa.map((item, index) => (
                                             <tr
                                                 key={item.id || item.nisn}
-                                                className="hover:bg-slate-50/70 transition-colors"
+                                                className="hover:bg-primary-50/70 transition-colors"
                                             >
                                                 {/* No */}
-                                                <td className="px-3 py-1.5 text-center text-[11px] text-slate-400 font-medium tabular-nums">
+                                                <td className="px-3 py-1.5 text-center text-[11px] text-primary-400 font-medium tabular-nums">
                                                     {index + 1}
                                                 </td>
 
                                                 {/* NISN */}
-                                                <td className="px-3 py-1.5 font-mono text-[11px] text-slate-500 tracking-wider">
+                                                <td className="px-3 py-1.5 font-mono text-[11px] text-primary-500 tracking-wider">
                                                     {item.nisn}
                                                 </td>
 
                                                 {/* Nama */}
-                                                <td className="px-3 py-1.5 font-medium text-[11px] text-slate-800">
+                                                <td className="px-3 py-1.5 font-medium text-[11px] text-primary-800">
                                                     {item.nama_siswa}
                                                 </td>
 
@@ -557,7 +557,7 @@ export default function Absensi({ dataKelas }) {
                                                                         className={`cursor-pointer border rounded-[4px] py-1 px-2 font-bold text-[10px] transition-all select-none flex items-center justify-center gap-1 min-w-[32px] ${
                                                                             isActive
                                                                                 ? opt.active
-                                                                                : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                                                                                : "bg-white text-primary-400 border-primary-200 hover:border-primary-300 hover:bg-primary-50"
                                                                         }`}
                                                                     >
                                                                         <input

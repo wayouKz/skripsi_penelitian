@@ -3,25 +3,32 @@
 @tailwind utilities;
 
 :root {
-    --color-primary: 16 185 129; /* emerald-500 default (#10b981) */
-    --color-primary-dark: 5 150 105; /* emerald-600 */
-    --color-primary-light: 52 211 153; /* emerald-400 */
+    --color-primary: 16 185 129;
+    --color-primary-dark: 5 150 105;
+    --color-primary-light: 52 211 153;
 }
 
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(34, 197, 94, 0.4);
+    background-color: rgb(var(--color-primary) / 0.4);
+    border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(22, 163, 74, 0.8); /* primary-600 */
+    background-color: rgb(var(--color-primary-dark) / 0.8);
 }
 html {
     scrollbar-width: thin;
-    scrollbar-color: rgba(16, 185, 129, 0.5) transparent;
+    scrollbar-color: rgb(var(--color-primary) / 0.5) transparent;
 }
 
 #nprogress .bar {
-    background: linear-gradient(to right, #059669, #10b981, #34d399) !important;
-    /* ganti hex di atas sesuai primary kamu */
+    background: rgb(var(--color-primary)) !important;
 }
 #nprogress .peg {
     box-shadow:

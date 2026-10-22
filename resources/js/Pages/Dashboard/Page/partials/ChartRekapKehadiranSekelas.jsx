@@ -58,8 +58,8 @@ export default function ChartRekapKehadiranSekelas({ rekapKehadiran }) {
 
     return (
         // Tambahkan flex flex-col dan h-full agar tingginya pas dengan tabel
-        <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex flex-col h-full">
-            <h3 className="text-sm font-bold text-slate-800 mb-4">
+        <div className="bg-white p-5 rounded-3xl border border-primary-100 shadow-sm flex flex-col h-full">
+            <h3 className="text-sm font-bold text-primary-800 mb-4">
                 Statistik Kehadiran Kelas
             </h3>
             <div className="flex-1 w-full min-h-[320px]">

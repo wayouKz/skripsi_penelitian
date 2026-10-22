@@ -50,7 +50,7 @@ function HeroSection({ user, tglStr, peran }) {
 
             <div className="relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 z-10">
                 <div>
-                    <p className="text-emerald-100 text-sm md:text-base font-medium mb-2 tracking-wide uppercase">
+                    <p className="text-primary-100 text-sm md:text-base font-medium mb-2 tracking-wide uppercase">
                         Selamat datang kembali 👋
                     </p>
 
@@ -59,18 +59,18 @@ function HeroSection({ user, tglStr, peran }) {
                     </h1>
 
                     <div className="flex flex-wrap gap-2">
-                        <span className="inline-flex items-center px-3 py-1 text-sm text-emerald-50 bg-emerald-800/50 backdrop-blur-sm rounded-lg border border-emerald-500/30">
+                        <span className="inline-flex items-center px-3 py-1 text-sm text-primary-50 bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
                             NIP: {user?.nip || "-"}
                         </span>
 
-                        <span className="inline-flex items-center px-3 py-1 text-sm text-emerald-50 bg-emerald-800/50 backdrop-blur-sm rounded-lg border border-emerald-500/30">
+                        <span className="inline-flex items-center px-3 py-1 text-sm text-primary-50 bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
                             {peran}
                         </span>
                     </div>
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
-                    <div className="text-sm text-emerald-100 mb-1">
+                    <div className="text-sm text-primary-100 mb-1">
                         Tanggal Hari Ini
                     </div>
 
@@ -109,18 +109,18 @@ function PanelKehadiranGuru({ info }) {
         hitungKehadiranGuru(info);
 
     return (
-        <div className="bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+        <div className="bg-white rounded-3xl p-7 border border-primary-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-primary-100">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-inner">
                         <i className="fa-solid fa-user-check text-base"></i>
                     </div>
 
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+                        <h2 className="text-xl font-bold text-primary-800 tracking-tight">
                             Kehadiran Guru
                         </h2>
-                        <p className="text-xs text-slate-400 font-medium">
+                        <p className="text-xs text-primary-400 font-medium">
                             Rekap kehadiran guru
                         </p>
                     </div>
@@ -131,18 +131,18 @@ function PanelKehadiranGuru({ info }) {
                 </span>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="p-5 rounded-2xl bg-primary-50 border border-primary-100">
                 <div className="flex items-center justify-between">
                     <div>
-                        <p className="text-xs text-slate-400 mb-1 font-medium">
+                        <p className="text-xs text-primary-400 mb-1 font-medium">
                             Persentase Kehadiran
                         </p>
-                        <h3 className="text-4xl font-extrabold text-slate-800">
+                        <h3 className="text-4xl font-extrabold text-primary-800">
                             {persentase.toFixed(2)}%
                         </h3>
                     </div>
 
-                    <div className="w-16 h-16 rounded-full bg-primary-100 text-emerald-600 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
                         <i className="fa-solid fa-chart-pie text-2xl"></i>
                     </div>
                 </div>
@@ -159,15 +159,15 @@ function PanelKehadiranGuru({ info }) {
                 </div>
 
                 {/* <div className="grid grid-cols-1 gap-3 mt-4">
-                    <div className="bg-white rounded-xl p-3 border border-slate-100">
-                        <p className="text-[10px] text-slate-400">Hadir</p>
-                        <p className="text-lg font-bold text-emerald-600">
+                    <div className="bg-white rounded-xl p-3 border border-primary-100">
+                        <p className="text-[10px] text-primary-400">Hadir</p>
+                        <p className="text-lg font-bold text-primary-600">
                             {totalHadir}
                         </p>
                     </div>
 
-                    <div className="bg-white rounded-xl p-3 border border-slate-100">
-                        <p className="text-[10px] text-slate-400">
+                    <div className="bg-white rounded-xl p-3 border border-primary-100">
+                        <p className="text-[10px] text-primary-400">
                             Tidak Hadir
                         </p>
                         <p className="text-lg font-bold text-rose-500">
@@ -177,10 +177,10 @@ function PanelKehadiranGuru({ info }) {
                 </div> */}
 
                 <div className="flex justify-between mt-3">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-primary-400">
                         Total data kehadiran
                     </span>
-                    <span className="text-[11px] font-semibold text-slate-600">
+                    <span className="text-[11px] font-semibold text-primary-600">
                         {totalAbsen} X Absensi
                     </span>
                 </div>
@@ -296,52 +296,52 @@ function DashboardWaliKelas({ info }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Kelas binaan */}
-                <div className="lg:col-span-2 bg-white rounded-3xl p-7 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                <div className="lg:col-span-2 bg-white rounded-3xl p-7 border border-primary-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-primary-100">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-primary-50 text-emerald-600 flex items-center justify-center font-bold shadow-inner">
+                            <div className="w-10 h-10 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold shadow-inner">
                                 <i className="fa-solid fa-chalkboard-user text-base"></i>
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+                                <h2 className="text-xl font-bold text-primary-800 tracking-tight">
                                     Wali Kelas {info?.nama_kelas || "-"}
                                 </h2>
-                                <p className="text-xs text-slate-400 font-medium">
+                                <p className="text-xs text-primary-400 font-medium">
                                     Monitoring keaktifan dan rekapitulasi kelas
                                     binaan
                                 </p>
                             </div>
                         </div>
 
-                        <span className="text-[11px] font-semibold bg-primary-100 text-emerald-700 px-3 py-1 rounded-full">
+                        <span className="text-[11px] font-semibold bg-primary-100 text-primary-700 px-3 py-1 rounded-full">
                             Aktif
                         </span>
                     </div>
 
-                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div className="p-5 rounded-2xl bg-primary-50 border border-primary-100">
                         <div className="flex justify-between items-center">
                             <div>
-                                <span className="text-xs text-slate-400 block mb-1 font-medium">
+                                <span className="text-xs text-primary-400 block mb-1 font-medium">
                                     Persentase Kehadiran Kelas
                                 </span>
-                                <div className="text-3xl font-extrabold text-slate-800">
+                                <div className="text-3xl font-extrabold text-primary-800">
                                     {info?.persentase_kehadiran || 0}%
                                 </div>
                             </div>
 
-                            <div className="w-14 h-14 rounded-full bg-primary-100 text-emerald-600 flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
                                 <i className="fa-solid fa-users text-xl"></i>
                             </div>
                         </div>
 
-                        <p className="text-[11px] text-emerald-600 mt-3 font-medium">
+                        <p className="text-[11px] text-primary-600 mt-3 font-medium">
                             {rekap?.hadir || 0} dari{" "}
                             {info?.total_siswa_perwalian || 0} siswa hadir
                         </p>
                     </div>
                     <div className="flex justify-end m-2">
                         <button
-                            className="bg-red-600 rounded-xl p-3 border border-slate-100 text-white"
+                            className="bg-red-600 rounded-xl p-3 border border-primary-100 text-white"
                             onClick={() => {
                                 (setOpenModalPdf(true),
                                     setPdf(
@@ -357,7 +357,7 @@ function DashboardWaliKelas({ info }) {
                                 <i className="fa-solid fa-file-pdf mr-2"></i>
                                 Jadwal Kelas {info?.nama_kelas} Pdf
                             </p>
-                            <p className="text-lg font-bold text-emerald-600"></p>
+                            <p className="text-lg font-bold text-primary-600"></p>
                         </button>
                     </div>
                 </div>
@@ -392,10 +392,10 @@ function DashboardWaliKelas({ info }) {
                                 <i className="fa-solid fa-chart-pie text-sm"></i>
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-slate-800 leading-tight">
+                                <h4 className="text-sm font-bold text-primary-800 leading-tight">
                                     {siswaTerpilih?.nama_siswa || "-"}
                                 </h4>
-                                <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                                <p className="text-[11px] text-primary-500 mt-0.5 font-medium">
                                     NISN: {siswaTerpilih?.nisn || "-"}
                                 </p>
                             </div>
@@ -403,7 +403,7 @@ function DashboardWaliKelas({ info }) {
 
                         <button
                             type="button"
-                            className="w-8 h-8 rounded-full bg-white border border-gray-200 text-slate-400 hover:text-slate-600 hover:bg-gray-100 transition-all flex items-center justify-center cursor-pointer"
+                            className="w-8 h-8 rounded-full bg-white border border-gray-200 text-primary-400 hover:text-primary-600 hover:bg-gray-100 transition-all flex items-center justify-center cursor-pointer"
                             onClick={() => setOpenChart(false)}
                         >
                             <i className="fa-solid fa-xmark text-xs"></i>
@@ -465,7 +465,7 @@ export default function GuruDashboard({
     }, [isWaliKelasProp, info?.nama_kelas]);
 
     return (
-        <div className="space-y-8 bg-slate-50 md:p-8 font-sans">
+        <div className="space-y-8 bg-primary-50 md:p-8 font-sans">
             <HeroSection
                 user={user}
                 tglStr={tglStr}
@@ -473,7 +473,7 @@ export default function GuruDashboard({
             />
 
             {loading ? (
-                <div className="text-center text-xs text-slate-400 py-10">
+                <div className="text-center text-xs text-primary-400 py-10">
                     Memuat data dashboard...
                 </div>
             ) : isWaliKelas ? (

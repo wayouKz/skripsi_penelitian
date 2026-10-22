@@ -205,9 +205,6 @@ export default function KelolaInformasiInstansi() {
                                 <p className="text-sm font-semibold text-gray-800">
                                     Tema Aplikasi
                                 </p>
-                                <p className="text-xs text-gray-500">
-                                    Warna disimpan di browser (localStorage)
-                                </p>
                             </div>
                         </div>
 

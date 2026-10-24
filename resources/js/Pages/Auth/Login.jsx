@@ -103,7 +103,7 @@ export default function Login({ status, canResetPassword, config }) {
 
                         </p> */}
 
-                        <p className="text-sm lg:text-base text-primary-100 font-light leading-relaxed c mx-auto lg:mx-0">
+                        <p className="text-sm lg:text-base text-white font-light leading-relaxed c mx-auto lg:mx-0">
                             {config?.alamat_instansi || null}
                             <br className="hidden lg:block" />
                             {config?.email_instansi || null}

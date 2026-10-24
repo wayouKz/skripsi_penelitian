@@ -1,8 +1,6 @@
 import FormModal from "@/Components/FormModal";
 import {
     DndContext,
-    useDraggable,
-    useDroppable,
     DragOverlay,
     useSensor,
     useSensors,
@@ -15,10 +13,145 @@ import "driver.js/dist/driver.css";
 import DroppableMapelRow from "./partials/DroppableMapelRow";
 import DraggableGuru from "./partials/DraggableGuru";
 import DragGhost from "./partials/DragGhost";
-import Select from "react-select";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import {
+    memo,
+    useCallback,
+    useDeferredValue,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AppSelect from "@/Components/AppSelect";
 import TextInput from "@/Components/TextInput";
+
+/* ------------------------------------------------------------------ */
+/* Panel guru: state `search` dipisah supaya ketikan tidak me-render   */
+/* ulang seluruh modal & tabel mapel.                                  */
+/* ------------------------------------------------------------------ */
+const GuruPanel = memo(function GuruPanel({ guruList, loading }) {
+    const [search, setSearch] = useState("");
+    const deferredSearch = useDeferredValue(search);
+
+    const filtered = useMemo(() => {
+        const q = deferredSearch.trim().toLowerCase();
+        if (!q) return guruList;
+        return guruList.filter((g) => g.label.toLowerCase().includes(q));
+    }, [guruList, deferredSearch]);
+
+    return (
+        <aside
+            id="tour-panel-guru"
+            className="w-64 flex-shrink-0 flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+        >
+            <div className="px-4 pt-4 pb-3 border-b border-gray-100">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
+                    Daftar Guru
+                </p>
+                <TextInput
+                    icon="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Cari guru…"
+                />
+            </div>
+            <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
+                {loading ? (
+                    <GuruSkeletonList />
+                ) : (
+                    filtered.map((guru) => (
+                        <DraggableGuru key={guru.value} guru={guru} />
+                    ))
+                )}
+            </div>
+        </aside>
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/* Footer total jam: dipisah supaya hanya dirender saat total berubah  */
+/* ------------------------------------------------------------------ */
+const TotalJamFooter = memo(function TotalJamFooter({ total }) {
+    const items = [
+        { label: "X", value: total[10] },
+        { label: "XI", value: total[11] },
+        { label: "XII", value: total[12] },
+    ];
+
+    return (
+        <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 px-5 py-3 border border-gray-200 text-xs text-gray-600 rounded-xl mt-4 gap-3 shadow-sm">
+            <div className="flex items-center gap-2 justify-end">
+                <small className="font-bold text-gray-800">Total Jam :</small>
+                {items.map((it) => (
+                    <span
+                        key={it.label}
+                        className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700"
+                    >
+                        {it.label}:{" "}
+                        <strong className="font-bold text-primary-600">
+                            {it.value}
+                        </strong>{" "}
+                        Jam
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/* Skeleton                                                            */
+/* ------------------------------------------------------------------ */
+const GuruSkeletonList = memo(function GuruSkeletonList({ count = 10 }) {
+    return (
+        <>
+            {Array.from({ length: count }).map((_, i) => (
+                <div
+                    key={i}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-100 bg-white animate-pulse"
+                >
+                    <div className="h-6 w-6 rounded-full bg-gray-200 flex-shrink-0" />
+                    <div
+                        className="h-3 rounded bg-gray-200"
+                        style={{ width: `${55 + ((i * 17) % 35)}%` }}
+                    />
+                </div>
+            ))}
+        </>
+    );
+});
+
+const MapelSkeletonRows = memo(function MapelSkeletonRows({ count = 8 }) {
+    return (
+        <>
+            {Array.from({ length: count }).map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                    <td className="w-56 px-5 py-4 align-top">
+                        <div className="flex items-center gap-3">
+                            <div className="h-4 w-4 rounded bg-gray-200" />
+                            <div
+                                className="h-3 rounded bg-gray-200"
+                                style={{ width: `${60 + ((i * 13) % 30)}%` }}
+                            />
+                        </div>
+                    </td>
+                    <td className="px-5 py-4">
+                        <div className="flex flex-wrap gap-2">
+                            {Array.from({ length: (i % 3) + 1 }).map(
+                                (__, j) => (
+                                    <div
+                                        key={j}
+                                        className="h-9 w-72 rounded-lg bg-gray-100 border border-gray-200"
+                                    />
+                                ),
+                            )}
+                        </div>
+                    </td>
+                </tr>
+            ))}
+        </>
+    );
+});
 
 export default function MappingGuruMapel({
     open,
@@ -31,157 +164,65 @@ export default function MappingGuruMapel({
     const [guruList, setGuruList] = useState([]);
     const [kelasList, setKelasList] = useState([]);
     const [activeGuru, setActiveGuru] = useState(null);
-    const [search, setSearch] = useState("");
     const [tahunAjaranList, setTahunAjaranList] = useState([]);
     const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
+    const [loadingGuru, setLoadingGuru] = useState(true);
+    const [loadingMapel, setLoadingMapel] = useState(true);
 
-    // State untuk total jam dari Database (Server)
-    const [totalJamServer, setTotalJamServer] = useState({
-        10: 0,
-        11: 0,
-        12: 0,
-    });
+    // counter id: lebih murah & stabil dibanding Math.random() per item
+    const uidRef = useRef(0);
+    const nextUid = () => `g-${++uidRef.current}`;
 
-    // --- STYLING CUSTOM UNTUK REACT-SELECT ---
-    const customSelectStyles = {
-        control: (base, state) => ({
-            ...base,
-            backgroundColor: !selectedTahunAjaran ? "#FEF3C7" : "#F9FAFB",
-            borderColor: state.isFocused
-                ? "#10B981"
-                : !selectedTahunAjaran
-                  ? "#FCD34D"
-                  : "#D1D5DB",
-            borderRadius: "0.5rem",
-            minHeight: "36px",
-            padding: "0 2px",
-            boxShadow: state.isFocused
-                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
-                : "none",
-            cursor: "pointer",
-            "&:hover": {
-                borderColor: "#10B981",
-            },
-        }),
-        valueContainer: (base) => ({
-            ...base,
-            padding: "0 6px",
-        }),
-        placeholder: (base) => ({
-            ...base,
-            color: "#9CA3AF",
-            fontSize: "0.75rem",
-            fontWeight: "500",
-        }),
-        singleValue: (base) => ({
-            ...base,
-            color: "#1F2937",
-            fontSize: "0.75rem",
-            fontWeight: "600",
-        }),
-        option: (base, state) => ({
-            ...base,
-            backgroundColor: state.isSelected
-                ? "#10B981"
-                : state.isFocused
-                  ? "#ECFDF5"
-                  : "white",
-            color: state.isSelected ? "white" : "#1F2937",
-            fontSize: "0.75rem",
-            fontWeight: "500",
-            cursor: "pointer",
-        }),
-        menuPortal: (base) => ({
-            ...base,
-            zIndex: 9999,
-        }),
-    };
+    // untuk mengabaikan response lama (race condition saat ganti tahun ajaran)
+    const mapelRequestRef = useRef(0);
 
-    useEffect(() => {
-        if (open) {
-            getMapelList();
-            getGuru();
-            getKelasList();
-            getTahunAjaranList();
-        }
-    }, [open]);
+    /* ---------------------------- FETCHERS ---------------------------- */
 
-    useEffect(() => {
-        if (open && selectedTahunAjaran !== "") {
-            getMapelList();
-        }
-    }, [selectedTahunAjaran]);
-
-    const getKelasList = async () => {
+    const getKelasList = useCallback(async () => {
         try {
             const res = await axios.get(route("getData.get-kelas"));
             setKelasList(res.data.data || res.data || []);
         } catch (error) {
             console.error("Gagal mengambil data kelas:", error);
         }
-    };
+    }, []);
 
-    const getTahunAjaranList = async () => {
+    const getTahunAjaranList = useCallback(async () => {
         try {
             const res = await axios.get(route("getData.get-tahun-ajaran"));
             const dataTA = res.data.data || res.data || [];
-
             setTahunAjaranList(dataTA);
 
             const activeTA = dataTA.find(
                 (ta) => ta.status === "active" || ta.status === 1,
             );
-
             if (activeTA) {
-                setSelectedTahunAjaran(activeTA.value);
+                setSelectedTahunAjaran((prev) => prev || activeTA.value);
+            } else {
+                // tidak ada tahun ajaran aktif: jangan skeleton selamanya
+                setLoadingMapel(false);
             }
         } catch (error) {
             console.error("Gagal mengambil data tahun ajaran:", error);
+            setLoadingMapel(false);
         }
-    };
+    }, []);
 
-    const getMapelList = async () => {
-        try {
-            const res = await axios.get(route("getData.get-mapel-guru"), {
-                params: {
-                    tahun_ajaran_id: selectedTahunAjaran,
-                },
-            });
-            const data = res.data.data.map((item) => ({
-                ...item,
-                guru: (item.guru || []).map((g) => ({
-                    ...g,
-                    unique_id: `existing-${g.nip}-${g.kelas_id}-${Math.random().toString(36).substring(2, 9)}`,
-                    value: g.nip,
-                    label: g.nama,
-                    beban_jam: g.beban_jam || "",
-                    kelas_id: g.kelas_id || "",
-                })),
-            }));
-            setMapelList(data);
-        } catch (error) {
-            // console.error("Gagal mengambil data mapel:", error);
-            showCenterAlert(
-                "Gagal mengambil data mapel. Silakan coba lagi.",
-                "error",
-                2000,
-            );
-        }
-    };
-
-    const getGuru = async () => {
+    const getGuru = useCallback(async () => {
+        setLoadingGuru(true);
         try {
             const res = await axios.get(route("getData.get-list-guru"));
             if (!res.data.success) {
                 setGuruList([]);
                 showCenterAlert(res.data.msg, "info", 2000);
             } else {
-                const data = res.data.data.map((guru) => ({
-                    value: guru.nip,
-                    label: guru.nama_guru,
-                    mapel: guru.mapel,
-                }));
-                setGuruList(data);
+                setGuruList(
+                    res.data.data.map((guru) => ({
+                        value: guru.nip,
+                        label: guru.nama_guru,
+                        mapel: guru.mapel,
+                    })),
+                );
             }
         } catch (error) {
             showCenterAlert(
@@ -189,47 +230,123 @@ export default function MappingGuruMapel({
                 "error",
                 2000,
             );
+        } finally {
+            setLoadingGuru(false);
         }
-    };
+    }, [showCenterAlert]);
+
+    const getMapelList = useCallback(
+        async (tahunAjaranId) => {
+            const reqId = ++mapelRequestRef.current;
+            setLoadingMapel(true);
+            try {
+                const res = await axios.get(route("getData.get-mapel-guru"), {
+                    params: { tahun_ajaran_id: tahunAjaranId },
+                });
+
+                // abaikan jika sudah ada request yang lebih baru
+                if (reqId !== mapelRequestRef.current) return;
+
+                const data = res.data.data.map((item) => ({
+                    ...item,
+                    guru: (item.guru || []).map((g) => ({
+                        ...g,
+                        unique_id: `existing-${nextUid()}`,
+                        value: g.nip,
+                        label: g.nama,
+                        beban_jam: g.beban_jam || "",
+                        kelas_id: g.kelas_id || "",
+                    })),
+                }));
+                setMapelList(data);
+            } catch (error) {
+                if (reqId !== mapelRequestRef.current) return;
+                showCenterAlert(
+                    "Gagal mengambil data mapel. Silakan coba lagi.",
+                    "error",
+                    2000,
+                );
+            } finally {
+                if (reqId === mapelRequestRef.current) {
+                    setLoadingMapel(false);
+                }
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [showCenterAlert],
+    );
+
+    /* ----------------------------- EFFECTS ---------------------------- */
+
+    // Data yang tidak bergantung tahun ajaran: sekali saat modal dibuka
+    useEffect(() => {
+        if (!open) return;
+        setLoadingMapel(true);
+        getGuru();
+        getKelasList();
+        getTahunAjaranList();
+    }, [open, getGuru, getKelasList, getTahunAjaranList]);
+
+    // Mapel hanya diambil setelah tahun ajaran terpilih (tidak dobel fetch)
+    useEffect(() => {
+        if (open && selectedTahunAjaran) {
+            getMapelList(selectedTahunAjaran);
+        }
+    }, [open, selectedTahunAjaran, getMapelList]);
+
+    /* ------------------------------ DND ------------------------------- */
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     );
 
-    const handleDragStart = ({ active }) => setActiveGuru(active.data.current);
+    const guruMap = useMemo(() => {
+        const m = new Map();
+        guruOptions.forEach((g) => m.set(g.value, g));
+        guruList.forEach((g) => m.set(g.value, g)); // guruList menimpa guruOptions
+        return m;
+    }, [guruList, guruOptions]);
 
-    const handleDragEnd = ({ active, over }) => {
-        setActiveGuru(null);
-        if (!over) return;
+    const handleDragStart = useCallback(
+        ({ active }) => setActiveGuru(active.data.current),
+        [],
+    );
+    const handleDragCancel = useCallback(() => setActiveGuru(null), []);
 
-        const guruId = active.id;
-        const mapelId = Number(over.id);
-        const guru =
-            guruList.find((g) => g.value === guruId) ||
-            guruOptions.find((g) => g.value === guruId);
-        if (!guru) return;
+    const handleDragEnd = useCallback(
+        ({ active, over }) => {
+            setActiveGuru(null);
+            if (!over) return;
 
-        setMapelList((prev) =>
-            prev.map((mapel) => {
-                if (mapel.id !== mapelId) return mapel;
+            const guru = guruMap.get(active.id);
+            if (!guru) return;
 
-                const uniqueId = `${guruId}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+            const mapelId = Number(over.id);
+            const uniqueId = nextUid();
 
-                return {
-                    ...mapel,
-                    guru: [
-                        ...mapel.guru,
-                        {
-                            ...guru,
-                            unique_id: uniqueId,
-                            beban_jam: "",
-                            kelas_id: "",
-                        },
-                    ],
-                };
-            }),
-        );
-    };
+            setMapelList((prev) =>
+                prev.map((mapel) =>
+                    mapel.id !== mapelId
+                        ? mapel
+                        : {
+                              ...mapel,
+                              guru: [
+                                  ...mapel.guru,
+                                  {
+                                      ...guru,
+                                      unique_id: uniqueId,
+                                      beban_jam: "",
+                                      kelas_id: "",
+                                  },
+                              ],
+                          },
+                ),
+            );
+        },
+        [guruMap],
+    );
+
+    /* ------------------------- EDIT / HAPUS GURU ---------------------- */
 
     const handleGuruDataChange = useCallback(
         (mapelId, uniqueId, field, value) => {
@@ -264,67 +381,31 @@ export default function MappingGuruMapel({
         );
     }, []);
 
-    // ==========================================
-    // VARIAN 1: Hitung dari Database via Fetch
-    // ==========================================
-    const fetchTotalJam = useCallback(async () => {
-        if (!selectedTahunAjaran) return;
+    /* ------------------------ TOTAL JAM REAL-TIME --------------------- */
 
-        try {
-            const res = await axios.get(route("getData.get-total-jam"), {
-                params: {
-                    tingkat: [10, 11, 12],
-                    tahun_ajaran_id: selectedTahunAjaran,
-                },
-            });
+    const tingkatByKelas = useMemo(() => {
+        const m = new Map();
+        kelasList.forEach((k) =>
+            m.set(Number(k.id || k.kelas_id || k.value), Number(k.tingkat)),
+        );
+        return m;
+    }, [kelasList]);
 
-            if (res.data.success) {
-                setTotalJamServer({
-                    10: res.data.data.tingkat10.total_jam,
-                    11: res.data.data.tingkat11.total_jam,
-                    12: res.data.data.tingkat12.total_jam,
-                });
-            }
-        } catch (error) {
-            console.error("Gagal mengambil total jam server:", error);
-        }
-    }, [selectedTahunAjaran]);
-
-    useEffect(() => {
-        if (open && selectedTahunAjaran) {
-            fetchTotalJam();
-        }
-    }, [open, selectedTahunAjaran]);
-
-    // ==========================================
-    // VARIAN 2: Hitung Real-time saat Input (Frontend)
-    // ==========================================
     const totalJamRealtime = useMemo(() => {
         const hasil = { 10: 0, 11: 0, 12: 0 };
-
-        mapelList.forEach((mapel) => {
-            (mapel.guru || []).forEach((g) => {
-                if (!g.kelas_id || !g.beban_jam) return;
-
-                const kelasObj = kelasList.find(
-                    (k) =>
-                        Number(k.id || k.kelas_id || k.value) ===
-                        Number(g.kelas_id),
-                );
-
-                if (kelasObj) {
-                    const tingkat = Number(kelasObj.tingkat);
-                    const jam = Number(g.beban_jam) || 0;
-
-                    if (hasil[tingkat] !== undefined) {
-                        hasil[tingkat] += jam;
-                    }
+        for (const mapel of mapelList) {
+            for (const g of mapel.guru) {
+                if (!g.kelas_id || !g.beban_jam) continue;
+                const tingkat = tingkatByKelas.get(Number(g.kelas_id));
+                if (tingkat in hasil) {
+                    hasil[tingkat] += Number(g.beban_jam) || 0;
                 }
-            });
-        });
-
+            }
+        }
         return hasil;
-    }, [mapelList, kelasList]);
+    }, [mapelList, tingkatByKelas]);
+
+    /* ------------------------------ SUBMIT ---------------------------- */
 
     const submit = (e) => {
         e.preventDefault();
@@ -340,7 +421,6 @@ export default function MappingGuruMapel({
         const hasEmpty = mapelList.some((m) =>
             m.guru.some((g) => g.beban_jam === "" || g.kelas_id === ""),
         );
-
         if (hasEmpty) {
             showCenterAlert(
                 "Lengkapi Kelas dan Beban Jam untuk semua guru yang ditetapkan.",
@@ -368,28 +448,46 @@ export default function MappingGuruMapel({
                 if (res.data.success) {
                     showAlert(res.data.msg, "success", 2000);
                     getGuruMapel();
-                    fetchTotalJam(); // Refresh data server setelah simpan
                 } else {
                     showCenterAlert(res.data.msg, "error", 2000);
                 }
+            })
+            .catch(() => {
+                showCenterAlert(
+                    "Terjadi kesalahan saat menyimpan data.",
+                    "error",
+                    2000,
+                );
             });
     };
 
-    const filteredGuruList = guruList.filter((g) =>
-        g.label.toLowerCase().includes(search.toLowerCase()),
+    /* ----------------------------- TAHUN AJARAN ----------------------- */
+
+    const tahunAjaranOptions = useMemo(
+        () =>
+            (tahunAjaranList || []).map((ta) => ({
+                value: ta.value,
+                label: ta.label,
+            })),
+        [tahunAjaranList],
     );
 
-    const tahunAjaranOptions = (tahunAjaranList || []).map((ta) => ({
-        value: ta.value,
-        label: ta.label,
-    }));
+    const selectedTahunAjaranOption = useMemo(
+        () =>
+            tahunAjaranOptions.find(
+                (opt) => String(opt.value) === String(selectedTahunAjaran),
+            ) || null,
+        [tahunAjaranOptions, selectedTahunAjaran],
+    );
 
-    const selectedTahunAjaranOption =
-        tahunAjaranOptions.find(
-            (opt) => String(opt.value) === String(selectedTahunAjaran),
-        ) || null;
+    const handleTahunAjaranChange = useCallback(
+        (option) => setSelectedTahunAjaran(option ? option.value : ""),
+        [],
+    );
 
-    const startTour = () => {
+    /* -------------------------------- TOUR ---------------------------- */
+
+    const startTour = useCallback(() => {
         const driverObj = driver({
             showProgress: true,
             nextBtnText: "Selanjutnya",
@@ -419,7 +517,9 @@ export default function MappingGuruMapel({
             ],
         });
         driverObj.drive();
-    };
+    }, []);
+
+    /* ------------------------------ RENDER ---------------------------- */
 
     return (
         <FormModal
@@ -441,11 +541,7 @@ export default function MappingGuruMapel({
                     <div className="w-[200px]">
                         <AppSelect
                             value={selectedTahunAjaranOption}
-                            onChange={(option) =>
-                                setSelectedTahunAjaran(
-                                    option ? option.value : "",
-                                )
-                            }
+                            onChange={handleTahunAjaranChange}
                             options={tahunAjaranOptions}
                             placeholder="-- Pilih Tahun Ajaran --"
                             isSearchable={true}
@@ -470,31 +566,11 @@ export default function MappingGuruMapel({
                 sensors={sensors}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
-                onDragCancel={() => setActiveGuru(null)}
+                onDragCancel={handleDragCancel}
             >
                 <div className="flex gap-5 h-[72vh]">
                     {/* Left Panel */}
-                    <aside
-                        id="tour-panel-guru"
-                        className="w-64 flex-shrink-0 flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
-                    >
-                        <div className="px-4 pt-4 pb-3 border-b border-gray-100">
-                            <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
-                                Daftar Guru
-                            </p>
-                            <TextInput
-                                icon="search"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Cari guru…"
-                            />
-                        </div>
-                        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
-                            {filteredGuruList.map((guru) => (
-                                <DraggableGuru key={guru.value} guru={guru} />
-                            ))}
-                        </div>
-                    </aside>
+                    <GuruPanel guruList={guruList} loading={loadingGuru} />
 
                     {/* Right Panel */}
                     <div
@@ -509,23 +585,27 @@ export default function MappingGuruMapel({
                                             Nama Mata Pelajaran
                                         </th>
                                         <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase text-gray-500 border-b">
-                                            Guru, Kelas, & Beban Jam
+                                            Guru, Kelas, & Jam Pelajaran (JP)
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {mapelList.map((mapel, index) => (
-                                        <DroppableMapelRow
-                                            key={mapel.id}
-                                            mapel={mapel}
-                                            index={index}
-                                            kelasList={kelasList}
-                                            removeGuru={removeGuru}
-                                            handleGuruDataChange={
-                                                handleGuruDataChange
-                                            }
-                                        />
-                                    ))}
+                                    {loadingMapel ? (
+                                        <MapelSkeletonRows />
+                                    ) : (
+                                        mapelList.map((mapel, index) => (
+                                            <DroppableMapelRow
+                                                key={mapel.id}
+                                                mapel={mapel}
+                                                index={index}
+                                                kelasList={kelasList}
+                                                removeGuru={removeGuru}
+                                                handleGuruDataChange={
+                                                    handleGuruDataChange
+                                                }
+                                            />
+                                        ))
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -537,37 +617,7 @@ export default function MappingGuruMapel({
                 </DragOverlay>
             </DndContext>
 
-            {/* Footer Gabungan Database & Real-time */}
-            {/* Sisi Kiri: Total Jam Server (Database) */}
-            {/* Footer Gabungan Satu UI */}
-            <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 px-5 py-3 border border-gray-200 text-xs text-gray-600 rounded-xl mt-4 gap-3 shadow-sm">
-                <div className="flex items-center gap-2 justify-end">
-                    <small className="font-bold text-gray-800">
-                        Total Jam :
-                    </small>
-                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
-                        X:{" "}
-                        <strong className="font-bold text-primary-600">
-                            {totalJamRealtime[10]}
-                        </strong>{" "}
-                        Jam
-                    </span>
-                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
-                        XI:{" "}
-                        <strong className="font-bold text-primary-600">
-                            {totalJamRealtime[11]}
-                        </strong>{" "}
-                        Jam
-                    </span>
-                    <span className="bg-white px-3 py-1 rounded-md border border-gray-200 shadow-sm text-gray-700">
-                        XII:{" "}
-                        <strong className="font-bold text-primary-600">
-                            {totalJamRealtime[12]}
-                        </strong>{" "}
-                        Jam
-                    </span>
-                </div>
-            </div>
+            <TotalJamFooter total={totalJamRealtime} />
         </FormModal>
     );
 }

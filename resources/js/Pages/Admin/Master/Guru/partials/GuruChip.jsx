@@ -163,7 +163,6 @@ function GuruChip({
                     isSearchable={true}
                     menuPortalTarget={document.body}
                     className="text-xs"
-                    classNamePrefix="react-select"
                 />
             </div>
 
@@ -175,6 +174,7 @@ function GuruChip({
                     value={localJam}
                     onChange={(e) => setLocalJam(e.target.value)}
                     onBlur={handleJamBlur}
+                    id="#jp"
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.target.blur(); // Trigger blur saat enter ditekan

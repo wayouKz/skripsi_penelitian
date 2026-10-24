@@ -162,11 +162,11 @@ export default function KelolaInformasiInstansi() {
                 <div className="p-4 border-b bg-white">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="p-2 bg-gray-100 rounded-lg">
-                                <i className="fa-solid fa-palette text-gray-600" />
+                            <div className="p-2 bg-primary-100 rounded-lg">
+                                <i className="fa-solid fa-palette text-primary-600" />
                             </div>
                             <div>
-                                <p className="text-sm font-semibold text-gray-800">
+                                <p className="text-sm font-semibold text-primary-800">
                                     Tema Aplikasi
                                 </p>
                             </div>

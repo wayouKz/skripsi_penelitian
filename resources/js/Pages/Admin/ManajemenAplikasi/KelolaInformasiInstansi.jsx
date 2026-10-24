@@ -5,9 +5,9 @@ import TextInput from "@/Components/TextInput";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
-import Select from "react-select";
 import { PRESETS, applyTheme, getSavedTheme } from "@/utils/theme";
 import { Palette } from "lucide-react"; // atau pakai fontawesome kalau lebih suka
+import AppSelect from "@/Components/AppSelect";
 export default function KelolaInformasiInstansi() {
     const [logoPreview, setLogoPreview] = useState(null);
     const [sampulPreview, setSampulPreview] = useState(null);
@@ -63,6 +63,13 @@ export default function KelolaInformasiInstansi() {
         foto_highlight_1: parsedCardImg[0] || parsedCardImg["0"] || null,
         foto_highlight_2: parsedCardImg[1] || parsedCardImg["1"] || null,
         foto_highlight_3: parsedCardImg[2] || parsedCardImg["2"] || null,
+        warna_primary: dataInstansi?.warna_primary || PRESETS.emerald.primary,
+        warna_primary_dark:
+            dataInstansi?.warna_primary_dark || PRESETS.emerald.dark,
+        warna_primary_light:
+            dataInstansi?.warna_primary_light || PRESETS.emerald.light,
+        warna_hex: dataInstansi?.warna_hex || PRESETS.emerald.hex,
+        nama_tema: dataInstansi?.nama_tema || PRESETS.emerald.name,
     });
 
     const handleSampulChange = (e) => {
@@ -118,59 +125,6 @@ export default function KelolaInformasiInstansi() {
             },
         });
     };
-    const customSelectStyles = {
-        control: (base, state) => ({
-            ...base,
-            backgroundColor: !data?.kepala_sekolah?.value ? "#FFFF" : "#F9FAFB",
-            borderColor: state.isFocused
-                ? "#10B981"
-                : !data?.kepala_sekolah?.value
-                  ? "#FCD34D"
-                  : "#D1D5DB",
-            borderRadius: "0.5rem",
-            minHeight: "36px",
-            padding: "0 2px",
-            boxShadow: state.isFocused
-                ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
-                : "none",
-            cursor: "pointer",
-            "&:hover": {
-                borderColor: "#10B981",
-            },
-        }),
-        valueContainer: (base) => ({
-            ...base,
-            padding: "0 6px",
-        }),
-        placeholder: (base) => ({
-            ...base,
-            color: "#9CA3AF",
-            fontSize: "0.75rem",
-            fontWeight: "500",
-        }),
-        singleValue: (base) => ({
-            ...base,
-            color: "#1F2937",
-            fontSize: "0.75rem",
-            fontWeight: "600",
-        }),
-        option: (base, state) => ({
-            ...base,
-            backgroundColor: state.isSelected
-                ? "#10B981"
-                : state.isFocused
-                  ? "#ECFDF5"
-                  : "white",
-            color: state.isSelected ? "white" : "#1F2937",
-            fontSize: "0.75rem",
-            fontWeight: "500",
-            cursor: "pointer",
-        }),
-        menuPortal: (base) => ({
-            ...base,
-            zIndex: 9999,
-        }),
-    };
 
     const getDataGuru = async () => {
         const res = await axios.get(route("master.guru.getGuru"));
@@ -185,11 +139,21 @@ export default function KelolaInformasiInstansi() {
         getDataGuru();
     }, []);
     const [activeTheme, setActiveTheme] = useState(() => getSavedTheme());
-
     const handleChangeTheme = (key) => {
         const colors = PRESETS[key];
         applyTheme(colors);
         setActiveTheme(colors);
+
+        // simpan ke form supaya ikut ter-submit ke DB
+        setData({
+            ...data,
+            warna_primary: colors.primary,
+            warna_primary_dark: colors.dark,
+            warna_primary_light: colors.light,
+            warna_hex: colors.hex,
+            nama_tema: colors.name,
+        });
+
         showAlert(`Tema diganti ke ${colors.name}`, "success");
     };
     return (
@@ -289,18 +253,15 @@ export default function KelolaInformasiInstansi() {
                                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                                     Kepala Sekolah
                                 </label>
-                                <Select
-                                    className="block w-full text-xs rounded-xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                                <AppSelect
                                     options={dataGuru}
-                                    value={data?.kepala_sekolah} // BERIKAN OBJECT PENUH (bukan .value)
-                                    onChange={
-                                        (e) => setData("kepala_sekolah", e) // SIMPAN OBJECT PENUH
+                                    value={data?.kepala_sekolah}
+                                    onChange={(e) =>
+                                        setData("kepala_sekolah", e)
                                     }
                                     placeholder="Pilih Kepala Sekolah"
-                                    isSearchable={true}
-                                    menuPortalTarget={document.body}
-                                    classNamePrefix="react-select"
-                                    styles={customSelectStyles}
+                                    isSearchable
+                                    isEmpty={!data?.kepala_sekolah?.value}
                                 />
                                 {errors.kepala_sekolah && (
                                     <p className="text-red-500 text-[10px] mt-1">

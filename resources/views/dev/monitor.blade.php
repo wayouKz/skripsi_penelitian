@@ -15,8 +15,8 @@
             100% { box-shadow: 0 0 0 0rem rgba(234, 179, 8, 0); }
         }
         @keyframes toastSlideIn {
-            0% { transform: tranprimaryX(100%); opacity: 0; }
-            100% { transform: tranprimaryX(0); opacity: 1; }
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
         .animate-chromosome { animation: fadeInScale 0.25s ease-in-out forwards; }
         .highlight-update { animation: highlightPulse 1.2s ease-in-out infinite; }
@@ -108,7 +108,7 @@
                     <span class="animate-pulse h-2 w-2 bg-red-500 rounded-full inline-block"></span>
                     Live Activity Log
                 </h2>
-                <span id="logCounterBadge" class="text-xs font-mono bg-blue-900/50 text-blue-300 px-2 py-1 rounded border border-blue-700">0 Events Terpantau</span>
+                <span id="logCounterBadge" class="text-xs font-mono bg-primary-900/50 text-primary-300 px-2 py-1 rounded border border-primary-700">0 Events Terpantau</span>
             </div>
             <div id="activityLogContainer" class="bg-black p-3 rounded-lg border border-gray-900 h-64 overflow-y-auto log-scroll space-y-2 font-mono text-xs text-gray-400">
                 <div id="emptyLogText" class="text-gray-600 italic">[System] Menunggu log mutasi & relokasi mapel...</div>
@@ -201,7 +201,7 @@
         };
 
         const colorPalette = [
-            { bg: 'bg-blue-950/80', border: 'border-blue-500', text: 'text-blue-200', title: 'text-blue-300' },
+            { bg: 'bg-primary-950/80', border: 'border-primary-500', text: 'text-primary-200', title: 'text-primary-300' },
             { bg: 'bg-primary-950/80', border: 'border-primary-500', text: 'text-primary-200', title: 'text-primary-300' },
             { bg: 'bg-purple-950/80', border: 'border-purple-500', text: 'text-purple-200', title: 'text-purple-300' },
             { bg: 'bg-amber-950/80', border: 'border-amber-500', text: 'text-amber-200', title: 'text-amber-300' },
@@ -249,7 +249,7 @@
 
             setTimeout(() => {
                 toast.style.opacity = '0';
-                toast.style.transform = 'tranprimaryX(100%)';
+                toast.style.transform = 'translateX(100%)';
                 toast.style.transition = 'all 0.3s ease-in-out';
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
@@ -267,7 +267,7 @@
 
             // Tentukan style badge berdasarkan "tahap"
             let badgeClass = "bg-gray-700 text-gray-300";
-            if (logObj.tahap === 'TUKAR_MAPEL') badgeClass = "bg-blue-900 border border-blue-600 text-blue-300";
+            if (logObj.tahap === 'TUKAR_MAPEL') badgeClass = "bg-primary-900 border border-primary-600 text-primary-300";
             else if (logObj.tahap === 'RELOKASI_MAPEL') badgeClass = "bg-orange-900 border border-orange-600 text-orange-300";
             else if (logObj.tahap === 'STAGNASI') badgeClass = "bg-red-900 border border-red-600 text-red-300";
             else if (logObj.tahap === 'NEW_BEST') badgeClass = "bg-primary-900 border border-primary-600 text-primary-300";

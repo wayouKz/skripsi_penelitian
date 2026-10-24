@@ -242,7 +242,7 @@ export default function SlotWaktu({
                     <button
                         onClick={handlePaste}
                         type="button"
-                        className="text-[10px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-lg hover:bg-blue-100 flex items-center gap-1 transition-colors border border-blue-200"
+                        className="text-[10px] text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded-lg hover:bg-primary-100 flex items-center gap-1 transition-colors border border-primary-200"
                     >
                         <ClipboardPaste size={12} /> Paste
                     </button>

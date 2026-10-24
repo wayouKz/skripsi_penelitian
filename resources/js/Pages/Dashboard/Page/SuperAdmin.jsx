@@ -156,27 +156,27 @@ export default function SuperAdmin({ user, tglStr, total }) {
             {/* ── SECTION: MONITORING UTAMA ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* Card Live KBM */}
-                <div className="lg:col-span-5 relative bg-gradient-to-br from-primary-900 to-primary-800 rounded-xl p-4 border border-primary-700 shadow-sm overflow-hidden group">
+                <div className="lg:col-span-5 relative bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-4 border border-primary-700 shadow-sm overflow-hidden group">
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
                     <div className="relative z-10 flex flex-col h-full justify-between gap-4">
                         <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-xl bg-primary-500/20 border border-primary-500/30 flex items-center justify-center">
+                                <div className="w-9 h-9 rounded-xl bg-white border border-primary-500/30 flex items-center justify-center">
                                     <i className="fa-solid fa-satellite-dish text-sm text-primary-400"></i>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-medium text-primary-300 mb-0.5">
+                                    <p className="text-xs font-medium text-white mb-0.5">
                                         Status KBM
                                     </p>
-                                    <p className="text-[10px] text-primary-400 font-medium flex items-center gap-1">
+                                    <p className="text-[10px] text-white font-medium flex items-center gap-1">
                                         <i className="fa-solid fa-circle-check"></i>{" "}
                                         Sedang Berlangsung
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-full border border-red-500/20">
+                            <div className="flex items-center gap-1.5 bg-red-500/10 px-2 py-1 rounded-full border border-red-600">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                                 </span>
                                 <span className="text-[9px] font-bold text-red-400 uppercase tracking-wider">

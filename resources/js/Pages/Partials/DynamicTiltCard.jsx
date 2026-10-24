@@ -73,13 +73,13 @@ export default function DynamicTiltCard() {
             style={{ perspective: "1000px" }} // Menambah kedalaman 3D
         >
             {/* Background Kotak Hijau yang miring statis */}
-            <div className="absolute top-[34px] left-[10%] w-[74%] h-[400px] bg-[#155153] border border-white/10 rounded-[10px] -z-10 rotate-6 transition-all duration-300" />
+            <div className="absolute top-[34px] left-[10%] w-[74%] h-[400px] bg-primary-700 border border-white/10 rounded-[10px] -z-10 rotate-6 transition-all duration-300" />
 
             {/* Container Card Utama */}
             <div
-                className="perforation absolute top-0 w-[88%] max-w-[350px] bg-[#ffffff] text-[#0a2f31] rounded-[10px] p-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] transition-transform duration-200 ease-out flex flex-col"
+                className="perforation absolute top-0 w-[88%] max-w-[350px] bg-[#ffffff] text-primary-700 rounded-[10px] p-2 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] transition-transform duration-200 ease-out flex flex-col"
                 style={{
-                    transform: `rotateY(${tilt.rx}deg) rotateX(${tilt.ry}deg) tranprimary(${tilt.tx}px, ${tilt.ty}px)`,
+                    transform: `rotateY(${tilt.rx}deg) rotateX(${tilt.ry}deg) translate(${tilt.tx}px, ${tilt.ty}px)`,
                     transformStyle: "preserve-3d",
                 }}
             >
@@ -107,7 +107,7 @@ export default function DynamicTiltCard() {
                             onClick={() => setActiveIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all duration-300 ${
                                 index === activeIndex
-                                    ? "bg-[#0a2f31] w-4" // Dot aktif (lebih panjang)
+                                    ? "bg-primary-700 w-4" // Dot aktif (lebih panjang)
                                     : "bg-gray-300 hover:bg-gray-400" // Dot pasif
                             }`}
                         />

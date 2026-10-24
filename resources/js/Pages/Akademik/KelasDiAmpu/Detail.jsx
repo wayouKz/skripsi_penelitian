@@ -143,7 +143,7 @@ export default function Detail({ dataKelas }) {
                                                 }}
                                                 className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors hidden"
                                             >
-                                                <i className="fa fa-file-pdf text-red-600 w-3.5"></i>
+                                                <i className="fa fa-print text-red-600 w-3.5"></i>
                                                 Cetak Raport
                                             </button>
                                             <button
@@ -158,7 +158,7 @@ export default function Detail({ dataKelas }) {
                                                 }}
                                                 className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors"
                                             >
-                                                <i className="fa fa-file-pdf text-red-600 w-3.5"></i>
+                                                <i className="fa fa-print text-red-600 w-3.5"></i>
                                                 Cetak Absensi
                                             </button>
                                             <button
@@ -173,7 +173,7 @@ export default function Detail({ dataKelas }) {
                                                 }}
                                                 className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium transition-colors hidden"
                                             >
-                                                <i className="fa fa-file-pdf text-red-600 w-3.5"></i>
+                                                <i className="fa fa-print text-red-600 w-3.5"></i>
                                                 Cetak Kartu Tugas
                                             </button>
                                         </div>

@@ -37,6 +37,7 @@ export default function UpdateProfileInformation({
                         id="name"
                         className="mt-1 block w-full text-xs py-1.5"
                         value={data.name}
+                        icon={"user"}
                         onChange={(e) => setData("name", e.target.value)}
                         required
                         isFocused
@@ -59,6 +60,7 @@ export default function UpdateProfileInformation({
                     <TextInput
                         id="username"
                         type="text"
+                        icon="key"
                         className="mt-1 block w-full text-xs py-1.5"
                         value={data.username}
                         onChange={(e) => setData("username", e.target.value)}

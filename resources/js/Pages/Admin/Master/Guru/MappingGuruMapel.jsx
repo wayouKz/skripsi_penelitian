@@ -17,6 +17,8 @@ import DraggableGuru from "./partials/DraggableGuru";
 import DragGhost from "./partials/DragGhost";
 import Select from "react-select";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import AppSelect from "@/Components/AppSelect";
+import TextInput from "@/Components/TextInput";
 
 export default function MappingGuruMapel({
     open,
@@ -437,7 +439,7 @@ export default function MappingGuruMapel({
                 </p>
                 <div className="flex gap-2 items-center">
                     <div className="w-[200px]">
-                        <Select
+                        <AppSelect
                             value={selectedTahunAjaranOption}
                             onChange={(option) =>
                                 setSelectedTahunAjaran(
@@ -450,7 +452,6 @@ export default function MappingGuruMapel({
                             menuPortalTarget={document.body}
                             className="text-xs"
                             classNamePrefix="react-select"
-                            styles={customSelectStyles}
                         />
                     </div>
 
@@ -481,12 +482,11 @@ export default function MappingGuruMapel({
                             <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2">
                                 Daftar Guru
                             </p>
-                            <input
-                                type="text"
+                            <TextInput
+                                icon="search"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Cari guru…"
-                                className="w-full px-3 py-2 text-sm bg-gray-50 border rounded-lg focus:ring-2 focus:ring-primary-500/30"
                             />
                         </div>
                         <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">

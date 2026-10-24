@@ -3,6 +3,7 @@ import DataTable from "@/Components/Datatables";
 import PrimaryButton from "@/Components/PrimaryButton";
 import MappingSiswaKelas from "./modals/MappingSiswaKelas";
 import Select from "react-select";
+import AppSelect from "@/Components/AppSelect";
 
 export default function SiswaKelas({
     columnsSiswaPerKelas,
@@ -135,7 +136,7 @@ export default function SiswaKelas({
                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                             Tahun Ajaran
                         </label>
-                        <Select
+                        <AppSelect
                             value={selectedTaOption}
                             onChange={(option) => {
                                 const val = option ? option.value : "";
@@ -149,7 +150,6 @@ export default function SiswaKelas({
                             menuPortalTarget={document.body}
                             className="w-full text-xs"
                             classNamePrefix="react-select"
-                            styles={customSelectStyles}
                         />
                     </div>
 
@@ -158,7 +158,7 @@ export default function SiswaKelas({
                         <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                             Kelas
                         </label>
-                        <Select
+                        <AppSelect
                             value={selectedKelasOption}
                             onChange={(option) => {
                                 const val = option ? option.value : "";
@@ -178,7 +178,6 @@ export default function SiswaKelas({
                             menuPortalTarget={document.body}
                             className="w-full text-xs"
                             classNamePrefix="react-select"
-                            styles={customSelectStyles}
                         />
                     </div>
                 </div>

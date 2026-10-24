@@ -5,6 +5,7 @@ import { useAlert } from "@/Components/AlertContext";
 import axios from "axios";
 import Offcanvas from "@/Components/Offcanvas";
 import Select from "react-select";
+import AppSelect from "@/Components/AppSelect";
 
 export default function Absensi({ dataKelas }) {
     const [open, setOpen] = useState(false);
@@ -289,8 +290,8 @@ export default function Absensi({ dataKelas }) {
         {
             value: "izin",
             short: "I",
-            active: "bg-blue-100 text-blue-700 border-blue-500 shadow-sm",
-            dot: "bg-blue-500",
+            active: "bg-primary-100 text-primary-700 border-primary-500 shadow-sm",
+            dot: "bg-primary-500",
         },
         {
             value: "alpha",
@@ -329,7 +330,7 @@ export default function Absensi({ dataKelas }) {
                         <input
                             type="date"
                             readOnly
-                            className="block w-full sm:w-[130px] h-[30px] bg-primary-100 border border-primary-200 text-primary-500 py-1 px-2 rounded-md text-xs cursor-not-allowed select-none"
+                            className="block w-full sm:w-[130px] h-[30px] bg-primary-100 border border-primary-200 text-black py-1 px-2 rounded-md text-xs cursor-not-allowed select-none"
                             value={tanggal}
                             onChange={(e) => setTanggal(e.target.value)}
                         />
@@ -340,7 +341,7 @@ export default function Absensi({ dataKelas }) {
                         <label className="text-[9px] font-semibold uppercase tracking-widest text-primary-400">
                             Mata Pelajaran
                         </label>
-                        <Select
+                        <AppSelect
                             value={selectedMapelOption}
                             onChange={handleSelectMapelChange}
                             options={mapelOptions}
@@ -349,7 +350,6 @@ export default function Absensi({ dataKelas }) {
                             menuPortalTarget={document.body}
                             className="text-xs"
                             classNamePrefix="react-select"
-                            styles={customSelectStyles}
                         />
                     </div>
 
@@ -504,16 +504,16 @@ export default function Absensi({ dataKelas }) {
                                     {/* Sticky header */}
                                     <thead className="bg-primary-50 border-b border-primary-200 sticky top-0 z-10">
                                         <tr>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 w-10 text-center">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest  text-black w-10 text-center">
                                                 No
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 w-28">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest  text-black w-28">
                                                 NISN
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest  text-black">
                                                 Nama Lengkap
                                             </th>
-                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest text-primary-400 text-center min-w-[240px]">
+                                            <th className="px-3 py-2.5 text-[9px] font-semibold uppercase tracking-widest  text-black text-center min-w-[240px]">
                                                 Status Kehadiran
                                             </th>
                                         </tr>
@@ -526,17 +526,17 @@ export default function Absensi({ dataKelas }) {
                                                 className="hover:bg-primary-50/70 transition-colors"
                                             >
                                                 {/* No */}
-                                                <td className="px-3 py-1.5 text-center text-[11px] text-primary-400 font-medium tabular-nums">
+                                                <td className="px-3 py-1.5 text-center text-[11px] text-black font-medium tabular-nums">
                                                     {index + 1}
                                                 </td>
 
                                                 {/* NISN */}
-                                                <td className="px-3 py-1.5 font-mono text-[11px] text-primary-500 tracking-wider">
+                                                <td className="px-3 py-1.5 font-mono text-[11px] ] text-black tracking-wider">
                                                     {item.nisn}
                                                 </td>
 
                                                 {/* Nama */}
-                                                <td className="px-3 py-1.5 font-medium text-[11px] text-primary-800">
+                                                <td className="px-3 py-1.5 font-medium text-[11px] ] text-black">
                                                     {item.nama_siswa}
                                                 </td>
 

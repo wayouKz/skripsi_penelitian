@@ -26,6 +26,7 @@ import Proses from "./partials/Proses";
 import HistoryJadwal from "./partials/HistoryJadwal";
 import Menu from "@/Components/Menu";
 import { useAlert } from "@/Components/AlertContext";
+import AppSelect from "@/Components/AppSelect";
 // Fungsi darurat untuk menebak slot urutan jam ke-berapa
 // berdasarkan jam_mulai dan hari.
 // SILAKAN SESUAIKAN JAM-JAM DI BAWAH INI DENGAN BEL SEKOLAH ANDA!
@@ -227,7 +228,7 @@ export default function GenerateJadwal() {
                                 </p>
                             </div>
                             <div className="w-full md:w-72 flex gap-2 items-center">
-                                <Select
+                                <AppSelect
                                     value={selectedTahunAjaranOption}
                                     onChange={(option) => {
                                         setSelectedTahunAjaran(
@@ -243,64 +244,6 @@ export default function GenerateJadwal() {
                                     menuPortalTarget={document.body}
                                     className="w-full text-xs"
                                     classNamePrefix="react-select"
-                                    styles={{
-                                        control: (base, state) => ({
-                                            ...base,
-                                            backgroundColor: "#FFFFFF",
-                                            borderColor: !selectedTahunAjaran
-                                                ? state.isFocused
-                                                    ? "#16A34A"
-                                                    : "#FCD34D"
-                                                : state.isFocused
-                                                  ? "#16A34A"
-                                                  : "#BBF7D0",
-                                            borderRadius: "0.5rem",
-                                            padding: "0.05rem 0.1rem",
-                                            minHeight: "32px",
-                                            boxShadow: state.isFocused
-                                                ? "0 0 0 3px rgba(34, 197, 94, 0.15)"
-                                                : "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-                                            cursor: "pointer",
-                                            "&:hover": {
-                                                borderColor: "#16A34A",
-                                            },
-                                        }),
-                                        valueContainer: (base) => ({
-                                            ...base,
-                                            padding: "0px 6px",
-                                        }),
-                                        placeholder: (base) => ({
-                                            ...base,
-                                            color: "#6B7280",
-                                            fontSize: "11px",
-                                        }),
-                                        singleValue: (base) => ({
-                                            ...base,
-                                            color: !selectedTahunAjaran
-                                                ? "#92400E"
-                                                : "#14532D",
-                                            fontWeight: "bold",
-                                            fontSize: "11px",
-                                        }),
-                                        option: (base, state) => ({
-                                            ...base,
-                                            backgroundColor: state.isSelected
-                                                ? "#16A34A"
-                                                : state.isFocused
-                                                  ? "#F0FDF4"
-                                                  : "white",
-                                            color: state.isSelected
-                                                ? "white"
-                                                : "#1F2937",
-                                            fontWeight: "600",
-                                            fontSize: "11px",
-                                            cursor: "pointer",
-                                        }),
-                                        menuPortal: (base) => ({
-                                            ...base,
-                                            zIndex: 9999,
-                                        }),
-                                    }}
                                 />
                                 <button
                                     type="button"

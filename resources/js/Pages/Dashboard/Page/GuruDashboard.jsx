@@ -50,7 +50,7 @@ function HeroSection({ user, tglStr, peran }) {
 
             <div className="relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 z-10">
                 <div>
-                    <p className="text-primary-100 text-sm md:text-base font-medium mb-2 tracking-wide uppercase">
+                    <p className="text-white text-sm md:text-base font-medium mb-2 tracking-wide uppercase">
                         Selamat datang kembali 👋
                     </p>
 
@@ -59,11 +59,11 @@ function HeroSection({ user, tglStr, peran }) {
                     </h1>
 
                     <div className="flex flex-wrap gap-2">
-                        <span className="inline-flex items-center px-3 py-1 text-sm text-primary-50 bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
+                        <span className="inline-flex items-center px-3 py-1 text-sm text-white bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
                             NIP: {user?.nip || "-"}
                         </span>
 
-                        <span className="inline-flex items-center px-3 py-1 text-sm text-primary-50 bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
+                        <span className="inline-flex items-center px-3 py-1 text-sm text-white bg-primary-800/50 backdrop-blur-sm rounded-lg border border-primary-500/30">
                             {peran}
                         </span>
                     </div>
@@ -112,7 +112,7 @@ function PanelKehadiranGuru({ info }) {
         <div className="bg-white rounded-3xl p-7 border border-primary-100 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-primary-100">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-inner">
+                    <div className="w-10 h-10 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold shadow-inner">
                         <i className="fa-solid fa-user-check text-base"></i>
                     </div>
 
@@ -126,7 +126,7 @@ function PanelKehadiranGuru({ info }) {
                     </div>
                 </div>
 
-                <span className="text-[11px] font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                <span className="text-[11px] font-semibold bg-primary-100 text-primary-700 px-3 py-1 rounded-full">
                     Guru
                 </span>
             </div>
@@ -202,7 +202,11 @@ function DashboardGuruMapel({ info }) {
             label: "Kehadiran Guru",
             value: `${persentase.toFixed(2)}%`,
         },
-        { label: "Total Hadir", value: `${totalHadir} Kali`, icon: "✅" },
+        {
+            label: "Total Minggu Aktif",
+            value: `${totalHadir} Kali`,
+            icon: "✅",
+        },
         {
             label: "Tidak Hadir",
             value: `${totalTidakHadir} Kali`,
@@ -354,7 +358,7 @@ function DashboardWaliKelas({ info }) {
                             }}
                         >
                             <p className="text-[10px]">
-                                <i className="fa-solid fa-file-pdf mr-2"></i>
+                                <i className="fa-solid fa-print mr-2"></i>
                                 Jadwal Kelas {info?.nama_kelas} Pdf
                             </p>
                             <p className="text-lg font-bold text-primary-600"></p>

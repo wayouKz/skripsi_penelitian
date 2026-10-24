@@ -4,10 +4,16 @@ import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
+import AppSelect from "@/Components/AppSelect";
 import { useForm, usePage } from "@inertiajs/react";
 import { useEffect, useMemo, useState } from "react";
-import Select from "react-select";
 import axios from "axios";
+
+const TINGKAT_OPTIONS = [
+    { value: "X", label: "X" },
+    { value: "XI", label: "XI" },
+    { value: "XII", label: "XII" },
+];
 
 export default function Add({
     open,
@@ -39,6 +45,15 @@ export default function Add({
                 kelas: item.kelas,
             })),
         [waliKelas],
+    );
+
+    const jurusanOptions = useMemo(
+        () =>
+            ListJurusan.map((j) => ({
+                value: j.id,
+                label: j.nama_jurusan,
+            })),
+        [ListJurusan],
     );
 
     const submit = (e) => {
@@ -93,14 +108,14 @@ export default function Add({
                 nama_kelas: Kelas.nama_kelas || "",
                 id_wali_kelas: Kelas.id_wali_kelas || "",
                 tingkat: Kelas.tingkat || "",
-                jurusan_id: Kelas.jurusan_id || "",
+                jurusan_id: Kelas.jurusan_id || null,
             });
-            if (Kelas.jurusan) setShowJurusan(true);
+            if (Kelas.jurusan || Kelas.jurusan_id) setShowJurusan(true);
         } else {
             reset();
             setShowJurusan(false);
         }
-    }, [isEdit, Kelas]);
+    }, [isEdit, Kelas, open]);
 
     return (
         <FormModal
@@ -111,37 +126,36 @@ export default function Add({
             closable={true}
         >
             <div className="space-y-3">
-                {/* Field Wali Kelas */}
+                {/* Wali Kelas */}
                 <div>
                     <InputLabel
                         value="Pilih Guru Wali Kelas"
-                        className="text-xs font-medium text-gray-700"
+                        className="text-xs font-medium text-gray-700 mb-1"
                     />
-                    <Select
-                        styles={{
-                            control: (base) => ({
-                                ...base,
-                                minHeight: "32px",
-                                fontSize: "12px",
-                            }),
-                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                        }}
-                        menuPortalTarget={document.body}
+                    <AppSelect
                         options={waliOptions}
                         value={
                             waliOptions.find(
                                 (o) => o.value == data.id_wali_kelas,
                             ) || null
                         }
-                        onChange={(val) => setData("id_wali_kelas", val?.value)}
+                        onChange={(val) =>
+                            setData("id_wali_kelas", val?.value ?? "")
+                        }
                         placeholder="Pilih Wali Kelas..."
+                        isSearchable
+                        error={!!errors.id_wali_kelas}
                         formatOptionLabel={(option) => (
-                            <div className="flex justify-between items-center text-xs">
+                            <div className="flex justify-between items-center text-xs gap-2">
                                 <span>
                                     {option.label} - {option.nip}
                                 </span>
                                 <span
-                                    className={`text-[10px] font-semibold ${option.kelas ? "text-red-600" : "text-primary-600"}`}
+                                    className={`text-[10px] font-semibold shrink-0 ${
+                                        option.kelas
+                                            ? "text-red-600"
+                                            : "text-primary-600"
+                                    }`}
                                 >
                                     {option.kelas
                                         ? `Dipakai ${option.kelas.nama_kelas}`
@@ -156,12 +170,12 @@ export default function Add({
                     />
                 </div>
 
-                {/* Field Nama & Tingkat */}
+                {/* Nama & Tingkat */}
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <InputLabel
                             value="Nama Kelas"
-                            className="text-xs font-medium text-gray-700"
+                            className="text-xs font-medium text-gray-700 mb-1"
                         />
                         <TextInput
                             icon="door-open"
@@ -171,7 +185,7 @@ export default function Add({
                             onChange={(e) =>
                                 setData("nama_kelas", e.target.value)
                             }
-                            className="mt-1 w-full text-xs py-1.5"
+                            className="w-full text-xs py-1.5"
                         />
                         <InputError
                             message={errors.nama_kelas}
@@ -182,20 +196,22 @@ export default function Add({
                     <div>
                         <InputLabel
                             value="Tingkat"
-                            className="text-xs font-medium text-gray-700"
+                            className="text-xs font-medium text-gray-700 mb-1"
                         />
-                        <select
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-xs text-xs py-1.5 focus:border-indigo-500 focus:ring-indigo-500"
-                            value={data.tingkat}
-                            onChange={(e) => setData("tingkat", e.target.value)}
-                        >
-                            <option value="">[Pilih tingkat]</option>
-                            {["10", "11", "12"].map((t) => (
-                                <option key={t} value={t}>
-                                    {t}
-                                </option>
-                            ))}
-                        </select>
+                        <AppSelect
+                            options={TINGKAT_OPTIONS}
+                            value={
+                                TINGKAT_OPTIONS.find(
+                                    (o) => o.value === data.tingkat,
+                                ) || null
+                            }
+                            onChange={(val) =>
+                                setData("tingkat", val?.value ?? "")
+                            }
+                            placeholder="Pilih Tingkat..."
+                            isSearchable={false}
+                            error={!!errors.tingkat}
+                        />
                         <InputError
                             message={errors.tingkat}
                             className="mt-1 text-[10px]"
@@ -203,39 +219,43 @@ export default function Add({
                     </div>
                 </div>
 
-                {/* Jurusan Checkbox */}
-                <div className="flex items-center pt-1 gap-2">
-                    <span className="ml-2 text-xs text-gray-700">
-                        Gunakan Jurusan :
-                    </span>
+                {/* Checkbox Jurusan */}
+                <div className="flex items-center gap-2 pt-1">
                     <Checkbox
                         checked={showJurusan}
-                        onChange={() => setShowJurusan(!showJurusan)}
+                        onChange={() => {
+                            const next = !showJurusan;
+                            setShowJurusan(next);
+                            if (!next) setData("jurusan_id", null);
+                        }}
                     />
+                    <span className="text-xs text-gray-700">
+                        Gunakan Jurusan
+                    </span>
                 </div>
 
                 {showJurusan && (
                     <div>
                         <InputLabel
                             value="Jurusan"
-                            className="text-xs font-medium text-gray-700"
+                            className="text-xs font-medium text-gray-700 mb-1"
                         />
-                        <select
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-xs text-xs py-1.5 focus:border-indigo-500 focus:ring-indigo-500"
-                            value={data.jurusan_id}
-                            onChange={(e) =>
-                                setData("jurusan_id", e.target.value)
+                        <AppSelect
+                            options={jurusanOptions}
+                            value={
+                                jurusanOptions.find(
+                                    (o) => o.value == data.jurusan_id,
+                                ) || null
                             }
-                        >
-                            <option value="">[Pilih jurusan]</option>
-                            {ListJurusan.map((j) => (
-                                <option key={j.id} value={j.id}>
-                                    {j.nama_jurusan}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={(val) =>
+                                setData("jurusan_id", val?.value ?? null)
+                            }
+                            placeholder="Pilih jurusan..."
+                            isSearchable
+                            error={!!errors.jurusan_id || !!errors.jurusan}
+                        />
                         <InputError
-                            message={errors.jurusan}
+                            message={errors.jurusan_id || errors.jurusan}
                             className="mt-1 text-[10px]"
                         />
                     </div>

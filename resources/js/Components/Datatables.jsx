@@ -1,4 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
+import AppSelect from "./AppSelect";
+import TextInput from "./TextInput";
+
+const PER_PAGE_OPTIONS = [
+    { value: 10, label: "10" },
+    { value: 20, label: "20" },
+    { value: 50, label: "50" },
+    { value: 100, label: "100" },
+];
 
 export default function DataTable({
     columns,
@@ -18,12 +27,10 @@ export default function DataTable({
         direction: "asc",
     });
 
-    // Reset halaman ke 1 jika data mentah atau kata kunci pencarian berubah
     useEffect(() => {
         setCurrentPage(1);
     }, [data, search]);
 
-    // 1. OPTIMASI: SEARCH/FILTERING DILAKUKAN TERLEBIH DAHULU
     const filteredData = useMemo(() => {
         if (!search) return data;
 
@@ -31,16 +38,13 @@ export default function DataTable({
         return data.filter((row) =>
             columns.some((col) => {
                 if (!col.accessor) return false;
-
                 const value = row[col.accessor];
                 if (value === null || value === undefined) return false;
-
                 return String(value).toLowerCase().includes(searchLower);
             }),
         );
     }, [data, search, columns]);
 
-    // 2. OPTIMASI: SORTING HANYA MEMPROSES DATA YANG SUDAH TERFILTER
     const sortedData = useMemo(() => {
         if (!sortConfig.key) return filteredData;
 
@@ -62,8 +66,7 @@ export default function DataTable({
         });
     }, [filteredData, sortConfig]);
 
-    // 3. PAGINATION CALCULATIONS
-    const totalPages = Math.ceil(sortedData.length / rowsPerPage);
+    const totalPages = Math.ceil(sortedData.length / rowsPerPage) || 1;
 
     const paginatedData = useMemo(() => {
         const start = (currentPage - 1) * rowsPerPage;
@@ -77,9 +80,7 @@ export default function DataTable({
 
         const pages = [1];
 
-        if (currentPage > 4) {
-            pages.push("...");
-        }
+        if (currentPage > 4) pages.push("...");
 
         const start = Math.max(2, currentPage - 1);
         const end = Math.min(totalPages - 1, currentPage + 1);
@@ -88,9 +89,7 @@ export default function DataTable({
             pages.push(i);
         }
 
-        if (currentPage < totalPages - 3) {
-            pages.push("...");
-        }
+        if (currentPage < totalPages - 3) pages.push("...");
 
         pages.push(totalPages);
         return pages;
@@ -106,50 +105,44 @@ export default function DataTable({
         }));
     };
 
+    const rowsPerPageValue =
+        PER_PAGE_OPTIONS.find((o) => o.value === rowsPerPage) ||
+        PER_PAGE_OPTIONS[0];
+
     return (
         <div className="w-full">
-            {/* TOPBAR */}
-            {/* <div className="flex items-center gap-4 p-2 mb-4">
-        <h2 className="text-base font-bold text-gray-800">{header}</h2>
-        {title && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase rounded-full bg-primary-100 text-primary-700">
-                {sortedData.length} {title}
-            </span>
-        )}
-    </div> */}
-
             <div className="mb-4 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
                 {searchable && (
-                    <div className="relative w-full md:w-64">
-                        <i className="fa fa-search absolute left-3 top-2.5 text-xs text-gray-400"></i>
-                        <input
-                            type="text"
+                    <div className="w-full sm:w-64">
+                        <TextInput
+                            icon="search"
                             placeholder="Cari..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-1.5 pl-9 pr-3 text-xs outline-none transition focus:border-primary-500 focus:bg-white focus:shadow-sm"
+                            className="text-xs py-1.5 rounded-xl"
                         />
                     </div>
                 )}
 
                 <div className="flex items-center gap-2 text-xs text-gray-500 justify-end">
-                    <select
-                        value={rowsPerPage}
-                        onChange={(e) => {
-                            setRowsPerPage(Number(e.target.value));
-                            setCurrentPage(1);
-                        }}
-                        className="rounded-xl border border-gray-200 px-6 py-1.5 text-xs outline-none focus:border-primary-500 bg-white"
-                    >
-                        <option value={10}>10</option>
-                        <option value={15}>15</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                    </select>
+                    <div className="w-[90px]">
+                        <AppSelect
+                            value={rowsPerPageValue}
+                            onChange={(option) => {
+                                setRowsPerPage(Number(option?.value ?? 10));
+                                setCurrentPage(1);
+                            }}
+                            options={PER_PAGE_OPTIONS}
+                            isSearchable={false}
+                            menuPlacement="auto"
+                        />
+                    </div>
+                    <span className="whitespace-nowrap text-gray-400">
+                        data
+                    </span>
                 </div>
             </div>
 
-            {/* TABLE CONTAINER */}
             <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-white">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse">
@@ -191,7 +184,6 @@ export default function DataTable({
 
                         <tbody className="divide-y divide-gray-100">
                             {loading ? (
-                                /* SKELETON LOADING */
                                 Array.from({ length: 5 }).map((_, rowIndex) => (
                                     <tr key={`skeleton-row-${rowIndex}`}>
                                         {columns.map((_, colIndex) => (
@@ -248,15 +240,10 @@ export default function DataTable({
                 </div>
             </div>
 
-            {/* PAGINATION FOOTER */}
-            {!loading && totalPages > 0 && (
+            {!loading && sortedData.length > 0 && (
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-1">
                     <div className="text-[11px] text-gray-400 font-medium text-center sm:text-left">
-                        Menampilkan{" "}
-                        {sortedData.length === 0
-                            ? 0
-                            : (currentPage - 1) * rowsPerPage + 1}{" "}
-                        sampai{" "}
+                        Menampilkan {(currentPage - 1) * rowsPerPage + 1} sampai{" "}
                         {Math.min(currentPage * rowsPerPage, sortedData.length)}{" "}
                         dari {sortedData.length}
                     </div>

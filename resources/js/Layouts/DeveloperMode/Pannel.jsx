@@ -379,7 +379,7 @@ export default function Panel({ url, user }) {
                                 if (log.type === "warning")
                                     textColor = "text-yellow-400";
                                 if (log.type === "info")
-                                    textColor = "text-blue-400";
+                                    textColor = "text-primary-400";
 
                                 return (
                                     <div key={index} className="leading-tight">
@@ -458,7 +458,7 @@ export default function Panel({ url, user }) {
                             {Object.entries(localStorageData).map(
                                 ([key, value]) => (
                                     <div key={key} className="truncate">
-                                        <span className="text-blue-600">
+                                        <span className="text-primary-600">
                                             {key}:
                                         </span>{" "}
                                         {value}

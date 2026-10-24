@@ -129,7 +129,7 @@ export default function Navbar({ user, onToggle, startTour }) {
                                             Log out
                                         </Link>
                                     </div>
-                                    <div className="py-1 border-t border-gray-100">
+                                    <div className="py-1 border-t border-gray-100 hidden">
                                         <button
                                             type="button"
                                             onClick={toggleDevMode}
@@ -151,6 +151,16 @@ export default function Navbar({ user, onToggle, startTour }) {
                                                     : "Dev Mode"}
                                             </span>
                                         </button>
+                                    </div>
+                                    <div className="py-1 border-t border-gray-100">
+                                        <Link
+                                            href={route("welcome")}
+                                            className={`w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold transition-all bg-primary-10 text-primary-700 hover:bg-primary-100`}
+                                        >
+                                            <i className="fa fa-home"></i>
+                                            Landing Page
+                                            <span></span>
+                                        </Link>
                                     </div>
                                 </div>
                             )}

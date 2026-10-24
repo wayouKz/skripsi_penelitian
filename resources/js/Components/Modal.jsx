@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import {
     Dialog,
     DialogPanel,
@@ -15,34 +16,37 @@ export default function Modal({
     const isFullScreen = maxWidth === "full";
 
     const close = () => {
-        // Cegah modal tertutup oleh tombol ESC atau klik area luar
-        // jika modal dalam mode full screen
+        // Cegah modal tertutup oleh ESC / klik area luar saat full screen
         if (closeable && !isFullScreen) {
             onClose();
         }
     };
 
-    const maxWidthClass = {
-        sm: "sm:max-w-sm",
-        md: "sm:max-w-md",
-        lg: "sm:max-w-lg",
-        xl: "sm:max-w-xl",
-        "2xl": "sm:max-w-2xl",
-    }[maxWidth];
+    const maxWidthClass =
+        {
+            sm: "sm:max-w-sm",
+            md: "sm:max-w-md",
+            lg: "sm:max-w-lg",
+            xl: "sm:max-w-xl",
+            "2xl": "sm:max-w-2xl",
+            "3xl": "sm:max-w-3xl",
+            "4xl": "sm:max-w-4xl",
+            "5xl": "sm:max-w-5xl",
+            "6xl": "sm:max-w-6xl",
+            "7xl": "sm:max-w-7xl",
+        }[maxWidth] ?? "sm:max-w-2xl";
 
     return (
         <Transition show={show} leave="duration-200">
             <Dialog
                 as="div"
                 id="modal"
-                className={`fixed inset-0 z-50 flex transform transition-all ${
-                    isFullScreen
-                        ? "items-start p-0"
-                        : "items-center overflow-y-auto px-4 py-6 sm:px-0"
-                }`}
-                onClose={close} // Fungsi close yang baru akan mencegat penutupan otomatis
+                className="relative z-50"
+                onClose={close}
             >
+                {/* Backdrop */}
                 <TransitionChild
+                    as={Fragment}
                     enter="ease-out duration-300"
                     enterFrom="opacity-0"
                     enterTo="opacity-100"
@@ -50,35 +54,52 @@ export default function Modal({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="absolute inset-0 bg-gray-500/75" />
+                    <div className="fixed inset-0 bg-gray-500/75" />
                 </TransitionChild>
 
-                <TransitionChild
-                    enter="ease-out duration-300"
-                    enterFrom={
-                        isFullScreen
-                            ? "opacity-0 tranprimary-y-full"
-                            : "opacity-0 tranprimary-y-4 sm:tranprimary-y-0 sm:scale-95"
-                    }
-                    enterTo="opacity-100 tranprimary-y-0 sm:scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 tranprimary-y-0 sm:scale-100"
-                    leaveTo={
-                        isFullScreen
-                            ? "opacity-0 tranprimary-y-full"
-                            : "opacity-0 tranprimary-y-4 sm:tranprimary-y-0 sm:scale-95"
-                    }
+                {/* Container scroll (terpisah dari container pemusatan) */}
+                <div
+                    className={`fixed inset-0 ${
+                        isFullScreen ? "overflow-hidden" : "overflow-y-auto"
+                    }`}
                 >
-                    <DialogPanel
+                    <div
                         className={
                             isFullScreen
-                                ? "w-full h-screen min-h-screen bg-white overflow-hidden flex flex-col transform transition-all"
-                                : `mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`
+                                ? "flex h-full items-start p-0"
+                                : "flex min-h-full items-center justify-center p-4 sm:p-6"
                         }
                     >
-                        {children}
-                    </DialogPanel>
-                </TransitionChild>
+                        {/* Panel: as={Fragment} supaya tidak ada div pembungkus */}
+                        <TransitionChild
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom={
+                                isFullScreen
+                                    ? "opacity-0 translate-y-full"
+                                    : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            }
+                            enterTo="opacity-100 translate-y-0 sm:scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                            leaveTo={
+                                isFullScreen
+                                    ? "opacity-0 translate-y-full"
+                                    : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            }
+                        >
+                            <DialogPanel
+                                className={
+                                    isFullScreen
+                                        ? "w-full h-screen min-h-screen bg-white overflow-hidden flex flex-col transform transition-all"
+                                        : `w-full ${maxWidthClass} transform overflow-hidden rounded-lg bg-white shadow-xl transition-all`
+                                }
+                            >
+                                {children}
+                            </DialogPanel>
+                        </TransitionChild>
+                    </div>
+                </div>
             </Dialog>
         </Transition>
     );

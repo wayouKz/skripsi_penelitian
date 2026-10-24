@@ -107,7 +107,7 @@ export default function HostingerDashboard({ children, header }) {
             <div
                 className={`
                     fixed lg:static z-40 h-full flex-shrink-0 transition-all duration-300
-                    ${collapsed ? "-translate-x-full lg:tranprimary-x-0" : "tranprimary-x-0"}
+                    ${collapsed ? "-translate-x-full lg:translate-x-0" : "translate-x-0"}
                 `}
             >
                 <Sidebar collapsed={collapsed} menuItems={menuItems} />

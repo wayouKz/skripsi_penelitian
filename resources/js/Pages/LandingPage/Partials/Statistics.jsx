@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import DaftarJadwal from "@/Pages/Admin/Master/GenerateJadwal/partials/component/DaftarJadwal";
 
 const Kosong = () => (
-    <span className="text-xs italic text-primary-400">Belum diisi</span>
+    <span className="text-xs italic text-gray-400">--Belum diisi--</span>
 );
 
 export default function Statistics({
@@ -72,9 +72,14 @@ export default function Statistics({
             header: "Nama Siswa",
             accessor: "nama_siswa",
             render: (row) => (
-                <span className="font-medium text-primary-800">
-                    {row.nama_siswa}
-                </span>
+                <span className="font-medium text-black">{row.nama_siswa}</span>
+            ),
+        },
+        {
+            header: "Nama Kelas",
+            accessor: "nama_kelas",
+            render: (row) => (
+                <span className="font-medium text-black">{row.nama_kelas}</span>
             ),
         },
         {

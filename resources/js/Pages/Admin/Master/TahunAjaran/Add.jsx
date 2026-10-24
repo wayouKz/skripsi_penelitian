@@ -1,9 +1,15 @@
 import { useAlert } from "@/Components/AlertContext";
+import AppSelect from "@/Components/AppSelect";
 import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import { useForm, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+
+const SEMESTER_OPTIONS = [
+    { value: "ganjil", label: "Ganjil" },
+    { value: "genap", label: "Genap" },
+];
 
 export default function Add({
     open,
@@ -20,6 +26,18 @@ export default function Add({
     const { showAlert } = useAlert();
     const flash = usePage().props.flash;
 
+    const tahunOptions = useMemo(() => {
+        const tahunSekarang = new Date().getFullYear();
+        const result = [];
+        for (let i = 0; i < 3; i++) {
+            const awal = tahunSekarang - i;
+            const akhir = awal + 1;
+            const label = `${awal}/${akhir}`;
+            result.push({ value: label, label });
+        }
+        return result;
+    }, []);
+
     const submit = (e) => {
         e.preventDefault();
 
@@ -30,26 +48,15 @@ export default function Add({
         post(url, {
             onSuccess: () => {
                 if (flash?.success) {
-                    showAlert(flash?.success, "success");
+                    showAlert(flash.success, "success");
                 } else if (flash?.error) {
-                    showAlert(flash?.error, "error");
+                    showAlert(flash.error, "error");
                 }
                 setOpen(false);
                 getTahunAjaran();
                 reset();
             },
         });
-    };
-
-    const ambilTahun = () => {
-        const tahunSekarang = new Date().getFullYear();
-        const result = [];
-        for (let i = 0; i < 3; i++) {
-            const awal = tahunSekarang - i;
-            const akhir = awal + 1;
-            result.push(`${awal}/${akhir}`);
-        }
-        return result;
     };
 
     useEffect(() => {
@@ -75,59 +82,56 @@ export default function Add({
             maxWidth="md"
         >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Tahun Ajaran */}
                 <div>
                     <InputLabel
-                        for="tahun_ajaran"
+                        htmlFor="tahun_ajaran"
                         value="Tahun Ajaran"
-                        className="text-xs"
+                        className="text-xs mb-1"
                     />
-                    <select
-                        name="tahun_ajaran"
-                        id="tahun_ajaran"
-                        value={data.tahun_ajaran}
-                        onChange={(e) =>
-                            setData("tahun_ajaran", e.target.value)
+                    <AppSelect
+                        inputId="tahun_ajaran"
+                        options={tahunOptions}
+                        value={
+                            tahunOptions.find(
+                                (o) => o.value === data.tahun_ajaran,
+                            ) || null
                         }
-                        className={`mt-1 block w-full py-1.5 px-2.5 border ${
-                            errors.tahun_ajaran
-                                ? "border-red-500"
-                                : "border-gray-300"
-                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-xs`}
-                    >
-                        <option value="">[Pilih Tahun]</option>
-                        {ambilTahun().map((tahun, index) => (
-                            <option key={index} value={tahun}>
-                                {tahun}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(opt) =>
+                            setData("tahun_ajaran", opt?.value ?? "")
+                        }
+                        placeholder="Pilih Tahun..."
+                        isSearchable={false}
+                        error={!!errors.tahun_ajaran}
+                    />
                     <InputError
                         message={errors.tahun_ajaran}
                         className="mt-1 text-[10px]"
                     />
                 </div>
 
+                {/* Semester */}
                 <div>
                     <InputLabel
-                        for="semester"
+                        htmlFor="semester"
                         value="Semester"
-                        className="text-xs"
+                        className="text-xs mb-1"
                     />
-                    <select
-                        name="semester"
-                        id="semester"
-                        value={data.semester}
-                        onChange={(e) => setData("semester", e.target.value)}
-                        className={`mt-1 block w-full py-1.5 px-2.5 border ${
-                            errors.semester
-                                ? "border-red-500"
-                                : "border-gray-300"
-                        } bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-xs`}
-                    >
-                        <option value="">[Pilih Semester]</option>
-                        <option value="ganjil">Ganjil</option>
-                        <option value="genap">Genap</option>
-                    </select>
+                    <AppSelect
+                        inputId="semester"
+                        options={SEMESTER_OPTIONS}
+                        value={
+                            SEMESTER_OPTIONS.find(
+                                (o) => o.value === data.semester,
+                            ) || null
+                        }
+                        onChange={(opt) =>
+                            setData("semester", opt?.value ?? "")
+                        }
+                        placeholder="Pilih Semester..."
+                        isSearchable={false}
+                        error={!!errors.semester}
+                    />
                     <InputError
                         message={errors.semester}
                         className="mt-1 text-[10px]"

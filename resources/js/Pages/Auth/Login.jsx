@@ -2,15 +2,26 @@ import { useState } from "react";
 import Checkbox from "@/Components/Checkbox";
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
-import { Head, Link, useForm } from "@inertiajs/react";
+import { Head, Link, router, useForm } from "@inertiajs/react";
 import TextInput from "@/Components/TextInput";
-
+import { useAlert } from "@/Components/AlertContext";
 export default function Login({ status, canResetPassword, config }) {
     const [captchaKey, setCaptchaKey] = useState(Date.now());
     const [isCaptchaLoading, setIsCaptchaLoading] = useState(true);
     const [showPassword, setShowPassword] = useState(false); // State untuk Toggle Password
+    const { showCenterAlert } = useAlert();
+    const [loading, setLoading] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+        setError,
+    } = useForm({
         username: "",
         password: "",
         remember: false,
@@ -19,18 +30,45 @@ export default function Login({ status, canResetPassword, config }) {
 
     const currentYear = new Date().getFullYear();
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
+        if (loading) return;
 
-        post(route("login"), {
-            onFinish: () => reset("password"),
-            onError: () => {
-                setCaptchaKey(Date.now());
-                reset("captcha");
-            },
-        });
+        setLoading(true);
+        clearErrors();
+
+        try {
+            const res = await axios.post(route("login"), data);
+
+            // Tujuan redirect dari server (mis. /dashboard)
+            const target = res.request?.responseURL || route("dashboard");
+
+            showCenterAlert("Login berhasil", "success", {
+                showConfirmButton: false,
+                timer: 1500,
+                allowOutsideClick: false,
+                onClose: () => router.visit(target),
+            });
+        } catch (err) {
+            if (err.response?.status === 422) {
+                // Ubah format error Laravel -> format useForm
+                const errors = Object.fromEntries(
+                    Object.entries(err.response.data.errors ?? {}).map(
+                        ([field, msgs]) => [field, msgs[0]],
+                    ),
+                );
+                setError(errors);
+            } else if (err.response?.status === 419) {
+                showCenterAlert("Sesi habis, muat ulang halaman", "error", 300);
+            } else {
+                showCenterAlert("Terjadi kesalahan, coba lagi", "error", 300);
+            }
+
+            setCaptchaKey(Date.now());
+            reset("captcha");
+            setLoading(false);
+        }
     };
-
     const refreshCaptcha = () => {
         setIsCaptchaLoading(true);
         setCaptchaKey(Date.now());
@@ -59,17 +97,16 @@ export default function Login({ status, canResetPassword, config }) {
                     {/* BAGIAN KIRI: Teks Instansi */}
                     <div className="w-full lg:w-1/2 text-white text-center lg:text-left mt-10 lg:mt-0">
                         <h1 className="text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg tracking-tight">
-                            {config?.nama_instansi || "SISTEM INFORMASI"}{" "}
+                            {config?.nama_instansi || null}
                         </h1>
                         {/* <p className="text-xl lg:text-2xl font-semibold mb-2 drop-shadow-md">
 
                         </p> */}
-                        <p className="text-sm lg:text-base text-primary-100 font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
-                            {config?.alamat_instansi ||
-                                "CONTOH JALAN, CONTOH KOTA"}
+
+                        <p className="text-sm lg:text-base text-primary-100 font-light leading-relaxed c mx-auto lg:mx-0">
+                            {config?.alamat_instansi || null}
                             <br className="hidden lg:block" />
-                            email :{" "}
-                            {config?.email_instansi || "contoh@contoh.com"}
+                            {config?.email_instansi || null}
                         </p>
                     </div>
 
@@ -110,11 +147,11 @@ export default function Login({ status, canResetPassword, config }) {
                                 <TextInput
                                     id="username"
                                     type="text"
+                                    icon="at"
                                     name="username"
                                     value={data.username}
                                     placeholder="Ketik Nama Pengguna"
                                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                    icon="email"
                                     autoComplete="username"
                                     onChange={(e) =>
                                         setData("username", e.target.value)
@@ -161,11 +198,12 @@ export default function Login({ status, canResetPassword, config }) {
                             <div>
                                 {/* Set tinggi container menjadi 44px */}
                                 <div className="lg:flex gap-3 h-[44px] sm:w-full">
-                                    <input
+                                    <TextInput
                                         id="captcha"
                                         type="text"
+                                        icon="shield-alt"
                                         value={data.captcha}
-                                        placeholder="Ketik Captcha"
+                                        placeholder="Captcha"
                                         className="w-full h-full border border-gray-200 rounded-xl px-4 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                                         onChange={(e) =>
                                             setData("captcha", e.target.value)
@@ -206,9 +244,9 @@ export default function Login({ status, canResetPassword, config }) {
                             <div className="pt-2">
                                 <PrimaryButton
                                     className="w-full justify-center py-3.5 text-sm font-bold bg-primary-600 hover:bg-primary-700 active:bg-primary-800 rounded-xl tracking-wide shadow-md transition-all"
-                                    disabled={processing}
+                                    disabled={loading}
                                 >
-                                    {processing ? (
+                                    {loading ? (
                                         <i className="fa fa-spinner fa-spin mr-2"></i>
                                     ) : null}
                                     MASUK

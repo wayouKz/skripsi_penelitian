@@ -360,7 +360,7 @@ export default function MonitoringKBM({ title, onClose, open }) {
                                     >
                                         <span>{hari}</span>
                                         <span
-                                            className={`text-[8px] font-normal ${isSelected ? "text-primary-100" : "text-primary-400"}`}
+                                            className={`text-[8px] font-normal ${isSelected ? "text-white" : "text-primary-400"}`}
                                         >
                                             {tanggalHariIniPekan.slice(5)}{" "}
                                             {/* Menampilkan format MM-DD agar rapi di tombol */}

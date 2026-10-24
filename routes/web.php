@@ -30,7 +30,7 @@ use App\Http\Controllers\Master\MapelController;
 use App\Http\Controllers\Master\TahunAjaranController;
 use App\Models\Config;
 
-Route::get('/', [LandingPageController::class, 'index'] );
+Route::get('/', [LandingPageController::class, 'index'] )->name('welcome');
 
 Route::prefix('install')->group(function () {
     Route::get('/', [InstalerController::class, 'index'])->name('install');
@@ -225,3 +225,4 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+

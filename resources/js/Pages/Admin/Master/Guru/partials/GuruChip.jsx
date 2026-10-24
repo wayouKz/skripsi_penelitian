@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Avatar from "./Avatar";
 import Select from "react-select";
+import AppSelect from "@/Components/AppSelect";
 
 function GuruChip({
     guru = {},
@@ -146,7 +147,7 @@ function GuruChip({
 
             {/* Dropdown Kelas (React Select) */}
             <div className="w-32">
-                <Select
+                <AppSelect
                     value={selectedKelasOption}
                     onChange={(option) =>
                         onChangeData(
@@ -163,7 +164,6 @@ function GuruChip({
                     menuPortalTarget={document.body}
                     className="text-xs"
                     classNamePrefix="react-select"
-                    styles={customSelectStyles}
                 />
             </div>
 

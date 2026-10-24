@@ -25,7 +25,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
                     <span className="animate-pulse h-1.5 w-1.5 bg-red-500 rounded-full inline-block"></span>
                     Live Activity Log
                 </h3>
-                <span className="text-[10px] font-mono bg-blue-100 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-bold">
+                <span className="text-[10px] font-mono bg-primary-100 text-primary-700 px-2 py-0.5 rounded border border-primary-200 font-bold">
                     {logs.length} Events Terpantau
                 </span>
             </div>
@@ -40,7 +40,7 @@ const LiveLogViewer = React.memo(({ logs = [] }) => {
                             "bg-gray-100 text-gray-600 border-gray-200";
                         if (log.tahap === "TUKAR_MAPEL")
                             badgeClass =
-                                "bg-blue-50 text-blue-600 border-blue-200";
+                                "bg-primary-50 text-primary-600 border-primary-200";
                         else if (log.tahap === "RELOKASI_MAPEL")
                             badgeClass =
                                 "bg-orange-50 text-orange-600 border-orange-200";
@@ -312,10 +312,10 @@ export default function ProsesViewJadwal({
 
     const colorPalette = [
         {
-            bg: "bg-blue-100",
-            border: "border-blue-400",
-            text: "text-blue-900",
-            title: "text-blue-700",
+            bg: "bg-primary-100",
+            border: "border-primary-400",
+            text: "text-primary-900",
+            title: "text-primary-700",
         },
         {
             bg: "bg-primary-100",

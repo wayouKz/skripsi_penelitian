@@ -1,6 +1,7 @@
 import Select from "react-select";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AppSelect from "@/Components/AppSelect";
 
 export default function JadwalMengajar({ dataKelas }) {
     const [mapel, setMapel] = useState([]);
@@ -182,7 +183,7 @@ export default function JadwalMengajar({ dataKelas }) {
                     <label className="text-[10px] font-bold uppercase tracking-wider text-primary-500 mb-1 block">
                         Mata Pelajaran
                     </label>
-                    <Select
+                    <AppSelect
                         options={mapels}
                         value={
                             selectedMapel
@@ -195,7 +196,6 @@ export default function JadwalMengajar({ dataKelas }) {
                             setSelectedMapel(opt ? opt.value : "")
                         }
                         isClearable={true}
-                        styles={customSelectStyles}
                         placeholder="Pilih Mapel..."
                         isLoading={loading}
                     />

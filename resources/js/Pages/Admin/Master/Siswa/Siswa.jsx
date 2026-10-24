@@ -9,6 +9,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import DataTable from "@/Components/Datatables";
 import SiswaKelas from "./SiswaKelas";
 import Select from "react-select";
+import AppSelect from "@/Components/AppSelect";
 
 export default function Siswa() {
     const [show, setShow] = useState(false);
@@ -371,7 +372,7 @@ export default function Siswa() {
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran
                                     </label>
-                                    <Select
+                                    <AppSelect
                                         value={selectedAlumniOption}
                                         onChange={(option) => {
                                             const value = option
@@ -386,60 +387,6 @@ export default function Siswa() {
                                         menuPortalTarget={document.body}
                                         className="w-full text-xs"
                                         classNamePrefix="react-select"
-                                        styles={{
-                                            control: (base, state) => ({
-                                                ...base,
-                                                backgroundColor: "#FFFFFF",
-                                                borderColor: state.isFocused
-                                                    ? "#10B981"
-                                                    : "#E5E7EB",
-                                                borderRadius: "0.5rem",
-                                                padding: "0.05rem 0.1rem",
-                                                minHeight: "32px",
-                                                boxShadow: state.isFocused
-                                                    ? "0 0 0 3px rgba(16, 185, 129, 0.15)"
-                                                    : "none",
-                                                cursor: "pointer",
-                                                "&:hover": {
-                                                    borderColor: "#10B981",
-                                                },
-                                            }),
-                                            valueContainer: (base) => ({
-                                                ...base,
-                                                padding: "0px 6px",
-                                            }),
-                                            placeholder: (base) => ({
-                                                ...base,
-                                                color: "#9CA3AF",
-                                                fontSize: "11px",
-                                                fontWeight: "normal",
-                                            }),
-                                            singleValue: (base) => ({
-                                                ...base,
-                                                color: "#1F2937",
-                                                fontSize: "11px",
-                                                fontWeight: "600",
-                                            }),
-                                            option: (base, state) => ({
-                                                ...base,
-                                                backgroundColor:
-                                                    state.isSelected
-                                                        ? "#10B981"
-                                                        : state.isFocused
-                                                          ? "#ECFDF5"
-                                                          : "white",
-                                                color: state.isSelected
-                                                    ? "white"
-                                                    : "#1F2937",
-                                                fontSize: "11px",
-                                                fontWeight: "500",
-                                                cursor: "pointer",
-                                            }),
-                                            menuPortal: (base) => ({
-                                                ...base,
-                                                zIndex: 9999,
-                                            }),
-                                        }}
                                     />
                                 </div>
                             </div>

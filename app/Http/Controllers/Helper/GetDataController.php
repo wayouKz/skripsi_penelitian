@@ -380,7 +380,7 @@ public function getSiswaInKelas(Request $request){
     $jadwal = $request->kode_jadwal;
 
     $sekarang = Carbon::now();
-    // $hariIni = $sekarang->locale('id')->tranprimarydFormat('l');
+    // $hariIni = $sekarang->locale('id')->translatedFormat('l');
     $hariIni = "Senin";
     $jamSekarang = $sekarang->format('H:i:00');
     if($request->type != 'informasi'){
@@ -502,7 +502,7 @@ public function getSiswaInKelas(Request $request){
             // Tentukan status KBM dan badge berdasarkan kondisi
             if ($isDisetujui) {
                 $statusKbm  = $belumAbsen ? 'Digantikan (Belum Absen)' : 'Digantikan (Hadir)';
-                $warnaBadge = $belumAbsen ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700';
+                $warnaBadge = $belumAbsen ? 'bg-amber-100 text-amber-700' : 'bg-primary-100 text-primary-700';
             } elseif ($isAdaPengajuan && $statusPergantian === 'ditolak') {
                 $statusKbm  = 'Pergantian Ditolak';
                 $warnaBadge = 'bg-rose-100 text-rose-700';

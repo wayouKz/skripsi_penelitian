@@ -30,8 +30,8 @@ class LandingPageController extends Controller
                     'label' => $m->nama_mapel  // Sesuaikan dengan kolom nama mata pelajaran
                 ];
             }
-            $tahunAjaraAktif = MTahunAjaran::getTahunAjaranAktif();
-            $data['dataGuruMapel'] = MMapel::mapGuruMapel($tahunAjaraAktif->id);
+        $tahunAjaraAktif = MTahunAjaran::getTahunAjaranAktif();
+        $data['dataGuruMapel'] = MMapel::mapGuruMapel($tahunAjaraAktif->id);
         $data['dataSiswa'] = MSiswa::getSiswaActive();
         $data['dataGuru'] = MGuru::GetAllGuru()->get();
         $data['dataJadwal'] = TJadwal::getJadwalByTahunAjaran($tahunAjaraAktif->id);

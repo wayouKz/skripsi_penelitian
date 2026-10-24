@@ -16,7 +16,7 @@ export default function ModalPdf({ isOpen, onClose, pdfUrl, title }) {
                 {/* Header Modal */}
                 <div className="flex items-center justify-between pb-2 border-b border-gray-200">
                     <h4 className="text-xs font-bold text-gray-800 flex items-center truncate">
-                        <i className="fas fa-file-pdf text-red-500 mr-2 text-lg"></i>
+                        <i className="fas fa-print text-red-500 mr-2 text-lg"></i>
                         <span className="truncate">
                             {title || "Dokumen PDF"}
                         </span>

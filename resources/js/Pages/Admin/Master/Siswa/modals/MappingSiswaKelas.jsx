@@ -5,6 +5,7 @@ import { useAlert } from "@/Components/AlertContext";
 import TabKenaikanKelas from "../main/tab/TabKenaikanSiswa";
 import TabMappingSiswa from "../main/tab/TabMappingSiswa";
 import Select from "react-select";
+import AppSelect from "@/Components/AppSelect";
 
 export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
     const { showCenterAlert, showAlert } = useAlert();
@@ -234,7 +235,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                                 Tahun Ajaran:
                             </label>
                             <div className="w-full sm:w-[220px]">
-                                <Select
+                                <AppSelect
                                     value={selectedTaOption}
                                     onChange={(option) =>
                                         setTahunAjaran(
@@ -247,7 +248,6 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                                     menuPortalTarget={document.body}
                                     className="text-sm"
                                     classNamePrefix="react-select"
-                                    styles={customSelectStyles}
                                 />
                             </div>
                         </div>
@@ -259,7 +259,7 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                                 Kelas:
                             </label>
                             <div className="w-full sm:w-[160px]">
-                                <Select
+                                <AppSelect
                                     value={selectedKelasOption}
                                     onChange={(option) =>
                                         setSelectedClassId(
@@ -272,7 +272,6 @@ export default function MappingSiswaKelas({ open, setOpen, getMappingData }) {
                                     menuPortalTarget={document.body}
                                     className="text-sm"
                                     classNamePrefix="react-select"
-                                    styles={customSelectStyles}
                                 />
                             </div>
                         </div>

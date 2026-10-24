@@ -5,6 +5,7 @@ import Select from "react-select";
 // --- IMPORT DRIVER.JS ---
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import AppSelect from "@/Components/AppSelect";
 
 function SummaryRow({ label, value, muted = false }) {
     return (
@@ -685,7 +686,7 @@ export default function TabKenaikanKelas() {
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Lama
                                     </label>
-                                    <Select
+                                    <AppSelect
                                         value={selectedTaAsalOption}
                                         onChange={(option) => {
                                             const selectedVal = option
@@ -710,14 +711,13 @@ export default function TabKenaikanKelas() {
                                         menuPortalTarget={document.body}
                                         className="text-xs"
                                         classNamePrefix="react-select"
-                                        styles={customSelectStyles}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                                         Kelas Saat Ini
                                     </label>
-                                    <Select
+                                    <AppSelect
                                         value={selectedKelasAsalOption}
                                         onChange={(option) => {
                                             const val = option
@@ -733,7 +733,6 @@ export default function TabKenaikanKelas() {
                                         menuPortalTarget={document.body}
                                         className="text-xs"
                                         classNamePrefix="react-select"
-                                        styles={customSelectStyles}
                                     />
                                 </div>
                             </div>
@@ -878,7 +877,7 @@ export default function TabKenaikanKelas() {
                                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Tahun Ajaran Baru
                                     </label>
-                                    <Select
+                                    <AppSelect
                                         value={selectedTaTujuanOption}
                                         onChange={(option) =>
                                             setTaTujuan(
@@ -891,14 +890,13 @@ export default function TabKenaikanKelas() {
                                         menuPortalTarget={document.body}
                                         className="text-xs"
                                         classNamePrefix="react-select"
-                                        styles={customSelectStyles}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <label className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                         Kelas Selanjutnya
                                     </label>
-                                    <Select
+                                    <AppSelect
                                         value={selectedKelasTujuanOption}
                                         onChange={(option) =>
                                             handleChangeKelasTujuan(
@@ -912,7 +910,6 @@ export default function TabKenaikanKelas() {
                                         menuPortalTarget={document.body}
                                         className="text-xs"
                                         classNamePrefix="react-select"
-                                        styles={customSelectStyles}
                                     />
                                 </div>
                             </div>

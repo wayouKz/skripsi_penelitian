@@ -4,43 +4,33 @@
 
 <style>
 @page {
-    margin: 15px 25px;
+    margin: 10px 25px;
 }
 
 .pdf-container {
-    margin-top: 5px;
+    margin-top: 0;
 }
 
 .pdf-header {
     text-align: center;
-    margin-bottom: 6px;
-    margin-top: 2px;
-}
-
-.pdf-table th,
-.pdf-table td {
-    border: 1px solid #333;
-    padding: 0 1px;
-    line-height: 1;
-    height: 9px;
-    text-align: center;
-    vertical-align: middle;
+    margin-bottom: 3px;
+    margin-top: 0;
 }
 
 .pdf-title {
     font-weight: bold;
     font-size: 11px;
     text-transform: uppercase;
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
 }
 
 .info-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 4px;
-    margin-bottom: 4px;
-    font-size: 8px;
-    line-height: 1.3;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 8.5px;
+    line-height: 1.2;
 }
 
 .info-table td {
@@ -53,14 +43,17 @@
     width: 100%;
     border-collapse: collapse;
     border: 1px solid #333;
-    font-size: 7px;
+    font-size: 8px;
     margin-top: 2px;
+    page-break-inside: avoid;
 }
 
 .pdf-table th,
 .pdf-table td {
     border: 1px solid #333;
-    padding: 1px 1px;
+    padding: 0 1px;
+    line-height: 1;
+    height: 10px;
     text-align: center;
     vertical-align: middle;
 }
@@ -68,7 +61,7 @@
 .pdf-table th {
     background-color: #f2f2f2;
     font-weight: bold;
-    font-size: 7.5px;
+    font-size: 8px;
 }
 
 /* Tanggal kecil di bawah nomor pertemuan */
@@ -76,43 +69,46 @@
     display: block;
     font-size: 5px;
     font-weight: normal;
-    line-height: 1.1;
-    margin-top: 1px;
+    line-height: 1;
+    margin-top: 0;
 }
 
-.text-left {
+/* Nama rata kiri */
+.pdf-table th.text-left,
+.pdf-table td.text-left {
     text-align: left !important;
-    padding-left: 3px !important;
+    padding-left: 4px !important;
 }
 
 .nama-col {
-    width: 110px !important;
-    max-width: 110px !important;
+    width: 130px !important;
+    max-width: 130px !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .no-col {
-    width: 18px !important;
+    width: 20px !important;
 }
 
 .lk-col {
-    width: 22px !important;
+    width: 24px !important;
 }
 
 .rekap-col {
-    width: 18px !important;
+    width: 20px !important;
 }
 
 .pertemuan-col {
-    width: 15px !important;
+    width: 16px !important;
 }
 
 .pdf-footer {
-    margin-top: 6px;
+    margin-top: 3px;
     width: 100%;
-    font-size: 8px;
+    font-size: 8.5px;
+    page-break-inside: avoid;
 }
 
 .footer-table {
@@ -127,13 +123,12 @@
     vertical-align: top;
 }
 </style>
-
 <div class="pdf-container">
     {{-- Looping per Mata Pelajaran --}}
     @forelse($daftarAbsenSiswa as $namaMapel => $dataMapel)
 
     @php
-    // Kumpulkan tanggal tiap pertemuan (dipakai di header kolom 1-18).
+    // Kumpulkan tanggal tiap pertemuan (dipakai di header kolom 1-20).
     // Tanggal pertemuan sama untuk semua siswa, jadi ambil yang pertama ditemukan.
     $tglPertemuan = [];
 
@@ -195,7 +190,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($dataMapel['siswa'] as $index => $siswa)
+                @forelse($dataMapel['siswa'] ?? [] as $index => $siswa)
                 @php
                 // Hitung rekap kehadiran per siswa
                 $totalH = 0;
@@ -223,7 +218,7 @@
                     @endphp
                     <tr>
                         <td>{{ $index + 1 }}</td>
-                        <td class="text-left nama-col" style="font-weight: 500;">{{ $siswa['nama_siswa'] }}</td>
+                        <td class="text-left nama-col">{{ $siswa['nama_siswa'] ?? '-' }}</td>
                         <td>{{ isset($siswa['jenis_kelamin']) ? strtoupper(substr($siswa['jenis_kelamin'], 0, 1)) : '-' }}
                         </td>
 
@@ -236,11 +231,17 @@
                             <td>{{ $totalA > 0 ? $totalA : '' }}</td>
                             <td></td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="28" style="text-align: center; font-style: italic; padding: 10px;">
+                            Tidak ada data siswa untuk mata pelajaran ini.
+                        </td>
+                    </tr>
+                    @endforelse
             </tbody>
         </table>
 
-        <table>
+        <table style="font-size: 9px; margin-top: 3px;">
             <tr>
                 <td style="width: 40%;">
                     <b>Keterangan:</b><br>
@@ -256,7 +257,11 @@
     </div>
 
     @empty
-    <p style="text-align: center; font-size: 9px;">Tidak ada data presensi.</p>
+    <div style="text-align: center; padding: 40px; font-size: 10px; font-style: italic;">
+        @include('pdf.format.kop_surat')
+        <h3 class="pdf-title" style="margin-top: 20px;">DAFTAR PRESENSI PESERTA DIDIK</h3>
+        <p>Data presensi tidak tersedia.</p>
+    </div>
     @endforelse
 </div>
 

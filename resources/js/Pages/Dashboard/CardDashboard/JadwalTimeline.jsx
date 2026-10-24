@@ -13,7 +13,7 @@ export default function JadwalTimeline({ jadwal }) {
                             <div
                                 className={`w-3 h-3 rounded-full mt-1.5 transition-all duration-300 border-2 ${
                                     isAktif
-                                        ? "bg-blue-600 border-blue-300 ring-4 ring-blue-100"
+                                        ? "bg-primary-600 border-primary-300 ring-4 ring-primary-100"
                                         : isSelesai
                                           ? "bg-primary-300 border-primary-300"
                                           : "bg-primary-100 border-primary-200"
@@ -23,7 +23,7 @@ export default function JadwalTimeline({ jadwal }) {
                                 <div
                                     className={`w-0.5 flex-1 my-1.5 ${
                                         isAktif
-                                            ? "bg-gradient-to-b from-blue-400 to-primary-200"
+                                            ? "bg-gradient-to-b from-primary-400 to-primary-200"
                                             : "bg-primary-200"
                                     }`}
                                 />
@@ -34,7 +34,7 @@ export default function JadwalTimeline({ jadwal }) {
                         <div
                             className={`flex-1 mb-4 p-4 rounded-xl border transition-all ${
                                 isAktif
-                                    ? "bg-blue-50 border-blue-200"
+                                    ? "bg-primary-50 border-primary-200"
                                     : "bg-gray-50 border-gray-100 hover:border-gray-200"
                             }`}
                         >
@@ -52,14 +52,14 @@ export default function JadwalTimeline({ jadwal }) {
 
                                 <div className="text-right flex-shrink-0">
                                     <div
-                                        className={`text-xs font-bold tabular-nums ${isAktif ? "text-blue-600" : "text-primary-500"}`}
+                                        className={`text-xs font-bold tabular-nums ${isAktif ? "text-primary-600" : "text-primary-500"}`}
                                     >
                                         {item.waktu}–{item.selesai}
                                     </div>
 
                                     {isAktif && (
-                                        <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
+                                        <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold text-primary-600 bg-primary-100 px-2 py-0.5 rounded-full">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-primary-600 animate-pulse" />
                                             Berlangsung
                                         </span>
                                     )}

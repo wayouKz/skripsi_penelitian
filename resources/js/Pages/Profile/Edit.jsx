@@ -93,7 +93,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                                 <UpdateProfileInformationForm
                                     mustVerifyEmail={mustVerifyEmail}
                                     status={status}
-                                    className="max-w-xl"
+                                    className="max-w-full"
                                 />
                             </div>
                         </div>
@@ -119,7 +119,7 @@ export default function Edit({ mustVerifyEmail, status }) {
                                 </div>
                             </div>
                             <div className="px-4 py-4">
-                                <UpdatePasswordForm className="max-w-xl" />
+                                <UpdatePasswordForm className="max-w-full" />
                             </div>
                         </div>
                     )}

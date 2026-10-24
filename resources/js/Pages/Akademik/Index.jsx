@@ -5,6 +5,7 @@ import JadwalMengajarAnda from "./Jadwal/JadwalMengajar";
 import Perwalian from "./Perwalian/Perwalian";
 import { useEffect, useState } from "react";
 import InputLabel from "@/Components/InputLabel";
+import AppSelect from "@/Components/AppSelect";
 
 export default function Akademik() {
     const [selectedTahunAjaran, setSelectedTahunAjaran] = useState("");
@@ -71,29 +72,26 @@ export default function Akademik() {
             icon: "users",
         },
     ];
-
+    const selectedOption =
+        tahunAjaran?.find(
+            (t) => String(t.value) === String(selectedTahunAjaran),
+        ) || null;
     return (
         <AuthenticatedLayout header="Akademik">
             <div className="flex justify-end mb-2">
                 <div className="w-52">
                     <InputLabel value="Tahun Ajaran" />
-                    <select
-                        value={selectedTahunAjaran}
-                        onChange={(e) => {
-                            setSelectedTahunAjaran(e.target.value);
-                            setNamaTahunAjaran(
-                                e.target.options[e.target.selectedIndex].text,
-                            );
+                    <AppSelect
+                        options={tahunAjaran || []}
+                        value={selectedOption}
+                        onChange={(opt) => {
+                            setSelectedTahunAjaran(opt?.value ?? "");
+                            setNamaTahunAjaran(opt?.label ?? "");
                         }}
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5"
-                    >
-                        <option value="">[Pilih Tahun Ajaran]</option>
-                        {tahunAjaran?.map((tahun) => (
-                            <option key={tahun.value} value={tahun.value}>
-                                {tahun.label}
-                            </option>
-                        ))}
-                    </select>
+                        placeholder="Pilih Tahun Ajaran..."
+                        isSearchable={false}
+                        isClearable
+                    />
                 </div>
             </div>
             <TabMenus menus={menus} />

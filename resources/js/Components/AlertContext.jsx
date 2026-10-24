@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AlertContext = createContext();
@@ -47,7 +47,7 @@ const LABELS = {
     warning: "Peringatan!",
 };
 
-// ─── SVG Icons ────────────────────────────────────────────────────────────────
+// ─── SVG Icons (Toast) ────────────────────────────────────────────────────────
 
 const ToastIcon = ({ type, size = 18 }) => {
     const props = {
@@ -97,6 +97,106 @@ const ToastIcon = ({ type, size = 18 }) => {
     );
 };
 
+// ─── SVG Icon animasi ala SweetAlert (Center Alert) ──────────────────────────
+
+const SwalIcon = ({ type, color }) => {
+    const base = {
+        fill: "none",
+        stroke: color,
+        strokeWidth: 4,
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+    };
+
+    // Garis yang "digambar" pelan-pelan
+    const draw = (len, delay, dur = 0.35) => ({
+        strokeDasharray: len,
+        strokeDashoffset: len,
+        animation: `swal_draw ${dur}s ${delay}s ease-out forwards`,
+    });
+
+    // Titik yang muncul dengan efek pop
+    const dot = (delay) => ({
+        fill: color,
+        stroke: "none",
+        transformBox: "fill-box",
+        transformOrigin: "center",
+        transform: "scale(0)",
+        animation: `swal_dot .3s ${delay}s cubic-bezier(.34,1.56,.64,1) forwards`,
+    });
+
+    return (
+        <svg
+            width="80"
+            height="80"
+            viewBox="0 0 80 80"
+            style={{
+                overflow: "visible",
+                ...(type === "error"
+                    ? { animation: "swal_shake .5s .6s ease-in-out" }
+                    : {}),
+            }}
+        >
+            {/* Cincin latar (samar) */}
+            <circle cx="40" cy="40" r="38" {...base} opacity=".25" />
+            {/* Cincin yang digambar berputar */}
+            <circle
+                cx="40"
+                cy="40"
+                r="38"
+                {...base}
+                transform="rotate(-90 40 40)"
+                style={draw(239, 0, 0.5)}
+            />
+
+            {type === "success" && (
+                <path
+                    d="M24 41 L35 52 L57 29"
+                    {...base}
+                    style={draw(50, 0.45)}
+                />
+            )}
+
+            {type === "error" && (
+                <>
+                    <path
+                        d="M28 28 L52 52"
+                        {...base}
+                        style={draw(36, 0.45, 0.25)}
+                    />
+                    <path
+                        d="M52 28 L28 52"
+                        {...base}
+                        style={draw(36, 0.65, 0.25)}
+                    />
+                </>
+            )}
+
+            {type === "warning" && (
+                <>
+                    <path
+                        d="M40 20 L40 45"
+                        {...base}
+                        style={draw(26, 0.45, 0.25)}
+                    />
+                    <circle cx="40" cy="57" r="3" style={dot(0.7)} />
+                </>
+            )}
+
+            {type === "info" && (
+                <>
+                    <circle cx="40" cy="25" r="3" style={dot(0.45)} />
+                    <path
+                        d="M40 36 L40 58"
+                        {...base}
+                        style={draw(24, 0.6, 0.25)}
+                    />
+                </>
+            )}
+        </svg>
+    );
+};
+
 const ModalIcon = () => (
     <svg
         width="36"
@@ -124,6 +224,23 @@ const KEYFRAMES = `
   0%   { transform: scale(0) rotate(-12deg); }
   60%  { transform: scale(1.15) rotate(4deg); }
   100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes swal_draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes swal_dot {
+  to { transform: scale(1); }
+}
+@keyframes swal_shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+@keyframes swal_timer {
+  from { width: 100%; }
+  to   { width: 0%; }
 }
 `;
 
@@ -160,12 +277,12 @@ function ModalButton({ onClick, variant, children, customColor }) {
                 ...BTN_STYLES[variant],
                 ...(customColor && {
                     background: customColor,
-                    boxShadow: `0 4px 16px ${customColor}40`, // Transparansi 25% untuk shadow
+                    boxShadow: `0 4px 16px ${customColor}40`,
                 }),
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.filter = "brightness(1.08)";
-                e.currentTarget.style.transform = "tranprimaryY(-1px)";
+                e.currentTarget.style.transform = "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.filter = "none";
@@ -182,15 +299,76 @@ function ModalButton({ onClick, variant, children, customColor }) {
 export function AlertProvider({ children }) {
     const [alert, setAlert] = useState(null);
 
-    // 1. Alert Biasa (Pojok Kanan Bawah)
-    const showAlert = (message, type = "info", duration = 3000) => {
-        setAlert({ type: "alert", message, alertType: type });
-        setTimeout(() => setAlert(null), duration);
+    const timerRef = useRef(null); // timer auto-close (toast & center)
+    const onCloseRef = useRef(null); // callback onClose milik center alert
+
+    const clearTimer = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
     };
 
-    // 2. Alert Center bergaya SweetAlert2 (Tidak auto-close kecuali diatur manual)
-    const showCenterAlert = (message, type = "info") => {
-        setAlert({ type: "center_alert", message, alertType: type });
+    useEffect(() => clearTimer, []);
+
+    // 1. Alert Biasa (Pojok Kanan Bawah)
+    const showAlert = (message, type = "info", duration = 3000) => {
+        clearTimer();
+        onCloseRef.current = null;
+        setAlert({ type: "alert", message, alertType: type });
+        timerRef.current = setTimeout(() => setAlert(null), duration);
+    };
+
+    // 2. Center alert bergaya SweetAlert2
+    //
+    // showCenterAlert(message, type, options)
+    // options (object):
+    //   title             : judul kustom (default: label sesuai type)
+    //   showConfirmButton : tampilkan tombol OK? (default: true)
+    //   confirmText       : teks tombol (default: "OK")
+    //   timer             : auto-close dalam ms (default: tidak ada)
+    //   allowOutsideClick : klik luar / tekan ESC menutup alert (default: true)
+    //   onClose           : dipanggil setelah alert tertutup (cocok untuk redirect)
+    //
+    // Untuk kompatibilitas, argumen ketiga berupa angka dianggap sebagai timer (ms).
+    const showCenterAlert = (message, type = "info", options = {}) => {
+        const opts =
+            typeof options === "number" ? { timer: options } : (options ?? {});
+
+        const {
+            title,
+            showConfirmButton = true,
+            confirmText = "OK",
+            timer = null,
+            allowOutsideClick = true,
+            onClose = null,
+        } = opts;
+
+        clearTimer();
+        onCloseRef.current = onClose;
+
+        setAlert({
+            type: "center_alert",
+            message,
+            alertType: type,
+            title,
+            showConfirmButton,
+            confirmText,
+            timer,
+            allowOutsideClick,
+        });
+
+        if (timer) {
+            timerRef.current = setTimeout(closeCenter, timer);
+        }
+    };
+
+    const closeCenter = () => {
+        clearTimer();
+        const cb = onCloseRef.current;
+        onCloseRef.current = null;
+        setAlert(null);
+        cb?.();
     };
 
     // 3. Question (Modal Yes/No)
@@ -201,6 +379,8 @@ export function AlertProvider({ children }) {
         confirmText = "Yes",
         cancelText = "No",
     ) => {
+        clearTimer();
+        onCloseRef.current = null;
         setAlert({
             type: "question",
             message,
@@ -226,6 +406,15 @@ export function AlertProvider({ children }) {
             cancelFn?.();
         }
     };
+
+    // Tutup center alert dengan tombol ESC
+    useEffect(() => {
+        if (alert?.type !== "center_alert" || !alert.allowOutsideClick) return;
+        const onKey = (e) => e.key === "Escape" && closeCenter();
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [alert]);
 
     const ts = TOAST_STYLES[alert?.alertType] ?? TOAST_STYLES.info;
 
@@ -309,37 +498,46 @@ export function AlertProvider({ children }) {
                     </motion.div>
                 )}
 
-                {/* ── 2. CENTER ALERT (Pop up bergaya SweetAlert2) ── */}
+                {/* ── 2. CENTER ALERT (bergaya SweetAlert2) ── */}
                 {alert?.type === "center_alert" && (
                     <motion.div
                         key="alert-overlay"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: 0.15 }}
                         onClick={(e) => {
-                            if (e.target === e.currentTarget) setAlert(null); // Tutup saat klik di luar area card
+                            if (
+                                e.target === e.currentTarget &&
+                                alert.allowOutsideClick
+                            )
+                                closeCenter();
                         }}
                         style={{
                             position: "fixed",
                             inset: 0,
                             zIndex: 9998,
-                            background: "rgba(15,15,20,.72)", // Latar gelap
-                            backdropFilter: "blur(8px)",
+                            background: "rgba(0,0,0,.4)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
+                            padding: 16,
                         }}
                     >
                         <motion.div
                             key="alert-modal"
-                            initial={{ opacity: 0, y: 24, scale: 0.85 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 24, scale: 0.85 }}
+                            role="alertdialog"
+                            aria-modal="true"
+                            initial={{ opacity: 0, scale: 0.7 }}
+                            animate={{
+                                opacity: 1,
+                                scale: [0.7, 1.05, 0.95, 1],
+                            }}
+                            exit={{ opacity: 0, scale: 0.5 }}
                             transition={{
-                                type: "spring",
-                                stiffness: 360,
-                                damping: 26,
+                                duration: 0.3,
+                                ease: "easeOut",
+                                times: [0, 0.45, 0.8, 1],
                             }}
                             style={{
                                 position: "relative",
@@ -348,69 +546,116 @@ export function AlertProvider({ children }) {
                                 flexDirection: "column",
                                 alignItems: "center",
                                 textAlign: "center",
-                                background: "#fff", // Card putih bersih
-                                borderRadius: 24,
-                                padding: "40px 32px 32px",
-                                width: 360,
-                                boxShadow:
-                                    "0 32px 64px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.04)",
+                                background: "#fff",
+                                borderRadius: 5,
+                                padding: "20px 20px 24px",
+                                width: 512,
+                                maxWidth: "100%",
+                                overflow: "hidden",
+                                boxShadow: "0 0 0 1px rgba(0,0,0,.02)",
                                 fontFamily:
                                     "'Plus Jakarta Sans', system-ui, sans-serif",
                             }}
                         >
-                            {/* Icon Besar di Tengah */}
-                            <div
-                                style={{
-                                    width: 80,
-                                    height: 80,
-                                    borderRadius: "50%",
-                                    background: ts.iconBg,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    margin: "0 auto 20px",
-                                    animation:
-                                        "swal_popIn .4s .1s cubic-bezier(.34,1.56,.64,1) both",
-                                }}
-                            >
-                                <ToastIcon type={alert.alertType} size={40} />
+                            {/* Progress bar timer */}
+                            {alert.timer && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        height: 4,
+                                        background: ts.progress,
+                                        opacity: 0.4,
+                                        animation: `swal_timer ${alert.timer}ms linear forwards`,
+                                    }}
+                                />
+                            )}
+
+                            {/* Ikon animasi */}
+                            <div style={{ margin: "20px auto 8px" }}>
+                                <SwalIcon
+                                    type={alert.alertType}
+                                    color={ts.progress}
+                                />
                             </div>
 
                             {/* Judul */}
                             <div
                                 style={{
-                                    fontSize: 22,
-                                    fontWeight: 700,
-                                    color: "#111827",
-                                    marginBottom: 12,
+                                    fontSize: 28,
+                                    fontWeight: 600,
+                                    color: "#595959",
+                                    margin: "12px 0 0",
+                                    padding: "0 16px",
                                     lineHeight: 1.3,
                                 }}
                             >
-                                {LABELS[alert.alertType] ?? alert.alertType}
+                                {alert.title ??
+                                    LABELS[alert.alertType] ??
+                                    alert.alertType}
                             </div>
 
                             {/* Pesan */}
                             <div
                                 style={{
-                                    fontSize: 15,
-                                    color: "#6b7280",
-                                    lineHeight: 1.6,
-                                    marginBottom: 32,
+                                    fontSize: 17,
+                                    fontWeight: 400,
+                                    color: "#545454",
+                                    lineHeight: 1.5,
+                                    margin: "16px 16px 0",
+                                    wordBreak: "break-word",
                                 }}
                             >
                                 {alert.message}
                             </div>
 
-                            {/* Tombol OK */}
-                            <div style={{ display: "flex", width: "100%" }}>
-                                <ModalButton
-                                    onClick={() => setAlert(null)}
-                                    variant="confirm"
-                                    customColor={ts.progress} // Tombol menyesuaikan warna tipe (hijau/merah/biru/kuning)
-                                >
-                                    OK
-                                </ModalButton>
-                            </div>
+                            {/* Tombol konfirmasi (opsional) */}
+                            {alert.showConfirmButton && (
+                                <div style={{ marginTop: 28 }}>
+                                    <button
+                                        type="button"
+                                        autoFocus
+                                        onClick={closeCenter}
+                                        style={{
+                                            background: ts.progress,
+                                            color: "#fff",
+                                            border: 0,
+                                            borderRadius: 4,
+                                            padding: "10px 24px",
+                                            fontSize: 16,
+                                            fontWeight: 500,
+                                            fontFamily: "inherit",
+                                            cursor: "pointer",
+                                            minWidth: 80,
+                                            transition:
+                                                "filter .15s, box-shadow .15s",
+                                        }}
+                                        onMouseEnter={(e) =>
+                                            (e.currentTarget.style.filter =
+                                                "brightness(.92)")
+                                        }
+                                        onMouseLeave={(e) =>
+                                            (e.currentTarget.style.filter =
+                                                "none")
+                                        }
+                                        onFocus={(e) =>
+                                            (e.currentTarget.style.boxShadow = `0 0 0 3px color-mix(in srgb, ${ts.progress} 40%, transparent)`)
+                                        }
+                                        onBlur={(e) =>
+                                            (e.currentTarget.style.boxShadow =
+                                                "none")
+                                        }
+                                    >
+                                        {alert.confirmText}
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Kalau tanpa tombol, beri jarak bawah */}
+                            {!alert.showConfirmButton && (
+                                <div style={{ height: 12 }} />
+                            )}
                         </motion.div>
                     </motion.div>
                 )}

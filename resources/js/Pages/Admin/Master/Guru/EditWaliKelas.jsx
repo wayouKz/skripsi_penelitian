@@ -1,4 +1,5 @@
 import { useAlert } from "@/Components/AlertContext";
+import AppSelect from "@/Components/AppSelect";
 import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
@@ -128,12 +129,9 @@ export default function Add({
                         for="tahun_ajaran"
                         value="Pilih Guru Wali Kelas"
                     />
-                    <Select
+                    <AppSelect
                         // Tambahkan props styles ini untuk menaikkan z-index menu dropdown-nya
-                        styles={{
-                            ...customSelectStyles,
-                            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                        }}
+
                         menuPortalTarget={document.body}
                         menuPosition="fixed"
                         options={waliKelas?.map((item) => ({

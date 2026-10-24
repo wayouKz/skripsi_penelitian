@@ -26,12 +26,19 @@ class KelolaInformasiInstansiController extends Controller
 
     // 3. Siapkan data dasar yang selalu disimpan/diupdate (selain file)
     $save = [
-        'nama_instansi'    => $request->nama_instansi,
-        'alamat_instansi'  => $request->alamat_instansi,
-        'telepon_instansi' => $request->telepon_instansi,
-        'email_instansi'   => $request->email_instansi,
-        'website_instansi' => $request->website_instansi,
-        'kepala_sekolah_id' => $request->kepala_sekolah['value'] ?? null, // Ambil value dari object Select
+        'nama_instansi'      => $request->nama_instansi,
+        'alamat_instansi'    => $request->alamat_instansi,
+        'telepon_instansi'   => $request->telepon_instansi,
+        'email_instansi'     => $request->email_instansi,
+        'website_instansi'   => $request->website_instansi,
+        'kepala_sekolah_id'  => $request->kepala_sekolah['value'] ?? null,
+
+        // === WARNA TEMA ===
+        'warna_primary'      => $request->warna_primary,
+        'warna_primary_dark' => $request->warna_primary_dark,
+        'warna_primary_light'=> $request->warna_primary_light,
+        'warna_hex'          => $request->warna_hex,
+        'nama_tema'          => $request->nama_tema,
     ];
 
     // 4. Proses Logo secara Dinamis

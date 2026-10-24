@@ -74,7 +74,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center space-x-2">
                                         <span
-                                            class="px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 rounded">{{ $item->hari }}</span>
+                                            class="px-2 py-0.5 text-xs font-medium bg-primary-50 text-primary-700 rounded">{{ $item->hari }}</span>
                                         <span class="text-gray-600 text-xs">{{ substr($item->jam_mulai, 0, 5) }} -
                                             {{ substr($item->jam_selesai, 0, 5) }}</span>
                                     </div>

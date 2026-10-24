@@ -1,3 +1,4 @@
+import AppSelect from "@/Components/AppSelect";
 import ModalPdf from "@/Components/ModalPdf";
 import React, { useState, useMemo } from "react";
 import Select from "react-select";
@@ -30,10 +31,10 @@ const COLOR_PALETTE = [
         text: "text-red-900",
     },
     {
-        bg: "bg-blue-100",
-        border: "border-blue-400",
-        hover: "hover:bg-blue-200",
-        text: "text-blue-900",
+        bg: "bg-primary-100",
+        border: "border-primary-400",
+        hover: "hover:bg-primary-200",
+        text: "text-primary-900",
     },
     {
         bg: "bg-primary-100",
@@ -1114,7 +1115,7 @@ export default function DaftarJadwal({
                 <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex gap-2 flex-wrap flex-1 min-w-[280px]">
                         <div className="min-w-[180px] flex-1">
-                            <Select
+                            <AppSelect
                                 options={filteredKelasList}
                                 value={
                                     filteredKelasList.find(function (opt) {
@@ -1130,7 +1131,6 @@ export default function DaftarJadwal({
                                             : null,
                                     );
                                 }}
-                                styles={customSelectStyles}
                                 isSearchable
                                 isClearable
                                 placeholder="Pilih Kelas..."
@@ -1138,7 +1138,7 @@ export default function DaftarJadwal({
                         </div>
 
                         <div className="min-w-[180px] flex-1">
-                            <Select
+                            <AppSelect
                                 options={dataMapel || []}
                                 value={
                                     dataMapel
@@ -1151,7 +1151,6 @@ export default function DaftarJadwal({
                                         : null
                                 }
                                 onChange={handleMapelChange}
-                                styles={customSelectStyles}
                                 isSearchable
                                 isClearable
                                 placeholder="Pilih Mapel..."
@@ -1159,7 +1158,7 @@ export default function DaftarJadwal({
                         </div>
 
                         <div className="min-w-[180px] flex-1">
-                            <Select
+                            <AppSelect
                                 options={dataGuruOptions}
                                 value={
                                     dataGuruOptions.find(function (opt) {
@@ -1172,7 +1171,6 @@ export default function DaftarJadwal({
                                     }) || null
                                 }
                                 onChange={handleGuruChange}
-                                styles={customSelectStyles}
                                 isSearchable
                                 isClearable
                                 placeholder="Pilih Guru..."

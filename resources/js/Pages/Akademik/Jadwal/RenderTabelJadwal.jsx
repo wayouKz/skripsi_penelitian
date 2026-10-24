@@ -31,9 +31,9 @@ export default function RenderTabelJadwal({
     // =========================================================
     const warnaKelas = [
         {
-            bg: "bg-blue-50",
-            border: "border-blue-200",
-            text: "text-blue-700",
+            bg: "bg-primary-50",
+            border: "border-primary-200",
+            text: "text-primary-700",
         },
         {
             bg: "bg-purple-50",
@@ -297,7 +297,6 @@ export default function RenderTabelJadwal({
                                     border-r
                                     border-gray-200
                                     w-32
-                                    sticky
                                     left-0
                                     bg-gray-100
                                     z-10
@@ -595,7 +594,6 @@ export default function RenderTabelJadwal({
                                                 border-r
                                                 border-gray-200
                                                 text-center
-                                                sticky
                                                 left-0
                                                 z-10
                                             "

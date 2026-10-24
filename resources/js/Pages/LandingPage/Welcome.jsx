@@ -113,8 +113,8 @@ export default function Welcome({ auth, data }) {
                     }`}
                 >
                     <div className="max-w-[1180px] mx-auto px-5 md:px-7 flex items-center justify-between">
-                        <a
-                            href="#"
+                        <Link
+                            href={route("welcome")}
                             className="flex items-center gap-2.5 font-serif-display text-xl font-bold text-primary-900"
                         >
                             <img
@@ -126,9 +126,9 @@ export default function Welcome({ auth, data }) {
                                 className="h-8 w-auto object-contain"
                             />
                             <span>{config.nama_instansi}</span>
-                        </a>
+                        </Link>
 
-                        <nav className="hidden md:flex gap-9 items-center">
+                        <nav className="hidden md:flex gap-1 items-center">
                             {[
                                 ["Overview", "#fitur"],
                                 ["Statistik", "#statistik"],
@@ -136,7 +136,7 @@ export default function Welcome({ auth, data }) {
                                 <a
                                     key={href}
                                     href={href}
-                                    className="text-sm text-primary-900/70 hover:text-primary-900 transition-colors relative group"
+                                    className="text-sm text-primary  p-2 hover:text-primary-900 transition-colors relative group"
                                 >
                                     {label}
                                     <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-primary-500 group-hover:w-full transition-all duration-300" />
@@ -180,7 +180,7 @@ export default function Welcome({ auth, data }) {
                                         key={href}
                                         href={href}
                                         onClick={() => setMenuOpen(false)}
-                                        className="px-3 py-3 rounded-lg text-sm font-medium text-primary-900/80 hover:bg-primary-50 hover:text-primary-900 transition-colors"
+                                        className="px-3 py-3 rounded-lg text-sm font-medium text-white hover:bg-primary-50 hover:text-primary-900 transition-colors"
                                     >
                                         {label}
                                     </a>

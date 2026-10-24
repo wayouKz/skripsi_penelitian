@@ -43,6 +43,9 @@ public static function getGuruPengampu($tahunAjaranId)
         'perwalian.nama_guru',
         'perwalian.nip'
     )
+   ->orderByRaw("
+        CAST(REGEXP_SUBSTR(m_kelas.nama_kelas, '[0-9]+') AS UNSIGNED) ASC
+    ")
     ->get();
 
     // QUERY 2: Ambil tambahan kelas/jadwal di mana guru ini bertindak sebagai guru pengganti

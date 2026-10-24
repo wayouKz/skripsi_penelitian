@@ -51,25 +51,44 @@ export const PRESETS = {
         hex: "#64748b",
     },
 };
-
 export function applyTheme(colors) {
+    if (!colors) return;
     const root = document.documentElement;
     root.style.setProperty("--color-primary", colors.primary);
     root.style.setProperty("--color-primary-dark", colors.dark);
     root.style.setProperty("--color-primary-light", colors.light);
+    // localStorage tetap boleh sebagai cache
     localStorage.setItem(THEME_KEY, JSON.stringify(colors));
 }
 
-export function loadTheme() {
+/**
+ * Prioritas: data dari DB (settings_application) > localStorage > emerald
+ */
+export function loadThemeFromSettings(settings) {
+    if (settings?.warna_primary) {
+        const colors = {
+            name: settings.nama_tema || "Custom",
+            primary: settings.warna_primary,
+            dark: settings.warna_primary_dark || settings.warna_primary,
+            light: settings.warna_primary_light || settings.warna_primary,
+            hex: settings.warna_hex || "#10b981",
+        };
+        applyTheme(colors);
+        return colors;
+    }
+
+    // fallback ke localStorage / default
     try {
         const saved = localStorage.getItem(THEME_KEY);
         if (saved) {
-            applyTheme(JSON.parse(saved));
-            return JSON.parse(saved);
+            const parsed = JSON.parse(saved);
+            applyTheme(parsed);
+            return parsed;
         }
     } catch (e) {}
-    applyTheme(PRESETS.primary);
-    return PRESETS.primary;
+
+    applyTheme(PRESETS.emerald);
+    return PRESETS.emerald;
 }
 
 export function getSavedTheme() {
@@ -77,5 +96,5 @@ export function getSavedTheme() {
         const saved = localStorage.getItem(THEME_KEY);
         if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return PRESETS.primary;
+    return PRESETS.emerald;
 }

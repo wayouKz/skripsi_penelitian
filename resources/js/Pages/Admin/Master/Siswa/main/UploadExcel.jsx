@@ -1,4 +1,5 @@
 import { useAlert } from "@/Components/AlertContext";
+import AppSelect from "@/Components/AppSelect";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useEffect, useRef, useState } from "react";
 import Select from "react-select";
@@ -200,7 +201,7 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
                 Tahun Ajaran:
             </label>
             <div className="w-full ">
-                <Select
+                <AppSelect
                     value={selectedTaOption}
                     onChange={(option) =>
                         setTahunAjaran(option ? option.value : "")
@@ -211,7 +212,6 @@ export default function UploadExcel({ openImport, setOpenImport, getSiswa }) {
                     menuPortalTarget={document.body}
                     className="text-sm"
                     classNamePrefix="react-select"
-                    styles={customSelectStyles}
                 />
             </div>
             {prosessImport == false ? (

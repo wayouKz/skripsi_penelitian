@@ -1,4 +1,5 @@
 import { useAlert } from "@/Components/AlertContext";
+import AppSelect from "@/Components/AppSelect";
 import FormModal from "@/Components/FormModal";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
@@ -79,34 +80,6 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
     }, [open]);
 
     // Kustomisasi ukuran styling react-select agar kompak (small)
-    const customSelectStyles = {
-        control: (base) => ({
-            ...base,
-            minHeight: "32px",
-            fontSize: "12px",
-            borderRadius: "0.75rem",
-            borderColor: "#e5e7eb",
-            boxShadow: "none",
-            "&:hover": { borderColor: "#10b981" },
-        }),
-        valueContainer: (base) => ({
-            ...base,
-            padding: "0px 8px",
-        }),
-        dropdownIndicator: (base) => ({
-            ...base,
-            padding: "4px",
-        }),
-        menuPortal: (base) => ({
-            ...base,
-            zIndex: 9999,
-        }),
-        option: (base) => ({
-            ...base,
-            fontSize: "12px",
-            padding: "6px 10px",
-        }),
-    };
 
     return (
         <FormModal
@@ -172,20 +145,18 @@ export default function Add({ open, setOpen, selectedData = null, getData }) {
                             value="Peran"
                             className="text-xs font-semibold text-gray-700 mb-1"
                         />
-                        <Select
+                        <AppSelect
                             options={roleOptions}
                             value={
                                 roleOptions.find(
-                                    (option) => option.value === data.role_id,
+                                    (o) => o.value === data.role_id,
                                 ) || null
                             }
-                            menuPortalTarget={document.body}
-                            menuPosition="fixed"
-                            placeholder="Pilih Peran..."
-                            styles={customSelectStyles}
-                            onChange={(selectedOption) =>
-                                setData("role_id", selectedOption?.value || "")
+                            onChange={(opt) =>
+                                setData("role_id", opt?.value || "")
                             }
+                            placeholder="Pilih Peran..."
+                            error={!!errors.role_id}
                         />
                         <InputError
                             message={errors.role_id}

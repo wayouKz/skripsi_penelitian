@@ -16,6 +16,7 @@ import MappingGuruMapel from "./MappingGuruMapel";
 import Modal from "@/Components/Modal";
 import InputLabel from "@/Components/InputLabel";
 import ModalPdf from "@/Components/ModalPdf";
+import AppSelect from "@/Components/AppSelect";
 
 export default function Guru() {
     const { showAlert, showQuestion } = useAlert();
@@ -307,7 +308,11 @@ export default function Guru() {
 
     const columnsMapel = useMemo(
         () => [
-            { header: "Mata Pelajaran", render: (row) => row.mapel },
+            {
+                header: "Mata Pelajaran",
+                accessor: "mapel",
+                render: (row) => row.mapel,
+            },
             {
                 header: "#",
                 render: (row) => (
@@ -428,7 +433,7 @@ export default function Guru() {
                     {activeMenu === "wali_kelas" && (
                         <div className="bg-white shadow sm:rounded-lg p-6">
                             <div className="w-72 m-2">
-                                <Select
+                                <AppSelect
                                     options={opsiKelas}
                                     value={
                                         opsiKelas.find(
@@ -441,7 +446,6 @@ export default function Guru() {
                                         })
                                     }
                                     isClearable={true}
-                                    styles={customSelectStyles}
                                     placeholder="Pilih Kelas..."
                                 />
                             </div>
@@ -459,14 +463,7 @@ export default function Guru() {
                             <div className="flex justify-between items-end mb-4">
                                 <div className="w-1/2 sm:w-1/3">
                                     <InputLabel value="Pilih Tahun Ajaran" />
-                                    <Select
-                                        styles={{
-                                            ...customSelectStyles,
-                                            menuPortal: (base) => ({
-                                                ...base,
-                                                zIndex: 9999,
-                                            }),
-                                        }}
+                                    <AppSelect
                                         menuPortalTarget={document.body}
                                         options={tahunAjaranOptions}
                                         placeholder="Pilih Tahun Ajaran..."
@@ -515,7 +512,7 @@ export default function Guru() {
                                         disabled={!selectedTahunAjaran}
                                     >
                                         Cetak SK{" "}
-                                        <i className="fa fa-file-pdf ms-2"></i>
+                                        <i className="fa fa-print ms-2"></i>
                                     </PrimaryButton>
                                     <PrimaryButton
                                         onClick={() =>
@@ -551,35 +548,45 @@ export default function Guru() {
                 Guru={modal.data}
                 getGuru={loadGuru}
             />
-
             <Modal
                 show={modal.show && modal.type === "details"}
                 onClose={closeModal}
-                maxWidth="2xl"
+                maxWidth="3xl"
             >
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-white sticky top-0 z-10">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-800">
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
+                    <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-gray-800">
                             Detail Penugasan Guru
                         </h2>
-                        <p className="text-sm text-gray-500 font-medium mt-1">
+                        <p className="text-sm text-gray-500 font-medium truncate">
                             {modal.data?.mapel}{" "}
                             <span className="text-primary-600 font-bold">
                                 ({modal.data?.kode_mapel})
                             </span>
                         </p>
                     </div>
-                    <button
-                        onClick={closeModal}
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-red-500"
-                    >
-                        <i className="fa fa-times text-lg"></i>
-                    </button>
+
+                    <div className="flex items-center gap-3">
+                        {modal.data?.guru?.length > 0 && (
+                            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-bold">
+                                <i className="fa fa-user-tie"></i>
+                                {modal.data.guru.length} Guru
+                            </span>
+                        )}
+                        <button
+                            onClick={closeModal}
+                            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-red-500"
+                        >
+                            <i className="fa fa-times text-lg"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div className="p-6 max-h-[70vh] overflow-y-auto bg-gray-50">
+                {/* Body */}
+                <div className="p-5 bg-gray-50">
                     {modal.data?.guru?.length > 0 ? (
-                        <div className="space-y-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {modal.data.guru.map((g) => {
                                 const totalJam = g.mengajar.reduce(
                                     (total, item) =>
@@ -590,19 +597,32 @@ export default function Guru() {
                                 return (
                                     <div
                                         key={g.value}
-                                        className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md"
+                                        className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all flex flex-col"
                                     >
-                                        <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                                            <div>
-                                                <h3 className="font-bold text-gray-900 text-base">
+                                        {/* Header kartu */}
+                                        <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3">
+                                            <div className="min-w-0">
+                                                <h3 className="font-bold text-gray-900 text-sm truncate">
                                                     {g.label}
                                                 </h3>
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-0.5">
+                                                <p className="text-[11px] text-gray-500 uppercase tracking-wider font-semibold mt-0.5 truncate">
                                                     NIP:{" "}
                                                     {g.nip || "Tidak tersedia"}
                                                 </p>
                                             </div>
-                                            <div className="flex items-center gap-3">
+
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <div className="text-center bg-primary-50 px-2.5 py-1 rounded-lg leading-tight">
+                                                    <p className="text-[9px] text-primary-600/70 uppercase font-bold tracking-wider">
+                                                        Total
+                                                    </p>
+                                                    <span className="text-base font-black text-primary-600">
+                                                        {totalJam}
+                                                        <span className="text-[10px] font-bold ml-0.5">
+                                                            Jam
+                                                        </span>
+                                                    </span>
+                                                </div>
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -612,65 +632,36 @@ export default function Guru() {
                                                             g.label,
                                                         )
                                                     }
-                                                    className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg text-xs font-bold transition-all shadow-sm"
+                                                    className="w-9 h-9 flex items-center justify-center bg-red-50 text-red-600 hover:bg-red-600 hover:text-white border border-red-200 rounded-lg transition-all"
                                                     title="Cetak PDF Jadwal Guru"
                                                 >
-                                                    <i className="fa fa-file-pdf text-sm"></i>
-                                                    <span>PDF</span>
+                                                    <i className="fa fa-print text-sm"></i>
                                                 </button>
-                                                <div className="text-right bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                                                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-                                                        Total Jam
-                                                    </p>
-                                                    <span className="text-lg font-black text-primary-600">
-                                                        {totalJam}
-                                                    </span>
-                                                </div>
                                             </div>
                                         </div>
 
-                                        <div className="p-0">
-                                            <table className="w-full text-sm">
-                                                <thead className="text-gray-500 bg-gray-50/50">
-                                                    <tr>
-                                                        <th className="px-5 py-3 text-left font-medium">
-                                                            Kelas
-                                                        </th>
-                                                        <th className="px-5 py-3 text-right font-medium">
-                                                            Beban Jam
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-100">
-                                                    {g.mengajar.map((item) => (
-                                                        <tr
-                                                            key={item.id}
-                                                            className="hover:bg-primary-50/30 transition-colors"
-                                                        >
-                                                            <td className="px-5 py-3 font-semibold text-gray-700">
-                                                                {item.kelas}
-                                                            </td>
-                                                            <td className="px-5 py-3 text-right font-mono text-gray-600">
-                                                                <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-xs font-bold">
-                                                                    {
-                                                                        item.beban_jam
-                                                                    }{" "}
-                                                                    Jam
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
+                                        {/* Daftar kelas (chip) */}
+                                        <div className="px-4 py-3 flex flex-wrap gap-2">
+                                            {g.mengajar.map((item) => (
+                                                <span
+                                                    key={item.id}
+                                                    className="inline-flex items-center gap-1.5 pl-2.5 pr-1 py-1 rounded-lg border border-gray-200 bg-gray-50 text-xs font-semibold text-gray-700"
+                                                >
+                                                    {item.kelas}
+                                                    <span className="bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded-md text-[11px] font-bold">
+                                                        {item.beban_jam} Jam
+                                                    </span>
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
                                 );
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-16 text-gray-400">
-                            <i className="fa fa-folder-open text-5xl mb-4 block opacity-30"></i>
-                            <p className="font-medium">
+                        <div className="text-center py-12 text-gray-400">
+                            <i className="fa fa-folder-open text-4xl mb-3 block opacity-30"></i>
+                            <p className="font-medium text-sm">
                                 Belum ada guru yang ditugaskan pada mata
                                 pelajaran ini.
                             </p>
